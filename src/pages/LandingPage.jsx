@@ -2,22 +2,9 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { motion, useScroll, useTransform, useSpring, useInView, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Zap, 
-  Wand2, 
-  Image as ImageIcon, 
-  Video as VideoIcon, 
-  Code, 
-  Database, 
-  MessageSquare, 
-  Search, 
-  BookOpen, 
-  ChevronRight, 
-  Play, 
-  Sparkles,
-  Layers,
-  ArrowRight,
-  Menu,
-  X
+  Sparkles, ArrowRight, ChevronRight, Zap, Database, 
+  Image as ImageIcon, Code, ArrowUpRight, CheckCircle2, 
+  Search, Brain, Lightbulb, Globe, Menu, X, Wand2, Layers, MessageSquare, Play, Video as VideoIcon
 } from 'lucide-react';
 import Lenis from 'lenis';
 import ExplodingObjects from '../components/landing/ExplodingObjects';
@@ -115,7 +102,7 @@ const Logo = () => (
   </div>
 );
 
-const Navbar = () => {
+const Navbar = ({ isSaaSActive }) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -132,6 +119,7 @@ const Navbar = () => {
         <MagneticButton className="lp-btn lp-btn-primary" onClick={() => navigate('/dashboard')} style={{ padding: '10px 24px', fontSize: '14px' }}>
           Launch App
         </MagneticButton>
+        {!isSaaSActive && <div style={{ fontSize: '10px', color: 'var(--lp-accent)', textAlign: 'center', marginTop: '4px', fontWeight: 700 }}>BETA MODE</div>}
       </div>
 
       {/* Mobile Toggle */}
@@ -472,9 +460,113 @@ const ThreeDSlider = () => {
   );
 };
 
+// --- SAVINGS CALCULATOR COMPONENT ---
+const SavingsCalculator = () => {
+  const [usage, setUsage] = useState(30); // 1-100 scale
+  const [selectedPlan, setSelectedPlan] = useState('all'); // chatgpt, claude, gemini, all
+
+  const plans = {
+    chatgpt: { name: 'ChatGPT Plus', price: 20 },
+    claude: { name: 'Claude Pro', price: 20 },
+    gemini: { name: 'Gemini Advanced', price: 20 },
+    all: { name: 'All Subscriptions', price: 60 }
+  };
+
+  const subCost = plans[selectedPlan].price;
+  const apiCost = (usage * 0.08).toFixed(2);
+  const monthlySavings = (subCost - apiCost).toFixed(2);
+  const yearlySavings = (monthlySavings * 12).toFixed(0);
+
+  return (
+    <div className="calc-container">
+      <div className="text-left">
+        <div className="badge">ECONOMICS OF AI</div>
+        <h2 style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 900, letterSpacing: '-2px', marginBottom: '32px' }}>
+          Stop Overpaying for <span style={{ color: 'var(--lp-accent)' }}>Access.</span>
+        </h2>
+        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.2rem', lineHeight: 1.6, marginBottom: '40px' }}>
+          Big AI companies charge a "Convenience Tax". Use PromptForge to access the same brains 
+          directly via API and pay only for what you actually use.
+        </p>
+        
+        <div className="comparison-box">
+          <div className="comp-item">
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontWeight: 800, fontSize: '18px' }}>Your Current Plan</span>
+                <select 
+                  value={selectedPlan} 
+                  onChange={(e) => setSelectedPlan(e.target.value)}
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px', padding: '4px 8px', fontSize: '12px', fontWeight: 700, outline: 'none' }}
+                >
+                  <option value="chatgpt">ChatGPT Plus</option>
+                  <option value="claude">Claude Pro</option>
+                  <option value="gemini">Gemini Advanced</option>
+                  <option value="all">All Three ($60/mo)</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '24px', fontWeight: 900, color: '#f87171' }}>${subCost.toFixed(2)}<span style={{ fontSize: '14px', opacity: 0.5 }}>/mo</span></div>
+            </div>
+          </div>
+
+          <div className="comp-item highlight">
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '18px' }}>PromptForge (BYOK)</div>
+              <div style={{ fontSize: '12px', color: 'var(--lp-accent)', marginTop: '4px' }}>Genuine API Usage Cost</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '24px', fontWeight: 900, color: '#34d399' }}>${apiCost}<span style={{ fontSize: '14px', opacity: 0.5 }}>/mo</span></div>
+              <div className="save-badge">SAVE {Math.round((monthlySavings / subCost) * 100)}%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="calc-card">
+        <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '24px' }}>Savings Calculator</h3>
+        <div className="calc-slider-wrap">
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600 }}>Adjust Monthly Usage</span>
+            <span style={{ color: 'var(--lp-accent)', fontWeight: 800 }}>
+              {usage < 30 ? 'Light User' : usage < 70 ? 'Moderate User' : 'Power User (Heavy)'}
+            </span>
+          </div>
+          <input 
+            type="range" 
+            className="calc-slider" 
+            min="1" 
+            max="100" 
+            value={usage} 
+            onChange={(e) => setUsage(parseInt(e.target.value))}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+            <span>CASUAL</span>
+            <span>PRO</span>
+            <span>ENTERPRISE</span>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '40px', padding: '24px', background: 'rgba(0,0,0,0.3)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+           <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginBottom: '8px' }}>ESTIMATED YEARLY SAVINGS</div>
+           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+              <span style={{ fontSize: '48px', fontWeight: 900, color: '#34d399' }}>${yearlySavings}</span>
+              <span style={{ fontSize: '16px', color: 'rgba(255,255,255,0.4)' }}>BACK IN YOUR POCKET</span>
+           </div>
+           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginTop: '16px', lineHeight: 1.4 }}>
+             *Based on current token pricing for GPT-4o and Claude 3.5 Sonnet. 
+             Calculated with a mix of 70% input and 30% output tokens.
+           </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- MAIN PAGE ---
 
-const LandingPage = () => {
+const LandingPage = ({ isSaaSActive }) => {
   const navigate = useNavigate();
   const heroRef = useRef(null);
   
@@ -499,7 +591,7 @@ const LandingPage = () => {
       <div className="noise-overlay" />
       <CursorFollower />
       <BackgroundParticles />
-      <Navbar />
+      <Navbar isSaaSActive={isSaaSActive} />
       <div className="ambient-glow" style={{ top: '10%', left: '10%' }}></div>
       <div className="ambient-glow" style={{ bottom: '10%', right: '10%', background: 'radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%)' }}></div>
 
@@ -523,9 +615,20 @@ const LandingPage = () => {
             </p>
           </RevealText>
           <div className="hero-cta-group" style={{ display: 'flex', justifyContent: 'center', gap: '24px' }}>
-            <MagneticButton className="lp-btn lp-btn-primary" onClick={() => navigate('/dashboard')} style={{ padding: '24px 48px', fontSize: '18px', fontWeight: 700 }}>
-              Get Started Now <ArrowRight size={20} />
-            </MagneticButton>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <MagneticButton className="lp-btn lp-btn-primary" onClick={() => navigate('/dashboard')} style={{ padding: '24px 48px', fontSize: '18px', fontWeight: 700 }}>
+                Launch Studio <ArrowRight size={20} />
+              </MagneticButton>
+              {!isSaaSActive && (
+                <motion.div 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  style={{ color: 'var(--lp-accent)', fontSize: '12px', fontWeight: 800, marginTop: '12px', letterSpacing: '2px' }}
+                >
+                  ⚡ BETA TESTING ACTIVE / NO SUBSCRIPTION REQUIRED
+                </motion.div>
+              )}
+            </div>
             <MagneticButton className="lp-btn lp-btn-outline" onClick={() => window.scrollTo({ top: 900, behavior: 'smooth' })} style={{ padding: '24px 48px', fontSize: '18px', fontWeight: 600 }}>
               Explore Tools <ChevronRight size={20} />
             </MagneticButton>
@@ -637,18 +740,6 @@ const LandingPage = () => {
           image="/all_in_one_studio_visual_1778616419210.png"
         />
 
-        <ShowcaseItem 
-          reverse
-          title="Natural AI Translator"
-          desc="Break language barriers with context-aware translation. Not robotic machine translation, but human-quality nuance."
-          features={[
-            "50+ Languages supported",
-            "10 Indian regional languages",
-            "6 Translation Styles (Formal to Casual)",
-            "Context & Tone preservation"
-          ]}
-          image="/promptforge_hero_visual_1778616354046.png"
-        />
 
         <ShowcaseItem 
           title="Cinematic Video Engine"
@@ -668,7 +759,38 @@ const LandingPage = () => {
         <ThreeDSlider />
       </section>
 
-      {/* --- SHUFFLE & REVEAL SECTION --- */}
+      {/* --- THE SINGULARITY SECTION --- */}
+      <section className="singularity-section" style={{ padding: '120px 20px', background: '#000', position: 'relative', overflow: 'hidden' }}>
+        <div className="neural-grid"></div>
+        <div className="section-header" style={{ textAlign: 'center', marginBottom: '100px', position: 'relative', zIndex: 2 }}>
+          <div className="badge singularity-badge" style={{ margin: '0 auto 16px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid #ef4444' }}>THE NEXT FRONTIER OF AI</div>
+          <h2 style={{ fontSize: 'clamp(3rem, 10vw, 6rem)', fontWeight: 900, letterSpacing: '-4px', lineHeight: 0.9 }}>
+            The <span style={{ color: '#ef4444' }}>Singularity</span> Core
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1.4rem', maxWidth: '900px', margin: '30px auto 0' }}>
+            The world's first AI with **Recursive Self-Correction (RSC)**. 
+            PromptForge doesn't just answer; it thinks, critiques itself, and evolves its response until it reaches logical perfection.
+          </p>
+        </div>
+
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px', position: 'relative', zIndex: 2 }}>
+          <div className="glass-card singularity-card" style={{ padding: '40px', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <div className="card-icon-wrap" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}><Brain size={30} /></div>
+            <h3 style={{ fontSize: '22px', fontWeight: 800, marginTop: '20px' }}>Recursive Logic</h3>
+            <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '12px' }}>A secondary "Judge" model finds flaws in the primary answer and forces an immediate rewrite.</p>
+          </div>
+          <div className="glass-card singularity-card" style={{ padding: '40px', border: '1px solid rgba(56,189,248,0.2)' }}>
+            <div className="card-icon-wrap" style={{ background: 'rgba(56,189,248,0.1)', color: '#38bdf8' }}><Lightbulb size={30} /></div>
+            <h3 style={{ fontSize: '22px', fontWeight: 800, marginTop: '20px' }}>The Inventor</h3>
+            <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '12px' }}>Generate novel inventions by fusing quantum physics with urban design, or biology with space-travel.</p>
+          </div>
+          <div className="glass-card singularity-card" style={{ padding: '40px', border: '1px solid rgba(124,92,252,0.2)' }}>
+            <div className="card-icon-wrap" style={{ background: 'rgba(124,92,252,0.1)', color: 'var(--lp-accent)' }}><Globe size={30} /></div>
+            <h3 style={{ fontSize: '22px', fontWeight: 800, marginTop: '20px' }}>Deep Intelligence</h3>
+            <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: '12px' }}>The Spider deployments extract real-time intelligence that paid subscriptions simply cannot see.</p>
+          </div>
+        </div>
+      </section>
       <section className="shuffle-section" style={{ padding: '40px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', maxWidth: '1200px', margin: '0 auto', alignItems: 'center' }}>
         <div>
           <RevealText>
@@ -696,69 +818,7 @@ const LandingPage = () => {
 
       {/* --- SAVINGS CALCULATOR --- */}
       <section className="calc-section">
-        <div className="calc-container">
-          <div className="text-left">
-            <div className="badge">ECONOMICS OF AI</div>
-            <h2 style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 900, letterSpacing: '-2px', marginBottom: '32px' }}>
-              Stop Overpaying for <span style={{ color: 'var(--lp-accent)' }}>Access.</span>
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.2rem', lineHeight: 1.6, marginBottom: '40px' }}>
-              Big AI companies charge a massive "Convenience Tax". We remove the middleman, 
-              connecting you directly to the source. Save thousands over the lifetime of your work.
-            </p>
-            
-            <div className="comparison-box">
-              <div className="comp-item">
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '18px' }}>Individual Subscriptions</div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>ChatGPT + Claude + Gemini</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '24px', fontWeight: 900, color: '#f87171' }}>$60.00<span style={{ fontSize: '14px', opacity: 0.5 }}>/mo</span></div>
-                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>$720.00 / YEAR</div>
-                </div>
-              </div>
-
-              <div className="comp-item highlight">
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '18px' }}>PromptForge (BYOK)</div>
-                  <div style={{ fontSize: '12px', color: 'var(--lp-accent)', marginTop: '4px' }}>Pure API Usage Cost (Average)</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '24px', fontWeight: 900, color: '#34d399' }}>~$2.40<span style={{ fontSize: '14px', opacity: 0.5 }}>/mo</span></div>
-                  <div className="save-badge">SAVE 96%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="calc-card">
-            <h3 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '24px' }}>Savings Calculator</h3>
-            <div className="calc-slider-wrap">
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                <span style={{ fontSize: '14px', fontWeight: 600 }}>Your Monthly Usage</span>
-                <span style={{ color: 'var(--lp-accent)', fontWeight: 800 }}>Light to Moderate</span>
-              </div>
-              <input type="range" className="calc-slider" min="1" max="100" defaultValue="30" />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
-                <span>CASUAL</span>
-                <span>PRO USER</span>
-                <span>GOD MODE</span>
-              </div>
-            </div>
-
-            <div style={{ marginTop: '40px', padding: '24px', background: 'rgba(0,0,0,0.3)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-               <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginBottom: '8px' }}>YEAR 1 PROJECTED COST</div>
-               <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                  <span style={{ fontSize: '48px', fontWeight: 900 }}>$78</span>
-                  <span style={{ fontSize: '16px', color: 'rgba(255,255,255,0.4)' }}>VS $720</span>
-               </div>
-               <p style={{ fontSize: '13px', color: '#34d399', fontWeight: 600, marginTop: '16px' }}>
-                 *Including $49 one-time lifetime license.
-               </p>
-            </div>
-          </div>
-        </div>
+        <SavingsCalculator />
       </section>
 
       {/* --- API ONBOARDING GUIDE --- */}
@@ -780,12 +840,16 @@ const LandingPage = () => {
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', lineHeight: 1.6 }}>
               Select OpenAI, Anthropic, or Google. We provide direct links to their developer dashboards. No searching required.
             </p>
+            <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <a href="https://platform.openai.com/api-keys" target="_blank" className="nav-link" style={{ fontSize: '11px', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>OpenAI Dashboard →</a>
+              <a href="https://console.anthropic.com/" target="_blank" className="nav-link" style={{ fontSize: '11px', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>Claude Console →</a>
+            </div>
           </div>
           <div className="api-step-card">
             <div className="step-num">02</div>
             <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '24px 0 16px' }}>Generate Key</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', lineHeight: 1.6 }}>
-              Click 'Create Secret Key' on their official site. Copy the string. Our visual guide shows you exactly where to click.
+              Click 'Create Secret Key' on their official site. Copy the string. Our visual guide inside the studio shows you exactly where to click.
             </p>
           </div>
           <div className="api-step-card">
@@ -793,7 +857,7 @@ const LandingPage = () => {
             <div className="step-num">03</div>
             <h3 style={{ fontSize: '20px', fontWeight: 800, margin: '24px 0 16px' }}>Paste & Power Up</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', lineHeight: 1.6 }}>
-              Paste the key into PromptForge's secure vault. Your keys stay in your browser, encrypted and private.
+              Paste the key into PromptForge's secure vault. Your keys stay in your browser, encrypted and private. No server-side logs.
             </p>
           </div>
         </div>

@@ -3,7 +3,7 @@ import {
   LayoutDashboard, PenTool, GitCompare, Code2, MessageSquare, 
   Key, Share2, Image as ImageIcon, Video, Languages, DollarSign,
   Zap, Search, Library, Wand2, Database, Archive, FileText,
-  PanelLeftClose, PanelRightClose
+  PanelLeftClose, PanelRightClose, Globe, Lightbulb
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -60,7 +60,8 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
         <NavItem id="codehelper" icon={Code2} label="Code Helper" />
         <NavItem id="datawizard" icon={Database} label="Data Wizard" badge="New" badgeClass="badge-new" />
         <NavItem id="seo" icon={Search} label="SEO Optimizer" />
-        <NavItem id="aichat" icon={MessageSquare} label="AI Personas" />
+        <NavItem id="search" icon={Globe} label="The Spider" badge="Deep" badgeClass="badge-hot" />
+        <NavItem id="inventor" icon={Lightbulb} label="The Inventor" badge="Future" badgeClass="badge-new" />
         <NavItem id="vault" icon={Archive} label="History Vault" />
         <NavItem id="keys" icon={Key} label="API Keys" />
       </div>
@@ -70,7 +71,6 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
         <NavItem id="creator" icon={Share2} label="Social Media AI" />
         <NavItem id="imageprompt" icon={ImageIcon} label="Image Prompt" />
         <NavItem id="videoprompt" icon={Video} label="Video Prompt" />
-        <NavItem id="translator" icon={Languages} label="Translator" badge="50+ Lang" badgeClass="badge-pro" />
       </div>
 
       <div className="nav-section">
@@ -84,7 +84,7 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
         </div>
       </div>
       
-      <style jsx>{`
+      <style jsx="true">{`
         .fixed-tooltip {
           position: fixed;
           transform: translateY(-50%);

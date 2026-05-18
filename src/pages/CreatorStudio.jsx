@@ -3,283 +3,812 @@ import remarkGfm from 'remark-gfm';
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { callAI } from '../utils/ai';
-import { Copy, Zap, Loader2, Camera, PlayCircle, Hash, Briefcase, Users, MessageSquare, Music2, Download } from 'lucide-react';
-import { motion } from 'framer-motion';
+import {
+  Copy, Zap, Loader2, Camera, PlayCircle, Hash,
+  Briefcase, Users, MessageSquare, Music2, Download,
+  Flame, CalendarDays, Swords, RefreshCw, Check, ChevronRight
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { downloadText } from '../utils/helpers';
 
+// ─── PLATFORM CONFIG ─────────────────────────────────────────────────────────
+const PLATFORMS = [
+  { id: 'instagram', icon: Camera,        label: 'Instagram',  color: '#e1306c' },
+  { id: 'youtube',   icon: PlayCircle,    label: 'YouTube',    color: '#ff0000' },
+  { id: 'tiktok',    icon: Music2,        label: 'TikTok',     color: '#69c9d0' },
+  { id: 'twitter',   icon: Hash,          label: 'Twitter/X',  color: '#1da1f2' },
+  { id: 'linkedin',  icon: Briefcase,     label: 'LinkedIn',   color: '#0077b5' },
+  { id: 'facebook',  icon: Users,         label: 'Facebook',   color: '#1877f2' },
+  { id: 'whatsapp',  icon: MessageSquare, label: 'WhatsApp',   color: '#25d366' },
+  { id: 'pinterest', icon: Camera,        label: 'Pinterest',  color: '#e60023' },
+];
+
+const PLATFORM_GUIDES = {
+  instagram: 'Instagram: Visual storytelling, emotion, aspirational. Line breaks for readability. Emojis are powerful. 150-300 chars caption + hashtags.',
+  youtube:   'YouTube: Hook in first 3 words, deliver on promise, include timestamps for scripts. Front-load keywords in descriptions.',
+  tiktok:    'TikTok: Pattern interrupt opening, fast pace, Gen-Z friendly, trending sounds reference. Scripts must be punchy.',
+  twitter:   'Twitter/X: Punchy, controversial, quotable. Threads: 8-15 tweets, each standalone. Hook tweet must stop the scroll.',
+  linkedin:  'LinkedIn: Professional but personal. Single sentence opener. Storytelling beats statistics. End with thought-provoking question.',
+  facebook:  'Facebook: Conversational, community-focused. Personal stories perform best. Ask questions to boost comments.',
+  whatsapp:  'WhatsApp: Personal, direct, conversational. Value-dense, concise messages. No fluff.',
+  pinterest: 'Pinterest: SEO-first descriptions, aspirational language, step-by-step value, save-worthy content.',
+};
+
+const HOOK_TYPES = [
+  { id: 'question',    label: '❓ Question',     desc: 'Makes reader think' },
+  { id: 'stat',        label: '📊 Shocking Stat', desc: 'Surprises with data' },
+  { id: 'story',       label: '📖 Story',         desc: 'Personal & relatable' },
+  { id: 'controversy', label: '🔥 Controversy',   desc: 'Bold & scroll-stopping' },
+  { id: 'challenge',   label: '⚡ Challenge',      desc: 'Calls reader to action' },
+];
+
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 const CreatorStudio = () => {
   const { activeModel, apiKey, providerKeys, customModels, showToast, saveToVault } = useContext(AppContext);
-  
+
+  // Active tool tab
+  const [activeTool, setActiveTool] = useState('generate'); // generate | hooks | calendar | competitor
+
+  // Shared
   const [platform, setPlatform] = useState('instagram');
-  const [goal, setGoal] = useState('Viral / high engagement');
-  const [format, setFormat] = useState('Caption + hashtags');
-  const [topic, setTopic] = useState('');
-  const [tone, setTone] = useState('Engaging & conversational');
-  const [lang, setLang] = useState('English');
+  const [topic,    setTopic]    = useState('');
+  const [lang,     setLang]     = useState('English');
+
+  // Generate tab
+  const [goal,     setGoal]     = useState('Viral / high engagement');
+  const [format,   setFormat]   = useState('Caption + hashtags');
+  const [tone,     setTone]     = useState('Engaging & conversational');
   const [hashtags, setHashtags] = useState('Yes — maximum reach');
   const [duration, setDuration] = useState('Under 60 seconds');
-  
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState('');
+  const [loading,  setLoading]  = useState(false);
+  const [result,   setResult]   = useState('');
 
-  const platforms = [
-    { id: 'instagram', icon: Camera, label: 'Instagram' },
-    { id: 'youtube', icon: PlayCircle, label: 'YouTube' },
-    { id: 'tiktok', icon: Music2, label: 'TikTok' },
-    { id: 'twitter', icon: Hash, label: 'Twitter/X' },
-    { id: 'linkedin', icon: Briefcase, label: 'LinkedIn' },
-    { id: 'facebook', icon: Users, label: 'Facebook' },
-    { id: 'whatsapp', icon: MessageSquare, label: 'WhatsApp' }
-  ];
+  // Hook generator
+  const [hookLoading, setHookLoading] = useState(false);
+  const [hooks,       setHooks]       = useState([]); // [{type, hook}]
+  const [copiedHook,  setCopiedHook]  = useState(null);
 
-  // Dynamic field logic based on platform
-  const hideHashtags = ['whatsapp'].includes(platform);
-  const showDuration = ['youtube', 'tiktok'].includes(platform);
-  const hideTone = ['whatsapp'].includes(platform);
+  // Calendar
+  const [calNiche,    setCalNiche]    = useState('');
+  const [calGoal,     setCalGoal]     = useState('Grow followers');
+  const [calLoading,  setCalLoading]  = useState(false);
+  const [calendar,    setCalendar]    = useState([]); // [{day, time, type, caption, hashtags}]
 
-  const getGoals = () => {
-    if (platform === 'whatsapp') {
-      return [
-        'Direct promotion / Sales',
-        'Community / Group update',
-        'Event invitation / Reminder',
-        'Personal check-in / Nurturing',
-        'Customer Support / FAQ'
-      ];
-    }
-    return [
-      'Viral / high engagement',
-      'Brand awareness',
-      'Lead generation',
-      'Product promotion',
-      'Educational / how-to',
-      'Storytelling',
-      'Trending topic'
-    ];
+  // Competitor angle
+  const [compUrl,     setCompUrl]     = useState('');
+  const [compLoading, setCompLoading] = useState(false);
+  const [compResult,  setCompResult]  = useState('');
+
+  // ── field visibility ─────────────────────────────────────────────────────
+  const hideHashtags  = ['whatsapp'].includes(platform);
+  const showDuration  = ['youtube', 'tiktok'].includes(platform);
+  const hideTone      = ['whatsapp'].includes(platform);
+
+  const getGoals = () => platform === 'whatsapp'
+    ? ['Direct promotion / Sales', 'Community / Group update', 'Event invitation', 'Customer Support / FAQ']
+    : ['Viral / high engagement', 'Brand awareness', 'Lead generation', 'Product promotion', 'Educational / how-to', 'Storytelling', 'Trending topic'];
+
+  const getFormats = () => platform === 'whatsapp'
+    ? ['Short broadcast message', 'Status update (Text)', 'DM / 1-on-1 message template', 'Group announcement']
+    : ['Caption + hashtags', 'Full script (video)', 'Hook + body + CTA', 'Thread / carousel (multi-post)', 'Reel script', 'Story sequence', 'Bio / About section', 'DM / message template'];
+
+  const handlePlatformChange = (p) => {
+    setPlatform(p);
+    setResult(''); setHooks([]); setCalendar([]); setCompResult('');
+    if (p === 'whatsapp') { setGoal('Direct promotion / Sales'); setFormat('Short broadcast message'); }
+    else if (platform === 'whatsapp') { setGoal('Viral / high engagement'); setFormat('Caption + hashtags'); }
   };
 
-  const getFormats = () => {
-    if (platform === 'whatsapp') {
-      return [
-        'Short broadcast message',
-        'Status update (Text)',
-        'DM / 1-on-1 message template',
-        'Group announcement'
-      ];
-    }
-    return [
-      'Caption + hashtags',
-      'Full script (video)',
-      'Hook + body + CTA',
-      'Thread / carousel (multi-post)',
-      'Reel script',
-      'Story sequence',
-      'Bio / About section',
-      'DM / message template'
-    ];
-  };
-
-  const handlePlatformChange = (newPlatform) => {
-    setPlatform(newPlatform);
-    setResult('');
-    
-    if (newPlatform === 'whatsapp' && platform !== 'whatsapp') {
-      setGoal('Direct promotion / Sales');
-      setFormat('Short broadcast message');
-    } else if (newPlatform !== 'whatsapp' && platform === 'whatsapp') {
-      setGoal('Viral / high engagement');
-      setFormat('Caption + hashtags');
-    }
-  };
-
+  // ── 1. GENERATE CONTENT ──────────────────────────────────────────────────
   const handleGenerate = async () => {
     if (!topic.trim()) { showToast('Please describe your topic', 'warn'); return; }
-    setLoading(true);
-    setResult('');
+    setLoading(true); setResult('');
 
-    const platformGuides = {
-      instagram: 'Instagram: Focus on visual storytelling, emotion, aspirational content. Use line breaks for readability. Emoji are powerful. Optimal post length: 150-300 characters caption + hashtags.',
-      youtube: 'YouTube: Hook in first 3 words, deliver on promise, include chapter timestamps for scripts. For descriptions: front-load keywords.',
-      tiktok: 'TikTok: Pattern interrupt opening, fast pace, Gen-Z friendly, trending sounds reference. Scripts should be punchy.',
-      twitter: 'Twitter/X: Punchy, controversial, quotable. Threads: 8-15 tweets, each standalone. Hook tweet must stop the scroll.',
-      linkedin: 'LinkedIn: Professional but personal. Single sentence opening line. Storytelling beats statistics. End with thought-provoking question.',
-      facebook: 'Facebook: Conversational, community-focused. Longer posts allowed. Personal stories perform best. Ask questions to boost comments.',
-      whatsapp: 'WhatsApp: Personal, direct, conversational. Groups need value-dense, concise messages.'
-    };
+    const system = `You are a world-class social media strategist and viral content creator with 10+ years experience. You know exactly what makes content go viral on each platform. Write in ${lang}.`;
 
-    const system = `You are a world-class social media strategist and viral content creator with 10+ years of experience. You know exactly what makes content go viral on each platform. You understand psychology, copywriting, and platform algorithms deeply. Write in ${lang}.`;
-    
-    let userPrompt = `Create ${format} for ${platform.toUpperCase()} about: ${topic}\n\n`;
-    userPrompt += `Platform guidelines: ${platformGuides[platform] || platform}\n`;
-    userPrompt += `Goal: ${goal}\n`;
-    if (!hideTone) userPrompt += `Tone/Style: ${tone}\n`;
-    if (!hideHashtags) userPrompt += `Hashtags: ${hashtags}\n`;
-    if (showDuration) userPrompt += `Target Duration: ${duration}\n`;
-
-    userPrompt += `\nThis content should:
-1. Stop the scroll immediately with a killer hook
-2. Deliver genuine value or emotion
-3. Drive the goal (engagement/leads/sales)
-4. Feel authentic, not AI-generated
-5. Be perfectly formatted for ${platform}
-
-Make it so good that content creators would screenshot it and show others.`;
+    let prompt = `Create ${format} for ${platform.toUpperCase()} about: ${topic}\n\n`;
+    prompt += `Platform guidelines: ${PLATFORM_GUIDES[platform]}\nGoal: ${goal}\n`;
+    if (!hideTone)     prompt += `Tone: ${tone}\n`;
+    if (!hideHashtags) prompt += `Hashtags: ${hashtags}\n`;
+    if (showDuration)  prompt += `Duration: ${duration}\n`;
+    prompt += `\nMake it stop-scroll worthy. Authentic, not AI-sounding. Perfectly formatted for ${platform}.`;
 
     try {
-      const res = await callAI(system, userPrompt, null, activeModel, apiKey, providerKeys, customModels);
+      const res = await callAI(system, prompt, null, activeModel, apiKey, providerKeys, customModels);
       setResult(res);
-      saveToVault('Creator Studio', `Platform: ${platform}\nGoal: ${goal}\nFormat: ${format}\nTopic: ${topic}`, res);
+      saveToVault?.('Creator Studio', `${platform} | ${goal} | ${topic}`, res);
+    } catch (e) { setResult('❌ Error: ' + e.message); }
+    finally { setLoading(false); }
+  };
+
+  // ── 2. VIRAL HOOK GENERATOR ──────────────────────────────────────────────
+  const handleGenerateHooks = async () => {
+    if (!topic.trim()) { showToast('Enter your topic first', 'warn'); return; }
+    setHookLoading(true); setHooks([]);
+
+    const system = `You are the world's best viral hook writer. You create opening lines that STOP the scroll instantly. 
+Every hook you write is based on deep psychology — curiosity gaps, pattern interrupts, emotional triggers.
+You write for ${platform} content specifically.
+
+Respond ONLY in this exact JSON format (no markdown, no extra text):
+[
+  {"type": "question", "hook": "..."},
+  {"type": "stat", "hook": "..."},
+  {"type": "story", "hook": "..."},
+  {"type": "controversy", "hook": "..."},
+  {"type": "challenge", "hook": "..."}
+]`;
+
+    const prompt = `Create 5 different viral hooks for ${platform} content about: "${topic}"
+Language: ${lang}
+Each hook must be under 15 words. Make them genuinely shocking, curiosity-inducing, or emotionally powerful.`;
+
+    try {
+      const raw = await callAI(system, prompt, null, activeModel, apiKey, providerKeys, customModels);
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+      setHooks(parsed);
     } catch (e) {
-      setResult('❌ Error: ' + e.message);
-    } finally {
-      setLoading(false);
+      // Fallback parse
+      try {
+        const lines = raw.split('\n').filter(l => l.includes('"hook"'));
+        const fallback = HOOK_TYPES.map((t, i) => ({
+          type: t.id,
+          hook: lines[i]?.match(/"hook":\s*"([^"]+)"/)?.[1] || `Hook ${i + 1} for: ${topic}`,
+        }));
+        setHooks(fallback);
+      } catch { showToast('Error generating hooks', 'error'); }
     }
+    finally { setHookLoading(false); }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(result);
-    showToast('✓ Copied to clipboard');
+  const copyHook = (hook, idx) => {
+    navigator.clipboard.writeText(hook);
+    setCopiedHook(idx);
+    setTimeout(() => setCopiedHook(null), 2000);
+    showToast('Hook copied!');
   };
 
-  const handleDownload = () => {
-    downloadText(result, `PromptForge_${platform}_Content.txt`);
-    showToast('✓ Download started');
+  const useHook = (hook) => {
+    setTopic(prev => hook + (prev ? '\n\n' + prev : ''));
+    setActiveTool('generate');
+    showToast('Hook added to topic!');
   };
 
+  // ── 3. CONTENT CALENDAR ──────────────────────────────────────────────────
+  const handleGenerateCalendar = async () => {
+    const niche = calNiche || topic;
+    if (!niche.trim()) { showToast('Enter your niche/topic for the calendar', 'warn'); return; }
+    setCalLoading(true); setCalendar([]);
+
+    const system = `You are a social media content strategist. Create a 7-day content calendar.
+Respond ONLY in this exact JSON format (no markdown, no extra text):
+[
+  {
+    "day": "Monday",
+    "best_time": "9:00 AM",
+    "content_type": "Reel",
+    "hook": "...",
+    "caption": "...",
+    "hashtags": "#tag1 #tag2 #tag3",
+    "tip": "..."
+  }
+]
+Return exactly 7 objects, one per day.`;
+
+    const prompt = `Create a 7-day ${platform} content calendar for:
+Niche/Topic: ${niche}
+Goal: ${calGoal}
+Language: ${lang}
+
+Each day needs: best posting time, content type (Post/Reel/Story/Carousel), scroll-stopping hook, full caption, 5-8 hashtags, and one pro tip for that day's content.`;
+
+    try {
+      const raw = await callAI(system, prompt, null, activeModel, apiKey, providerKeys, customModels);
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+      setCalendar(parsed);
+      saveToVault?.('Content Calendar', `${platform} | ${niche}`, JSON.stringify(parsed, null, 2));
+    } catch (e) {
+      showToast('Error generating calendar. Try again.', 'error');
+    }
+    finally { setCalLoading(false); }
+  };
+
+  const copyCalendar = () => {
+    const text = calendar.map(d =>
+      `${d.day} — ${d.best_time} | ${d.content_type}\nHook: ${d.hook}\nCaption: ${d.caption}\n${d.hashtags}\nTip: ${d.tip}`
+    ).join('\n\n─────────────────\n\n');
+    navigator.clipboard.writeText(text);
+    showToast('Full calendar copied!');
+  };
+
+  // ── 4. COMPETITOR ANGLE ──────────────────────────────────────────────────
+  const handleCompetitor = async () => {
+    if (!compUrl.trim() && !topic.trim()) { showToast('Enter competitor info or topic', 'warn'); return; }
+    setCompLoading(true); setCompResult('');
+
+    const system = `You are a competitive intelligence expert and viral content strategist. 
+You analyze competitor content and create BETTER alternatives that outperform the original.`;
+
+    const prompt = `Competitor info: ${compUrl || 'Not provided'}
+My niche/topic: ${topic || 'Same as competitor'}
+Platform: ${platform}
+Language: ${lang}
+
+Analyze and create:
+1. **What they're doing** (2-3 bullet points — strengths/weaknesses)
+2. **How I can do it 10x better** (specific angles they missed)
+3. **My superior version** (full post/caption that beats theirs)
+4. **Unique angle they'll never think of** (my unfair advantage)
+
+Make the "superior version" ready to post — formatted perfectly for ${platform}.`;
+
+    try {
+      const res = await callAI(system, prompt, null, activeModel, apiKey, providerKeys, customModels);
+      setCompResult(res);
+      saveToVault?.('Competitor Analysis', `${platform} | ${topic}`, res);
+    } catch (e) { setCompResult('❌ Error: ' + e.message); }
+    finally { setCompLoading(false); }
+  };
+
+  // ── TOOL TABS CONFIG ─────────────────────────────────────────────────────
+  const tools = [
+    { id: 'generate',   icon: Zap,         label: 'Generate',        color: '#a78bfa' },
+    { id: 'hooks',      icon: Flame,        label: 'Viral Hooks',     color: '#f97316' },
+    { id: 'calendar',   icon: CalendarDays, label: 'Content Calendar',color: '#4ade80' },
+    { id: 'competitor', icon: Swords,       label: 'Beat Competitor', color: '#f87171' },
+  ];
+
+  const activePlatform = PLATFORMS.find(p => p.id === platform);
+
+  // ── RENDER ────────────────────────────────────────────────────────────────
   return (
     <div className="page active">
       <div className="section-header">
         <h2 className="section-title">🎨 Creator Studio</h2>
-        <div className="section-sub">One studio for all your social media platforms — optimized content that actually performs.</div>
+        <div className="section-sub">Generate · Viral Hooks · 7-Day Calendar · Beat Competitors — all platforms, all in one place.</div>
       </div>
-      
-      <div className="tool-card">
-        <div className="form-label" style={{ marginBottom: '12px' }}>SELECT PLATFORM</div>
-        <div className="platform-grid">
-          {platforms.map(p => (
-            <div 
-              key={p.id} 
-              className={`platform-btn ${platform === p.id ? 'active' : ''}`}
-              onClick={() => handlePlatformChange(p.id)}
+
+      {/* Platform Selector */}
+      <div style={{ marginBottom: 20 }}>
+        <div className="form-label" style={{ marginBottom: 12 }}>SELECT PLATFORM</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 10 }}>
+          {PLATFORMS.map(p => {
+            const Icon = p.icon;
+            const isActive = platform === p.id;
+            return (
+              <motion.div
+                key={p.id}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handlePlatformChange(p.id)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  gap: 7, padding: '14px 8px', borderRadius: 12, cursor: 'pointer',
+                  border: `1.5px solid ${isActive ? p.color : 'var(--border)'}`,
+                  background: isActive ? `${p.color}18` : 'var(--bg2)',
+                  color: isActive ? p.color : 'var(--text2)',
+                  fontSize: 11, fontWeight: 700, textAlign: 'center',
+                  transition: 'all 0.2s',
+                  boxShadow: isActive ? `0 4px 16px ${p.color}30` : 'none',
+                }}
+              >
+                <Icon size={22} />
+                {p.label}
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tool tabs */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
+        {tools.map(t => {
+          const Icon = t.icon;
+          const isActive = activeTool === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActiveTool(t.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 7,
+                padding: '8px 16px', borderRadius: 20, fontSize: 12, fontWeight: 700,
+                cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+                background: isActive ? `${t.color}20` : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${isActive ? t.color : 'rgba(255,255,255,0.1)'}`,
+                color: isActive ? t.color : 'rgba(255,255,255,0.5)',
+              }}
             >
-              <p.icon size={24} className="platform-icon" />
-              {p.label}
-            </div>
-          ))}
-        </div>
+              <Icon size={13} />{t.label}
+            </button>
+          );
+        })}
+      </div>
 
-        <div className="form-row cols2">
-          <div className="form-group">
-            <label className="form-label">Content Goal</label>
-            <select className="form-select" value={goal} onChange={e => setGoal(e.target.value)}>
-              {getGoals().map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Content Format</label>
-            <select className="form-select" value={format} onChange={e => setFormat(e.target.value)}>
-              {getFormats().map(f => <option key={f} value={f}>{f}</option>)}
-            </select>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Your Topic / Niche / Product</label>
-          <textarea 
-            className="form-textarea" 
-            rows="3" 
-            placeholder="e.g. I'm a fitness coach. I want to promote my 30-day weight loss program targeting working moms aged 25-40..."
-            value={topic}
-            onChange={e => setTopic(e.target.value)}
-          ></textarea>
-        </div>
-
-        <div className="form-row cols3">
-          {!hideTone && (
-            <div className="form-group">
-              <label className="form-label">Tone / Style</label>
-              <select className="form-select" value={tone} onChange={e => setTone(e.target.value)}>
-                <option>Engaging & conversational</option>
-                <option>Professional</option>
-                <option>Funny & relatable</option>
-                <option>Bold & provocative</option>
-                <option>Inspirational</option>
-                <option>Educational</option>
-              </select>
-            </div>
-          )}
-          <div className="form-group">
-            <label className="form-label">Language</label>
-            <select className="form-select" value={lang} onChange={e => setLang(e.target.value)}>
-              <option>English</option><option>Hindi</option><option>Hinglish</option><option>Spanish</option>
-            </select>
-          </div>
-          {!hideHashtags && (
-            <div className="form-group">
-              <label className="form-label">Include Hashtags?</label>
-              <select className="form-select" value={hashtags} onChange={e => setHashtags(e.target.value)}>
-                <option>Yes — maximum reach</option>
-                <option>Yes — 5-10 targeted only</option>
-                <option>No hashtags</option>
-              </select>
-            </div>
-          )}
-          {showDuration && (
-             <div className="form-group">
-             <label className="form-label">Video Duration</label>
-             <select className="form-select" value={duration} onChange={e => setDuration(e.target.value)}>
-               <option>Under 15 seconds (Shorts/Reels)</option>
-               <option>Under 60 seconds</option>
-               <option>1 - 3 minutes</option>
-               <option>3 - 10 minutes (Long form)</option>
-             </select>
-           </div>
-          )}
-        </div>
-
-        <button className="btn-generate" onClick={handleGenerate} disabled={loading}>
-          {loading ? <><Loader2 className="animate-spin" /> Creating...</> : <><Zap /> Generate Creator Content</>}
-        </button>
-
-        {loading && (
-          <div className="output-box">
-             <div className="loading-shimmer" style={{ width: '90%' }}></div>
-             <div className="loading-shimmer" style={{ width: '70%' }}></div>
-             <div className="loading-shimmer" style={{ width: '85%' }}></div>
-          </div>
-        )}
-
-        {result && !loading && (
-          <motion.div 
-            className="output-box"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="output-header">
-              <span className="output-label">✓ {platform.charAt(0).toUpperCase() + platform.slice(1)} Content Ready</span>
-              <div className="output-actions">
-                <button className="btn-copy" onClick={handleDownload}><Download size={14} /> Download</button>
-                <button className="btn-copy" onClick={handleCopy}><Copy size={14} /> Copy</button>
+      {/* ════ GENERATE TAB ════ */}
+      <AnimatePresence mode="wait">
+        {activeTool === 'generate' && (
+          <motion.div key="gen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <div className="tool-card">
+              <div className="form-row cols2">
+                <div className="form-group">
+                  <label className="form-label">Content Goal</label>
+                  <select className="form-select" value={goal} onChange={e => setGoal(e.target.value)}>
+                    {getGoals().map(g => <option key={g}>{g}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Content Format</label>
+                  <select className="form-select" value={format} onChange={e => setFormat(e.target.value)}>
+                    {getFormats().map(f => <option key={f}>{f}</option>)}
+                  </select>
+                </div>
               </div>
+
+              <div className="form-group">
+                <label className="form-label">Your Topic / Niche / Product</label>
+                <textarea
+                  className="form-textarea" rows="3"
+                  placeholder={`e.g. I'm a fitness coach promoting my 30-day program for working moms...`}
+                  value={topic} onChange={e => setTopic(e.target.value)}
+                />
+              </div>
+
+              <div className="form-row cols3">
+                {!hideTone && (
+                  <div className="form-group">
+                    <label className="form-label">Tone / Style</label>
+                    <select className="form-select" value={tone} onChange={e => setTone(e.target.value)}>
+                      <option>Engaging & conversational</option>
+                      <option>Professional</option>
+                      <option>Funny & relatable</option>
+                      <option>Bold & provocative</option>
+                      <option>Inspirational</option>
+                      <option>Educational</option>
+                      <option>Luxury / Premium</option>
+                    </select>
+                  </div>
+                )}
+                <div className="form-group">
+                  <label className="form-label">Language</label>
+                  <select className="form-select" value={lang} onChange={e => setLang(e.target.value)}>
+                    <option>English</option><option>Hindi</option><option>Hinglish</option>
+                    <option>Spanish</option><option>French</option><option>Arabic</option>
+                    <option>Portuguese</option><option>German</option>
+                  </select>
+                </div>
+                {!hideHashtags && (
+                  <div className="form-group">
+                    <label className="form-label">Hashtags</label>
+                    <select className="form-select" value={hashtags} onChange={e => setHashtags(e.target.value)}>
+                      <option>Yes — maximum reach</option>
+                      <option>Yes — 5-10 targeted only</option>
+                      <option>No hashtags</option>
+                    </select>
+                  </div>
+                )}
+                {showDuration && (
+                  <div className="form-group">
+                    <label className="form-label">Video Duration</label>
+                    <select className="form-select" value={duration} onChange={e => setDuration(e.target.value)}>
+                      <option>Under 15 seconds</option>
+                      <option>Under 60 seconds</option>
+                      <option>1 - 3 minutes</option>
+                      <option>3 - 10 minutes</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              <button className="btn-generate" onClick={handleGenerate} disabled={loading}>
+                {loading
+                  ? <><Loader2 className="animate-spin" /> Creating...</>
+                  : <><Zap /> Generate {activePlatform?.label} Content</>}
+              </button>
+
+              {loading && (
+                <div className="output-box">
+                  <div className="loading-shimmer" style={{ width: '90%' }} />
+                  <div className="loading-shimmer" style={{ width: '70%' }} />
+                  <div className="loading-shimmer" style={{ width: '80%' }} />
+                </div>
+              )}
+
+              {result && !loading && (
+                <motion.div className="output-box" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                  <div className="output-header">
+                    <span className="output-label" style={{ color: activePlatform?.color }}>
+                      ✓ {activePlatform?.label} Content Ready
+                    </span>
+                    <div className="output-actions">
+                      <button className="btn-copy" onClick={() => downloadText(result, `${platform}_content.txt`)}><Download size={14} /> Download</button>
+                      <button className="btn-copy" onClick={() => { navigator.clipboard.writeText(result); showToast('Copied!'); }}><Copy size={14} /> Copy</button>
+                    </div>
+                  </div>
+                  <div className="output-content"><ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown></div>
+                </motion.div>
+              )}
             </div>
-            <div className="output-content"><ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown></div>
           </motion.div>
         )}
-      </div>
 
-      <style jsx>{`
-        .platform-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-bottom: 24px; }
-        .platform-btn {
-          display: flex; flex-direction: column; align-items: center; gap: 8px;
-          padding: 16px 8px; border-radius: 12px; cursor: pointer;
-          border: 1.5px solid var(--border); background: var(--bg2);
-          transition: all 0.25s; color: var(--text2); font-size: 12px; font-weight: 600;
-          text-align: center; user-select: none;
-        }
-        .platform-btn:hover { border-color: var(--accent); color: var(--text); background: rgba(124,92,252,0.08); transform: translateY(-2px); }
-        .platform-btn.active { border-color: var(--accent); background: rgba(124,92,252,0.15); color: var(--accent2); box-shadow: 0 4px 16px rgba(124,92,252,0.2); }
-        .platform-icon { margin-bottom: 4px; }
-      `}</style>
+        {/* ════ VIRAL HOOKS TAB ════ */}
+        {activeTool === 'hooks' && (
+          <motion.div key="hooks" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <div className="tool-card">
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
+                padding: '10px 14px', background: 'rgba(249,115,22,0.08)',
+                border: '1px solid rgba(249,115,22,0.2)', borderRadius: 10,
+              }}>
+                <Flame size={16} color="#f97316" />
+                <div>
+                  <span style={{ fontSize: 13, color: '#f97316', fontWeight: 700 }}>Viral Hook Generator</span>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>
+                    5 scroll-stopping opening lines — one for each hook style
+                  </span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Your topic / niche</label>
+                <textarea className="form-textarea" rows="2"
+                  placeholder="e.g. I help busy moms lose 10kg in 90 days without gym membership..."
+                  value={topic} onChange={e => setTopic(e.target.value)} />
+              </div>
+
+              <div className="form-row cols2">
+                <div className="form-group">
+                  <label className="form-label">Language</label>
+                  <select className="form-select" value={lang} onChange={e => setLang(e.target.value)}>
+                    <option>English</option><option>Hindi</option><option>Hinglish</option>
+                    <option>Spanish</option><option>French</option><option>Arabic</option>
+                  </select>
+                </div>
+              </div>
+
+              <button className="btn-generate" onClick={handleGenerateHooks} disabled={hookLoading}
+                style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}>
+                {hookLoading
+                  ? <><Loader2 className="animate-spin" /> Generating hooks...</>
+                  : <><Flame size={16} /> Generate 5 Viral Hooks</>}
+              </button>
+
+              {hookLoading && (
+                <div style={{ marginTop: 16 }}>
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="loading-shimmer" style={{ width: `${85 - i * 5}%`, marginBottom: 12 }} />
+                  ))}
+                </div>
+              )}
+
+              {hooks.length > 0 && !hookLoading && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: 16 }}>
+                  <div style={{ marginBottom: 12, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    5 HOOKS GENERATED — Click to copy or use as opener
+                  </div>
+                  {hooks.map((h, i) => {
+                    const hookMeta = HOOK_TYPES.find(t => t.id === h.type) || HOOK_TYPES[i] || HOOK_TYPES[0];
+                    return (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.08 }}
+                        style={{
+                          display: 'flex', alignItems: 'flex-start', gap: 12,
+                          padding: '14px 16px', borderRadius: 12, marginBottom: 10,
+                          background: 'rgba(249,115,22,0.06)',
+                          border: '1px solid rgba(249,115,22,0.2)',
+                          cursor: 'pointer', transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(249,115,22,0.5)'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(249,115,22,0.2)'}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                            <span style={{
+                              fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 8,
+                              background: 'rgba(249,115,22,0.15)', color: '#f97316',
+                              border: '1px solid rgba(249,115,22,0.3)',
+                            }}>{hookMeta.label}</span>
+                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{hookMeta.desc}</span>
+                          </div>
+                          <div style={{ fontSize: 14, color: '#fff', lineHeight: 1.6, fontWeight: 500 }}>
+                            "{h.hook}"
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+                          <button
+                            onClick={() => copyHook(h.hook, i)}
+                            style={{
+                              padding: '5px 10px', borderRadius: 7, fontSize: 11, fontWeight: 700,
+                              background: copiedHook === i ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.06)',
+                              border: `1px solid ${copiedHook === i ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.12)'}`,
+                              color: copiedHook === i ? '#4ade80' : 'rgba(255,255,255,0.5)',
+                              cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4,
+                            }}
+                          >
+                            {copiedHook === i ? <><Check size={11} /> Copied</> : <><Copy size={11} /> Copy</>}
+                          </button>
+                          <button
+                            onClick={() => useHook(h.hook)}
+                            style={{
+                              padding: '5px 10px', borderRadius: 7, fontSize: 11, fontWeight: 700,
+                              background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.25)',
+                              color: '#a78bfa', cursor: 'pointer', fontFamily: 'inherit',
+                              display: 'flex', alignItems: 'center', gap: 4,
+                            }}
+                          >
+                            <ChevronRight size={11} /> Use
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                  <button
+                    onClick={handleGenerateHooks}
+                    style={{
+                      marginTop: 4, padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                      background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
+                      color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'inherit',
+                      display: 'flex', alignItems: 'center', gap: 6,
+                    }}
+                  >
+                    <RefreshCw size={12} /> Regenerate all hooks
+                  </button>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ════ CONTENT CALENDAR TAB ════ */}
+        {activeTool === 'calendar' && (
+          <motion.div key="cal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <div className="tool-card">
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
+                padding: '10px 14px', background: 'rgba(74,222,128,0.08)',
+                border: '1px solid rgba(74,222,128,0.2)', borderRadius: 10,
+              }}>
+                <CalendarDays size={16} color="#4ade80" />
+                <div>
+                  <span style={{ fontSize: 13, color: '#4ade80', fontWeight: 700 }}>7-Day Content Calendar</span>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>
+                    Full week of {activePlatform?.label} posts — hooks, captions, hashtags, best times
+                  </span>
+                </div>
+              </div>
+
+              <div className="form-row cols2">
+                <div className="form-group">
+                  <label className="form-label">Your Niche / Topic</label>
+                  <input className="form-input"
+                    placeholder="e.g. Personal finance for millennials, fitness coaching, tech reviews..."
+                    value={calNiche || topic}
+                    onChange={e => setCalNiche(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Weekly Goal</label>
+                  <select className="form-select" value={calGoal} onChange={e => setCalGoal(e.target.value)}>
+                    <option>Grow followers</option>
+                    <option>Drive sales / conversions</option>
+                    <option>Build brand authority</option>
+                    <option>Increase engagement</option>
+                    <option>Launch a product</option>
+                    <option>Build email list</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row cols2">
+                <div className="form-group">
+                  <label className="form-label">Language</label>
+                  <select className="form-select" value={lang} onChange={e => setLang(e.target.value)}>
+                    <option>English</option><option>Hindi</option><option>Hinglish</option>
+                    <option>Spanish</option><option>French</option>
+                  </select>
+                </div>
+              </div>
+
+              <button className="btn-generate" onClick={handleGenerateCalendar} disabled={calLoading}
+                style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}>
+                {calLoading
+                  ? <><Loader2 className="animate-spin" /> Building your week...</>
+                  : <><CalendarDays size={16} /> Generate 7-Day Calendar</>}
+              </button>
+
+              {calLoading && (
+                <div style={{ marginTop: 16 }}>
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} style={{ marginBottom: 12, padding: 14, border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10 }}>
+                      <div className="loading-shimmer" style={{ width: '30%', marginBottom: 8 }} />
+                      <div className="loading-shimmer" style={{ width: '80%', marginBottom: 6 }} />
+                      <div className="loading-shimmer" style={{ width: '60%' }} />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {calendar.length > 0 && !calLoading && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>
+                      7 DAYS — {activePlatform?.label.toUpperCase()} CONTENT CALENDAR
+                    </span>
+                    <button onClick={copyCalendar} style={{
+                      padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                      background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)',
+                      color: '#4ade80', cursor: 'pointer', fontFamily: 'inherit',
+                      display: 'flex', alignItems: 'center', gap: 5,
+                    }}>
+                      <Copy size={12} /> Copy All
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {calendar.map((day, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.06 }}
+                        style={{
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: 12, overflow: 'hidden',
+                        }}
+                      >
+                        {/* Day header */}
+                        <div style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '10px 16px',
+                          background: `linear-gradient(135deg, rgba(74,222,128,0.08), rgba(74,222,128,0.03))`,
+                          borderBottom: '1px solid rgba(255,255,255,0.06)',
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ fontSize: 14, fontWeight: 800, color: '#4ade80' }}>{day.day}</span>
+                            <span style={{
+                              fontSize: 11, padding: '2px 8px', borderRadius: 8,
+                              background: 'rgba(74,222,128,0.1)', color: '#4ade80',
+                              border: '1px solid rgba(74,222,128,0.2)',
+                            }}>{day.content_type}</span>
+                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>🕐 {day.best_time}</span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${day.hook}\n\n${day.caption}\n\n${day.hashtags}`);
+                              showToast(`${day.day} copied!`);
+                            }}
+                            style={{
+                              padding: '4px 10px', borderRadius: 6, fontSize: 11,
+                              background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
+                              color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'inherit',
+                              display: 'flex', alignItems: 'center', gap: 4,
+                            }}
+                          >
+                            <Copy size={10} /> Copy day
+                          </button>
+                        </div>
+
+                        {/* Day content */}
+                        <div style={{ padding: '14px 16px' }}>
+                          <div style={{
+                            fontSize: 13, fontWeight: 700, color: '#fbbf24',
+                            marginBottom: 8, padding: '6px 10px',
+                            background: 'rgba(251,191,36,0.06)',
+                            borderLeft: '2px solid #fbbf24',
+                            borderRadius: '0 6px 6px 0',
+                          }}>
+                            🎯 Hook: "{day.hook}"
+                          </div>
+                          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, marginBottom: 8 }}>
+                            {day.caption}
+                          </div>
+                          <div style={{ fontSize: 12, color: '#60a5fa', marginBottom: 8 }}>{day.hashtags}</div>
+                          {day.tip && (
+                            <div style={{
+                              fontSize: 11, color: 'rgba(255,255,255,0.45)',
+                              padding: '5px 10px', background: 'rgba(255,255,255,0.03)',
+                              borderRadius: 6, border: '1px solid rgba(255,255,255,0.06)',
+                            }}>
+                              💡 Pro tip: {day.tip}
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <button onClick={handleGenerateCalendar} style={{
+                    marginTop: 12, padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                    background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'inherit',
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}>
+                    <RefreshCw size={12} /> Regenerate calendar
+                  </button>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ════ COMPETITOR ANGLE TAB ════ */}
+        {activeTool === 'competitor' && (
+          <motion.div key="comp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <div className="tool-card">
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
+                padding: '10px 14px', background: 'rgba(248,113,113,0.08)',
+                border: '1px solid rgba(248,113,113,0.2)', borderRadius: 10,
+              }}>
+                <Swords size={16} color="#f87171" />
+                <div>
+                  <span style={{ fontSize: 13, color: '#f87171', fontWeight: 700 }}>Beat Competitor</span>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>
+                    Paste competitor's post or URL → AI creates something 10x better
+                  </span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Competitor's post / URL / description</label>
+                <textarea className="form-textarea" rows="4"
+                  placeholder="Paste their exact post text, or describe their content angle... e.g. 'My competitor posts motivational fitness quotes with generic stock photos and gets 500 likes'"
+                  value={compUrl} onChange={e => setCompUrl(e.target.value)} />
+              </div>
+
+              <div className="form-row cols2">
+                <div className="form-group">
+                  <label className="form-label">My niche / What I do</label>
+                  <input className="form-input"
+                    placeholder="e.g. Fitness coach for new moms..."
+                    value={topic} onChange={e => setTopic(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Language</label>
+                  <select className="form-select" value={lang} onChange={e => setLang(e.target.value)}>
+                    <option>English</option><option>Hindi</option><option>Hinglish</option><option>Spanish</option>
+                  </select>
+                </div>
+              </div>
+
+              <button className="btn-generate" onClick={handleCompetitor} disabled={compLoading}
+                style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+                {compLoading
+                  ? <><Loader2 className="animate-spin" /> Analyzing & building...</>
+                  : <><Swords size={16} /> Analyze & Beat Them</>}
+              </button>
+
+              {compLoading && (
+                <div className="output-box" style={{ marginTop: 16 }}>
+                  <div className="loading-shimmer" style={{ width: '80%' }} />
+                  <div className="loading-shimmer" style={{ width: '60%' }} />
+                  <div className="loading-shimmer" style={{ width: '70%' }} />
+                  <p style={{ fontSize: 12, color: 'var(--text3)', marginTop: 8 }}>Analyzing competitor weaknesses...</p>
+                </div>
+              )}
+
+              {compResult && !compLoading && (
+                <motion.div className="output-box" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  style={{ marginTop: 16, borderLeft: '3px solid #f87171' }}>
+                  <div className="output-header">
+                    <span className="output-label" style={{ color: '#f87171' }}>⚔ Competitive Analysis + Superior Content</span>
+                    <div className="output-actions">
+                      <button className="btn-copy" onClick={() => { navigator.clipboard.writeText(compResult); showToast('Copied!'); }}>
+                        <Copy size={14} /> Copy
+                      </button>
+                    </div>
+                  </div>
+                  <div className="output-content"><ReactMarkdown remarkPlugins={[remarkGfm]}>{compResult}</ReactMarkdown></div>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

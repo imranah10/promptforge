@@ -4,8 +4,8 @@ import { ALL_MODELS } from '../utils/models';
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  const initialProviderKeys = JSON.parse(sessionStorage.getItem('pf_provider_keys') || '{}');
-  const initialGlobalKey = sessionStorage.getItem('pf_key') || '';
+  const initialProviderKeys = JSON.parse(localStorage.getItem('pf_provider_keys') || '{}');
+  const initialGlobalKey = localStorage.getItem('pf_key') || '';
   
   let initialModelId = 'claude-3-5-sonnet-20241022';
   let initialModelName = 'Claude 3.5 Sonnet';
@@ -40,11 +40,11 @@ export const AppProvider = ({ children }) => {
   const [toastMsg, setToastMsg] = useState(null);
 
   useEffect(() => {
-    sessionStorage.setItem('pf_key', apiKey);
+    localStorage.setItem('pf_key', apiKey);
   }, [apiKey]);
 
   useEffect(() => {
-    sessionStorage.setItem('pf_provider_keys', JSON.stringify(providerKeys));
+    localStorage.setItem('pf_provider_keys', JSON.stringify(providerKeys));
   }, [providerKeys]);
 
   useEffect(() => {

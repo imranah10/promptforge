@@ -10,9 +10,8 @@ import ImagePrompt from './pages/ImagePrompt';
 import VideoPrompt from './pages/VideoPrompt';
 import ModelCompare from './pages/ModelCompare';
 import CodeHelper from './pages/CodeHelper';
-import AIChat from './pages/AIChat';
-import Translator from './pages/Translator';
 import ApiKeys from './pages/ApiKeys';
+import PricingPage from './pages/PricingPage';
 import SellAndEarn from './pages/SellAndEarn';
 import SEOOptimizer from './pages/SEOOptimizer';
 import PromptLibrary from './pages/PromptLibrary';
@@ -20,6 +19,8 @@ import PromptOptimizer from './pages/PromptOptimizer';
 import DataWizard from './pages/DataWizard';
 import ChatWithData from './pages/ChatWithData';
 import Vault from './pages/Vault';
+import TheSpider from './pages/TheSpider';
+import TheInventor from './pages/TheInventor';
 import Toast from './components/Toast';
 import { AppProvider } from './context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,8 +38,9 @@ function DashboardLayout() {
     dashboard:'Dashboard', optimizer: 'Prompt Optimizer', aiwriter:'AI Writer', 
     creator:'Creator Studio', imageprompt:'Image Prompt', videoprompt:'Video Prompt', 
     compare:'Model Compare', codehelper:'Code Helper', datawizard: 'Data Wizard', chatdata: 'Chat With Data',
-    aichat:'AI Personas', vault: 'Generation Vault', translator:'Translator', keys:'API Keys', 
-    sellearn:'Sell & Earn', seo: 'SEO Optimizer', library: 'Prompt Library'
+    vault: 'Generation Vault', keys:'API Keys', 
+    sellearn:'Sell & Earn', seo: 'SEO Optimizer', library: 'Prompt Library', search: 'The Spider',
+    inventor: 'The Inventor'
   };
 
   useEffect(() => {
@@ -99,13 +101,13 @@ function DashboardLayout() {
                 <Route path="/codehelper" element={<CodeHelper />} />
                 <Route path="/datawizard" element={<DataWizard />} />
                 <Route path="/chatdata" element={<ChatWithData />} />
-                <Route path="/aichat" element={<AIChat />} />
                 <Route path="/vault" element={<Vault />} />
-                <Route path="/translator" element={<Translator />} />
                 <Route path="/keys" element={<ApiKeys />} />
                 <Route path="/sellearn" element={<SellAndEarn />} />
                 <Route path="/seo" element={<SEOOptimizer />} />
                 <Route path="/library" element={<PromptLibrary onNavigate={handleNavigate} />} />
+                <Route path="/search" element={<TheSpider />} />
+                <Route path="/inventor" element={<TheInventor />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
             </motion.div>
@@ -117,13 +119,19 @@ function DashboardLayout() {
 }
 
 function App() {
+  // No Auth/SaaS requirements needed
+
   return (
     <AppProvider>
       <div className="ambient-bg"></div>
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/dashboard/*" element={<DashboardLayout />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route 
+            path="/dashboard/*" 
+            element={<DashboardLayout />} 
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

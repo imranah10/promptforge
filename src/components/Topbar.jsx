@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Menu } from 'lucide-react';
 
@@ -42,7 +43,10 @@ const Topbar = ({ title, onToggleSidebar }) => {
 
         @media (max-width: 900px) {
           .menu-toggle { display: flex; }
-          .topbar { padding: 0 16px; }
+          .topbar { padding: 0 16px; display: flex; }
+        }
+        @media (min-width: 901px) {
+          .topbar { display: none; }
         }
       `}</style>
     </div>

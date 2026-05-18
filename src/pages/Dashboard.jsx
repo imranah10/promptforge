@@ -2,7 +2,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, Bot, Globe, Zap, Image, Video, Share2, Code, FileText, Search } from 'lucide-react';
+import { Sparkles, ArrowRight, Bot, Globe, Zap, Image, Video, Share2, Code, FileText, Search, Brain, Lightbulb } from 'lucide-react';
 
 const Dashboard = ({ onNavigate }) => {
   return (
@@ -70,6 +70,17 @@ const Dashboard = ({ onNavigate }) => {
         ))}
       </div>
 
+      <div className="god-mode-cta glass-card singularity-style" style={{ padding: '30px', margin: '40px 0', border: '1px solid #ef4444', background: 'linear-gradient(135deg, rgba(239,68,68,0.1), transparent)' }}>
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          <div className="brain-glow singularity"><Brain size={40} color="#ef4444" /></div>
+          <div style={{ flex: 1 }}>
+            <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px' }}>Neural <span style={{ color: '#ef4444' }}>Singularity</span> Active</h3>
+            <p style={{ color: 'var(--text2)', fontSize: '15px' }}>Deploy Recursive Self-Correction (RSC). The AI now reviews and fixes its own logic flaws before responding. Unbeatable intelligence.</p>
+          </div>
+          <button className="btn btn-primary" style={{ background: '#ef4444', border: 'none' }} onClick={() => onNavigate('aichat')}>Deploy Singularity <Zap size={16} /></button>
+        </div>
+      </div>
+
       <motion.div 
         className="section-card"
         initial={{ y: 20, opacity: 0 }}
@@ -77,18 +88,18 @@ const Dashboard = ({ onNavigate }) => {
         transition={{ duration: 0.5, delay: 0.6 }}
       >
         <h3 style={{ fontFamily: 'var(--font-head)', fontSize: '18px', fontWeight: 700, marginBottom: '20px' }}>
-          ✦ Quick start
+          ✦ Elite Command Center
         </h3>
         <div className="quickstart-chips">
           {[
-            { label: 'Write a blog post', id: 'aiwriter', icon: FileText },
-            { label: 'Instagram caption', id: 'creator', icon: Share2 },
-            { label: 'Fix my code', id: 'codehelper', icon: Code },
-            { label: 'Translate text', id: 'translator', icon: Globe },
-            { label: 'Image prompt', id: 'imageprompt', icon: Image },
-            { label: 'Video prompt', id: 'videoprompt', icon: Video },
-            { label: 'Compare 2 models', id: 'compare', icon: Zap },
-            { label: 'Optimize SEO', id: 'seo', icon: Search }
+            { label: 'Singularity Chat', id: 'aichat', icon: Brain },
+            { label: 'The Inventor', id: 'inventor', icon: Lightbulb },
+            { label: 'The Spider', id: 'search', icon: Globe },
+            { label: 'Data Factory', id: 'datawizard', icon: FileText },
+            { label: 'Prompt Optimizer', id: 'optimizer', icon: Zap },
+            { label: 'Staff Engineer Code', id: 'codehelper', icon: Code },
+            { label: 'Universal Translator', id: 'translator', icon: Globe },
+            { label: 'Cinematic Prompter', id: 'imageprompt', icon: Image }
           ].map((item, i) => (
             <motion.div 
               key={i} 
@@ -158,6 +169,13 @@ const Dashboard = ({ onNavigate }) => {
         @media (max-width: 900px) {
           .stats-row { grid-template-columns: repeat(2, 1fr); }
         }
+        .brain-glow { 
+          width: 80px; height: 80px; border-radius: 50%; background: rgba(124,92,252,0.1); 
+          display: flex; align-items: center; justify-content: center; border: 1px solid var(--accent);
+          box-shadow: 0 0 30px rgba(124,92,252,0.3); animation: pulse-brain 3s infinite;
+        }
+        .brain-glow.singularity { border-color: #ef4444; box-shadow: 0 0 30px rgba(239,68,68,0.3); }
+        @keyframes pulse-brain { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 50px rgba(239,68,68,0.5); } 100% { transform: scale(1); opacity: 0.8; } }
       `}</style>
     </div>
   );
