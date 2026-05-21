@@ -38,6 +38,9 @@ body {
   overflow-x: hidden;
   font-family: var(--lp-font);
   letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .landing-page {
@@ -603,11 +606,10 @@ body {
   position: absolute;
   width: 360px;
   height: 480px;
-  background: linear-gradient(135deg, rgba(14, 14, 30, 0.96) 0%, rgba(6, 6, 15, 0.99) 100%);
+  background: linear-gradient(135deg, rgba(14, 14, 30, 0.98) 0%, rgba(6, 6, 15, 1) 100%);
   border: 1px solid var(--lp-glass-border);
   border-radius: 36px;
   padding: 44px;
-  backdrop-filter: blur(35px);
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95);
   transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
@@ -616,6 +618,11 @@ body {
   flex-direction: column;
   justify-content: space-between;
   transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .quantum-card:hover {
@@ -644,16 +651,32 @@ body {
   border-radius: 36px;
   background-size: cover;
   background-position: center;
-  opacity: 0.92;
-  filter: saturate(1.2) contrast(1.1) brightness(0.85);
+  opacity: 0.82;
+  filter: saturate(1.25) contrast(1.12) brightness(0.85);
   z-index: 0;
   pointer-events: none;
-  transition: all 0.5s;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .quantum-card:hover .quantum-card-bg {
-  opacity: 1.0;
-  filter: saturate(1.3) contrast(1.15) brightness(1.0);
+  opacity: 0.95;
+  filter: saturate(1.3) contrast(1.15) brightness(0.95);
+}
+
+/* Soft cinematic gradient vignette to enrich depth and border blend */
+.quantum-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 8, 24, 0.15) 0%, rgba(5, 5, 12, 0.35) 50%, rgba(2, 2, 6, 0.72) 100%);
+  border-radius: 36px;
+  z-index: 1;
+  pointer-events: none;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quantum-card:hover::before {
+  background: linear-gradient(180deg, rgba(8, 8, 24, 0.1) 0%, rgba(5, 5, 12, 0.25) 50%, rgba(2, 2, 6, 0.65) 100%);
 }
 
 .quantum-card-inner {
@@ -1073,105 +1096,383 @@ body {
   box-shadow: 0 0 18px var(--lp-accent-glow);
 }
 
-/* --- THE VALUE CALCULATOR --- */
+/* --- THE MATHEMATICS OF BYOK SHOWCASE --- */
 .calc-section {
-  padding: 45px 24px;
+  padding: 80px 24px;
   box-sizing: border-box;
 }
 
-.calc-container {
+.math-showcase-card {
   max-width: 1220px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 80px;
-  align-items: center;
-}
-
-.calc-card {
   background: var(--lp-glass);
   border: 1px solid var(--lp-glass-border);
   border-radius: 44px;
-  padding: 60px;
+  padding: 80px 60px;
   backdrop-filter: blur(30px);
-  box-shadow: 0 35px 90px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 45px 120px rgba(0, 0, 0, 0.75);
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.calc-card::after {
-  content: '';
+.math-showcase-shine {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 350px;
-  height: 350px;
-  background: radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 50%, rgba(124, 92, 252, 0.04) 0%, transparent 60%);
   pointer-events: none;
 }
 
-.calc-slider-wrap {
-  margin: 48px 0;
-}
-
-.calc-slider {
-  -webkit-appearance: none;
+/* --- BYOK Infographic Compare Grid --- */
+.byok-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
   width: 100%;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  outline: none;
+  margin-bottom: 60px;
+  box-sizing: border-box;
 }
 
-.calc-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 30px;
-  height: 30px;
-  background: linear-gradient(135deg, var(--lp-accent), var(--lp-cyan));
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 25px var(--lp-accent-glow);
-  transition: transform 0.2s;
-  border: 2px solid #ffffff;
+.compare-card {
+  background: rgba(255, 255, 255, 0.012);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 36px;
+  padding: 44px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
-.calc-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
+.compare-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255, 255, 255, 0.022);
+  box-shadow: 0 35px 80px rgba(0, 0, 0, 0.5);
 }
 
-.comparison-box {
+.traditional-card {
+  border-color: rgba(239, 68, 68, 0.08);
+}
+.traditional-card:hover {
+  border-color: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 30px 80px rgba(239, 68, 68, 0.03);
+}
+
+.promptforge-card {
+  border-color: rgba(6, 182, 212, 0.12);
+}
+.promptforge-card:hover {
+  border-color: rgba(6, 182, 212, 0.3);
+  box-shadow: 0 30px 80px rgba(6, 182, 212, 0.04);
+}
+
+.compare-tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: 'Space Grotesk', sans-serif;
+  margin-bottom: 16px;
+}
+
+.red-tag {
+  color: #ef4444;
+}
+
+.cyan-tag {
+  color: var(--lp-cyan);
+}
+
+.compare-card h3 {
+  font-size: 25px;
+  font-weight: 900;
+  color: white;
+  margin: 0 0 32px 0;
+  font-family: var(--lp-font);
+  letter-spacing: -0.02em;
+}
+
+.compare-list {
   display: flex;
   flex-direction: column;
   gap: 28px;
 }
 
-.comp-item {
+.compare-item-detailed {
   display: flex;
-  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.item-marker {
+  display: flex;
   align-items: center;
-  padding: 30px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--lp-glass-border);
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
 }
 
-.comp-item.highlight {
-  border-color: rgba(124, 92, 252, 0.4);
-  background: linear-gradient(135deg, rgba(124, 92, 252, 0.12) 0%, rgba(6, 182, 212, 0.04) 100%);
-  box-shadow: 0 15px 45px rgba(124, 92, 252, 0.08);
+.red-marker {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.15);
 }
 
-.save-badge {
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  color: #ffffff;
-  padding: 8px 16px;
-  border-radius: 100px;
+.cyan-marker {
+  background: rgba(6, 182, 212, 0.08);
+  color: var(--lp-cyan);
+  border: 1px solid rgba(6, 182, 212, 0.18);
+}
+
+.item-text strong {
+  display: block;
+  font-size: 15px;
   font-weight: 800;
-  font-size: 11.5px;
-  letter-spacing: 1px;
-  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25);
+  color: white;
+  margin-bottom: 6px;
+  font-family: var(--lp-font);
 }
+
+.item-text p {
+  font-size: 13.5px;
+  color: var(--lp-text-muted);
+  line-height: 1.55;
+  margin: 0;
+  font-family: var(--lp-font);
+}
+
+.card-bg-glow {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  opacity: 0.12;
+  transition: opacity 0.4s ease;
+}
+
+.compare-card:hover .card-bg-glow {
+  opacity: 0.22;
+}
+
+.card-glow-red {
+  bottom: -60px;
+  left: -60px;
+  background: #ef4444;
+}
+
+.card-glow-cyan {
+  bottom: -60px;
+  right: -60px;
+  background: var(--lp-cyan);
+}
+
+/* --- BYOK Flow Pipeline Visualizer --- */
+.byok-flow-visualizer-container {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 36px;
+  padding: 40px;
+  margin-bottom: 50px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.pipeline-title {
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--lp-text-muted);
+  letter-spacing: 3px;
+  margin: 0 0 32px 0;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.pipeline-visual {
+  display: grid;
+  grid-template-columns: 110px 1fr 110px;
+  align-items: center;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.pipeline-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.local-vault {
+  background: rgba(124, 92, 252, 0.08);
+  border: 1px solid rgba(124, 92, 252, 0.2);
+  border-radius: 24px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(124, 92, 252, 0.05);
+}
+
+.pulse-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lp-cyan);
+  box-shadow: 0 0 10px var(--lp-cyan-glow);
+  animation: pulse 2s infinite;
+}
+
+.node-icon {
+  font-size: 26px;
+}
+
+.node-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: white;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.pipeline-channels {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.pulse-path {
+  stroke-dasharray: 20, 150;
+  stroke-dashoffset: 0;
+  animation: flowStream 4s linear infinite;
+}
+
+.openai-pulse { animation-duration: 3s; }
+.anthropic-pulse { animation-duration: 3.5s; }
+.gemini-pulse { animation-duration: 4s; }
+.deepseek-pulse { animation-duration: 4.5s; }
+
+@keyframes flowStream {
+  to {
+    stroke-dashoffset: -170;
+  }
+}
+
+.pipeline-targets {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pipeline-target-node {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.target-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.openai-dot { background: #10a37f; box-shadow: 0 0 8px #10a37f; }
+.anthropic-dot { background: #d97706; box-shadow: 0 0 8px #d97706; }
+.gemini-dot { background: #4285f4; box-shadow: 0 0 8px #4285f4; }
+.deepseek-dot { background: #2563eb; box-shadow: 0 0 8px #2563eb; }
+
+.target-name {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--lp-text-muted);
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.math-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+  width: 100%;
+  margin-top: 60px;
+}
+
+.math-badge-item {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--lp-glass-border);
+  border-radius: 28px;
+  padding: 36px;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.math-badge-item:hover {
+  background: rgba(124, 92, 252, 0.04);
+  border-color: rgba(124, 92, 252, 0.35);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(124, 92, 252, 0.05);
+}
+
+.math-badge-icon {
+  font-size: 32px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
+}
+
+.math-badge-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 12px;
+  font-family: var(--lp-font-title);
+  letter-spacing: -0.01em;
+}
+
+.math-badge-desc {
+  font-size: 13.5px;
+  color: var(--lp-text-muted);
+  line-height: 1.6;
+  font-family: var(--lp-font);
+}
+
+@media (max-width: 968px) {
+  .math-showcase-card {
+    padding: 60px 30px;
+    border-radius: 32px;
+  }
+  
+  .math-badges-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-top: 45px;
+  }
+  
+  .math-badge-item {
+    padding: 28px;
+    border-radius: 20px;
+  }
+}
+
 
 /* --- BYOK ONBOARDING & TERMINAL --- */
 .api-guide-section {
@@ -1509,11 +1810,6 @@ body {
     padding: 40px;
   }
 
-  .calc-container {
-    grid-template-columns: 1fr;
-    gap: 48px;
-  }
-
   .footer-grid {
     grid-template-columns: 1fr 1fr;
     gap: 48px;
@@ -1714,6 +2010,96 @@ body {
   pointer-events: auto;
 }
 
+/* --- DPG Responsive Overrides --- */
+@media (max-width: 968px) {
+  .dpg-section-wrap {
+    padding: 40px 16px;
+  }
+  
+  .dpg-perspective-box {
+    height: 520px;
+  }
+  
+  .dpg-glass-panel {
+    width: 90%;
+    height: 75%;
+    border-radius: 24px;
+  }
+  
+  .dpg-narrative-card {
+    bottom: 30px;
+    left: 30px;
+    max-width: 380px;
+    padding: 24px;
+    border-radius: 20px;
+  }
+  
+  .dpg-narrative-card h3 {
+    font-size: 22px !important;
+    margin: 12px 0 8px !important;
+  }
+  
+  .dpg-narrative-card p {
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+  
+  .dpg-floating-tag {
+    top: 20px;
+    right: 20px;
+    font-size: 9px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dpg-section-wrap {
+    padding: 20px 12px;
+  }
+  
+  .dpg-perspective-box {
+    height: 480px;
+  }
+  
+  .dpg-glass-panel {
+    width: 96%;
+    height: 65%;
+    border-radius: 16px;
+    align-self: flex-start;
+    margin-top: 10px;
+  }
+  
+  .dpg-narrative-card {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+    padding: 18px 20px;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.95);
+  }
+  
+  .dpg-narrative-card h3 {
+    font-size: 18px !important;
+    margin: 10px 0 6px !important;
+  }
+  
+  .dpg-narrative-card p {
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+  
+  .dpg-floating-tag {
+    top: 15px;
+    right: 15px;
+    font-size: 8px;
+    padding: 4px 10px;
+  }
+}
+
+
 /* --- ORBITAL SLIDER ARROW CONTROLS & BRANDING LINKS --- */
 .orbital-arrow-btn {
   position: absolute;
@@ -1832,6 +2218,31 @@ body {
   .orbital-arrow-btn.next {
     right: 20px;
   }
+  .byok-compare-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+  .compare-card {
+    padding: 36px;
+  }
+  .byok-flow-visualizer-container {
+    padding: 30px;
+    margin-bottom: 35px;
+  }
+  .pipeline-visual {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .pipeline-channels {
+    display: none;
+  }
+  .pipeline-targets {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -1847,5 +2258,20 @@ body {
   }
   .provider-console-grid {
     grid-template-columns: 1fr;
+  }
+  .compare-card {
+    padding: 28px 20px;
+    border-radius: 28px;
+  }
+  .compare-card h3 {
+    font-size: 21px;
+    margin-bottom: 24px;
+  }
+  .compare-list {
+    gap: 20px;
+  }
+  .byok-flow-visualizer-container {
+    padding: 20px;
+    border-radius: 28px;
   }
 }

@@ -323,25 +323,60 @@ const QuantumArena = () => {
 
               <div className="quantum-card-inner">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span className="tag-premium" style={{ borderColor: card.color, color: '#fff', background: `${card.color}2c` }}>{card.badge}</span>
-                  <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontWeight: 800 }}>0{card.id + 1}</span>
+                  <span className="tag-premium" style={{ borderColor: card.color, color: '#fff', background: `${card.color}2c`, textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>{card.badge}</span>
+                  <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', fontWeight: 800 }}>0{card.id + 1}</span>
                 </div>
 
-                <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'white', margin: '28px 0 12px 0', fontFamily: 'var(--lp-font)', letterSpacing: '-0.03em', lineHeight: 1.25 }}>
-                  {card.title}
-                </h3>
-                
-                <p style={{ fontSize: '14.5px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: '20px' }}>
-                  {card.desc}
-                </p>
+                {/* Local glassmorphic panel protecting text legibility over beautiful background images */}
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(4, 4, 10, 0.94) 0%, rgba(1, 1, 3, 0.98) 100%)',
+                  backdropFilter: 'blur(20px) saturate(1.2)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(1.2)',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  borderRadius: '24px',
+                  padding: '24px 22px',
+                  margin: '22px 0 16px 0',
+                  boxShadow: '0 12px 30px rgba(0, 0, 0, 0.65)',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden'
+                }}>
+                  <h3 style={{ 
+                    fontSize: '18px', 
+                    fontWeight: 700, 
+                    color: '#ffffff', 
+                    margin: '0 0 10px 0', 
+                    fontFamily: 'var(--lp-font)', 
+                    letterSpacing: '-0.015em', 
+                    lineHeight: 1.3,
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale',
+                    textRendering: 'optimizeLegibility'
+                  }}>
+                    {card.title}
+                  </h3>
+                  
+                  <p style={{ 
+                    fontSize: '13px', 
+                    color: '#cbd5e1', 
+                    lineHeight: 1.65, 
+                    margin: 0, 
+                    fontWeight: 400,
+                    letterSpacing: '0.01em',
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale',
+                    textRendering: 'optimizeLegibility'
+                  }}>
+                    {card.desc}
+                  </p>
+                </div>
 
                 <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <div style={{
                     width: '36px',
                     height: '36px',
                     borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(0,0,0,0.5)',
+                    border: '1px solid rgba(255,255,255,0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -712,21 +747,26 @@ const CardShuffle = () => {
             position: 'absolute',
             width: '330px',
             height: '210px',
-            background: 'linear-gradient(135deg, rgba(16, 16, 32, 0.95) 0%, rgba(6, 6, 12, 0.98) 100%)',
-            border: `1px solid ${card.color}3a`,
+            background: 'linear-gradient(135deg, rgba(16, 16, 32, 0.98) 0%, rgba(6, 6, 12, 1) 100%)',
+            border: `1px solid ${card.color}45`,
             borderRadius: '24px',
             padding: '28px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            boxShadow: `0 20px 45px ${card.color}15`,
-            backdropFilter: 'blur(20px)',
-            borderLeft: `4px solid ${card.color}`
+            boxShadow: `0 20px 45px ${card.color}18`,
+            borderLeft: `4px solid ${card.color}`,
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale',
+            textRendering: 'optimizeLegibility',
+            transformStyle: 'preserve-3d'
           }}
         >
           <div style={{ color: card.color, marginBottom: '14px' }}>{card.icon}</div>
-          <div style={{ color: 'white', fontWeight: 900, fontSize: '20px', marginBottom: '8px', fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.01em' }}>{card.title}</div>
-          <div style={{ fontSize: '13px', color: 'var(--lp-text-muted)', lineHeight: 1.5 }}>{card.desc}</div>
+          <div style={{ color: 'white', fontWeight: 900, fontSize: '20px', marginBottom: '8px', fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.01em', WebkitFontSmoothing: 'antialiased' }}>{card.title}</div>
+          <div style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.8)', lineHeight: 1.5, WebkitFontSmoothing: 'antialiased' }}>{card.desc}</div>
         </motion.div>
       ))}
       <div style={{ position: 'absolute', bottom: '-24px', color: 'var(--lp-cyan)', fontSize: '10px', fontWeight: 800, letterSpacing: '2px', fontFamily: 'Space Grotesk' }}>⚡ CLICK DECK TO SHUFFLE CHANNELS</div>
@@ -884,100 +924,176 @@ const ThreeDSlider = () => {
 // --- SAVINGS CALCULATOR ---
 
 const SavingsCalculator = () => {
-  const [usage, setUsage] = useState(30); 
-  const [selectedPlan, setSelectedPlan] = useState('all'); 
-
-  const plans = {
-    chatgpt: { name: 'ChatGPT Plus', price: 20 },
-    claude: { name: 'Claude Pro', price: 20 },
-    gemini: { name: 'Gemini Advanced', price: 20 },
-    all: { name: 'All Subscriptions', price: 60 }
-  };
-
-  const subCost = plans[selectedPlan].price;
-  const apiCost = (usage * 0.07).toFixed(2);
-  const monthlySavings = (subCost - apiCost).toFixed(2);
-  const yearlySavings = (monthlySavings * 12).toFixed(0);
-
   return (
-    <div className="calc-container">
-      <div className="text-left">
-        <span className="tag-premium">THE MATHEMATICS OF BYOK</span>
-        <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800, letterSpacing: '-0.04em', marginBottom: '20px', marginTop: '16px', fontFamily: 'var(--lp-font)' }}>
-          Stop Overpaying <br />For AI <span style={{ color: 'var(--lp-accent)' }}>Access.</span>
-        </h2>
-        <p style={{ color: 'var(--lp-text-muted)', fontSize: '1.15rem', lineHeight: 1.7, marginBottom: '36px' }}>
-          Traditional SaaS providers charge a hefty monthly markup. PromptForge acts as a serverless router. By adding your own keys, you bypass corporate middleman fees and pay only raw token consumption costs.
-        </p>
-        
-        <div className="comparison-box">
-          <div className="comp-item">
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontWeight: 900, fontSize: '17px', fontFamily: 'Outfit, sans-serif' }}>SaaS Monthly Tier</span>
-                <select 
-                  value={selectedPlan} 
-                  onChange={(e) => setSelectedPlan(e.target.value)}
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '8px', padding: '6px 10px', fontSize: '12px', fontWeight: 800, outline: 'none' }}
-                >
-                  <option value="chatgpt">ChatGPT Plus ($20/mo)</option>
-                  <option value="claude">Claude Pro ($20/mo)</option>
-                  <option value="gemini">Gemini Advanced ($20/mo)</option>
-                  <option value="all">All Three ($60/mo)</option>
-                </select>
+    <div className="math-showcase-card">
+      <div className="math-showcase-shine" />
+      <span className="tag-premium" style={{ color: 'var(--lp-cyan)', borderColor: 'var(--lp-cyan-glow)' }}>
+        THE MATHEMATICS OF BYOK
+      </span>
+      <h2 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '24px 0', fontFamily: 'var(--lp-font)', textAlign: 'center', lineHeight: 1.1 }}>
+        Stop Overpaying <br />For AI <span style={{ background: 'linear-gradient(135deg, #a78bfa 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Access.</span>
+      </h2>
+      <p style={{ color: 'var(--lp-text-muted)', fontSize: '1.25rem', lineHeight: 1.8, maxWidth: '820px', margin: '0 auto 48px', textAlign: 'center', fontFamily: 'var(--lp-font)', fontWeight: 400 }}>
+        Traditional SaaS providers charge a hefty monthly markup. <strong style={{ color: '#fff', fontWeight: 700 }}>PromptForge</strong> acts as a serverless router. By adding your own keys, you bypass corporate middleman fees and pay only raw token consumption costs.
+      </p>
+
+      {/* Modern Comparative Infographic */}
+      <div className="byok-compare-grid">
+        {/* Left Side: Traditional SaaS Markup */}
+        <div className="compare-card traditional-card">
+          <div className="card-header">
+            <span className="compare-tag red-tag">TRADITIONAL MIDDLEMAN SUBSCRIPTION</span>
+            <h3>Corporate SaaS Tax</h3>
+          </div>
+          <div className="compare-list">
+            <div className="compare-item-detailed">
+              <div className="item-marker red-marker">✕</div>
+              <div className="item-text">
+                <strong>Static $20 - $60/mo Subscription</strong>
+                <p>You pay the full rate even if you only prompt a few times a week, subsidizing heavy users.</p>
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '24px', fontWeight: 900, color: 'var(--lp-rose)', fontFamily: 'Space Grotesk' }}>${subCost.toFixed(2)}<span style={{ fontSize: '12px', opacity: 0.5 }}>/mo</span></div>
+            <div className="compare-item-detailed">
+              <div className="item-marker red-marker">✕</div>
+              <div className="item-text">
+                <strong>Privacy & Security Risks</strong>
+                <p>Your api keys, custom data index matrices, and prompts are routed through third-party servers.</p>
+              </div>
+            </div>
+            <div className="compare-item-detailed">
+              <div className="item-marker red-marker">✕</div>
+              <div className="item-text">
+                <strong>Artificial Model Restrictions</strong>
+                <p>Strict rate limits, prompt length ceilings, and single-model locking to preserve vendor margins.</p>
+              </div>
             </div>
           </div>
+          <div className="card-bg-glow card-glow-red" />
+        </div>
 
-          <div className="comp-item highlight">
-            <div>
-              <div style={{ fontWeight: 900, fontSize: '17px', fontFamily: 'Outfit, sans-serif' }}>PromptForge Serverless (BYOK)</div>
-              <div style={{ fontSize: '12px', color: 'var(--lp-cyan)', marginTop: '4px', fontFamily: 'Space Grotesk' }}>Direct API Token Usage Rate</div>
+        {/* Right Side: BYOK Advantage */}
+        <div className="compare-card promptforge-card">
+          <div className="card-header">
+            <span className="compare-tag cyan-tag">PROMPTFORGE DECOUPLED ARCHITECTURE</span>
+            <h3>Serverless BYOK Routing</h3>
+          </div>
+          <div className="compare-list">
+            <div className="compare-item-detailed">
+              <div className="item-marker cyan-marker">✓</div>
+              <div className="item-text">
+                <strong>Raw Token Consumption Pricing</strong>
+                <p>Pay exactly for what you prompt. Typical moderate use results in ~$2/mo instead of $60/mo.</p>
+              </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '24px', fontWeight: 900, color: '#10b981', fontFamily: 'Space Grotesk' }}>${apiCost}<span style={{ fontSize: '12px', opacity: 0.5 }}>/mo</span></div>
-              <div className="save-badge" style={{ marginTop: '4px' }}>SAVE {Math.round((monthlySavings / subCost) * 100)}%</div>
+            <div className="compare-item-detailed">
+              <div className="item-marker cyan-marker">✓</div>
+              <div className="item-text">
+                <strong>Local-First Client Sandbox</strong>
+                <p>Keys are encrypted locally in your browser IndexedDB (AES-GCM). Data never touches external servers.</p>
+              </div>
+            </div>
+            <div className="compare-item-detailed">
+              <div className="item-marker cyan-marker">✓</div>
+              <div className="item-text">
+                <strong>Parallel Concurrency Sandbox</strong>
+                <p>Prompt 30+ top-tier models in parallel with no synthetic rate limits or artificial throttles.</p>
+              </div>
+            </div>
+          </div>
+          <div className="card-bg-glow card-glow-cyan" />
+        </div>
+      </div>
+
+      {/* Animated Direct Routing Pipeline Visual */}
+      <div className="byok-flow-visualizer-container">
+        <h4 className="pipeline-title">DIRECT ROUTING PIPELINE SECURE DATAFLOW</h4>
+        <div className="pipeline-visual">
+          <div className="pipeline-node local-vault">
+            <div className="pulse-dot" />
+            <span className="node-icon">🔒</span>
+            <span className="node-label">Client Vault</span>
+          </div>
+
+          <div className="pipeline-channels">
+            <svg width="100%" height="80" viewBox="0 0 400 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* OpenAI Line */}
+              <path d="M10 40 C 100 40, 100 15, 390 15" stroke="rgba(16, 163, 127, 0.15)" strokeWidth="2" strokeLinecap="round" />
+              <path className="pulse-path openai-pulse" d="M10 40 C 100 40, 100 15, 390 15" stroke="url(#openai-gradient)" strokeWidth="2.5" strokeLinecap="round" />
+              
+              {/* Anthropic Line */}
+              <path d="M10 40 C 100 40, 100 32, 390 32" stroke="rgba(217, 119, 6, 0.15)" strokeWidth="2" strokeLinecap="round" />
+              <path className="pulse-path anthropic-pulse" d="M10 40 C 100 40, 100 32, 390 32" stroke="url(#anthropic-gradient)" strokeWidth="2.5" strokeLinecap="round" />
+
+              {/* Gemini Line */}
+              <path d="M10 40 C 100 40, 100 48, 390 48" stroke="rgba(66, 133, 244, 0.15)" strokeWidth="2" strokeLinecap="round" />
+              <path className="pulse-path gemini-pulse" d="M10 40 C 100 40, 100 48, 390 48" stroke="url(#gemini-gradient)" strokeWidth="2.5" strokeLinecap="round" />
+
+              {/* DeepSeek Line */}
+              <path d="M10 40 C 100 40, 100 65, 390 65" stroke="rgba(37, 99, 235, 0.15)" strokeWidth="2" strokeLinecap="round" />
+              <path className="pulse-path deepseek-pulse" d="M10 40 C 100 40, 100 65, 390 65" stroke="url(#deepseek-gradient)" strokeWidth="2.5" strokeLinecap="round" />
+
+              <defs>
+                <linearGradient id="openai-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#7c5cfc" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#10a37f" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#10a37f" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="anthropic-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#7c5cfc" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#d97706" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#d97706" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#7c5cfc" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#4285f4" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#4285f4" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="deepseek-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#7c5cfc" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#2563eb" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <div className="pipeline-targets">
+            <div className="pipeline-target-node">
+              <span className="target-dot openai-dot" />
+              <span className="target-name">OpenAI</span>
+            </div>
+            <div className="pipeline-target-node">
+              <span className="target-dot anthropic-dot" />
+              <span className="target-name">Anthropic</span>
+            </div>
+            <div className="pipeline-target-node">
+              <span className="target-dot gemini-dot" />
+              <span className="target-name">Gemini</span>
+            </div>
+            <div className="pipeline-target-node">
+              <span className="target-dot deepseek-dot" />
+              <span className="target-name">DeepSeek</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="calc-card">
-        <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '20px', fontFamily: 'var(--lp-font)', letterSpacing: '-0.01em' }}>Savings Calculator</h3>
-        <div className="calc-slider-wrap">
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-            <span style={{ fontSize: '14px', fontWeight: 700 }}>Adjust Monthly Prompt Volume</span>
-            <span style={{ color: 'var(--lp-accent-light)', fontWeight: 800, fontSize: '13px', fontFamily: 'Space Grotesk' }}>
-              {usage < 30 ? 'Moderate Developer' : usage < 70 ? 'Power Creator' : 'Heavy AI Workstation'}
-            </span>
-          </div>
-          <input 
-            type="range" 
-            className="calc-slider" 
-            min="1" 
-            max="100" 
-            value={usage} 
-            onChange={(e) => setUsage(parseInt(e.target.value))}
-          />
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '14px', fontSize: '11px', color: 'var(--lp-text-muted)', fontWeight: 700, fontFamily: 'Space Grotesk' }}>
-            <span>CASUAL</span>
-            <span>PRO</span>
-            <span>ENTERPRISE</span>
-          </div>
+      {/* Premium Visual Decoupled Badges */}
+      <div className="math-badges-grid">
+        <div className="math-badge-item">
+          <div className="math-badge-icon">⚡</div>
+          <div className="math-badge-title">Direct API Routing</div>
+          <div className="math-badge-desc">Zero platform markup fees. Pay strictly for raw token usage.</div>
         </div>
-
-        <div style={{ marginTop: '36px', padding: '24px', background: 'rgba(0,0,0,0.35)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.04)' }}>
-           <div style={{ fontSize: '11px', color: 'var(--lp-text-muted)', marginBottom: '8px', letterSpacing: '1px', fontFamily: 'Space Grotesk' }}>ESTIMATED ANNUAL SAVINGS</div>
-           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-              <span style={{ fontSize: '42px', fontWeight: 900, color: '#10b981', fontFamily: 'Space Grotesk' }}>${yearlySavings}</span>
-              <span style={{ fontSize: '14px', color: 'var(--lp-text-muted)', fontWeight: 700 }}>RETURNED TO YOUR WALLET</span>
-           </div>
-           <p style={{ fontSize: '12.5px', color: 'var(--lp-text-muted)', marginTop: '16px', lineHeight: 1.5, marginBottom: 0 }}>
-             *Based on standard API prompt ratios of 70% input tokens and 30% output tokens for Claude 3.5 Sonnet and GPT-4o.
-           </p>
+        <div className="math-badge-item">
+          <div className="math-badge-icon">🔒</div>
+          <div className="math-badge-title">Absolute Key Safety</div>
+          <div className="math-badge-desc">Keys are encrypted local-first. Never touch external servers.</div>
+        </div>
+        <div className="math-badge-item">
+          <div className="math-badge-icon">🛠️</div>
+          <div className="math-badge-title">No Limits Sandbox</div>
+          <div className="math-badge-desc">Parallel prompts, vector indexing, OCR, and infinite workflows.</div>
         </div>
       </div>
     </div>
@@ -1275,7 +1391,7 @@ const LandingPage = () => {
           </RevealText>
           <RevealText className="hero-title">
             <span style={{ background: 'linear-gradient(to right, #fff, var(--lp-accent-light))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '1.03em', fontWeight: 900 }}>Your Keys. Your Control.</span> <br /> 
-            <span style={{ opacity: 0.95, textShadow: '0 0 50px rgba(124,92,252,0.25)' }}>Decoupled AI Router.</span>
+            <span style={{ background: 'linear-gradient(to right, var(--lp-accent-light), var(--lp-cyan))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '1.0em', fontWeight: 900 }}>Decoupled AI Router.</span>
           </RevealText>
           <RevealText>
             <p className="hero-subtitle">
