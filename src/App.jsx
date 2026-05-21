@@ -21,6 +21,7 @@ import ChatWithData from './pages/ChatWithData';
 import Vault from './pages/Vault';
 import TheSpider from './pages/TheSpider';
 import TheInventor from './pages/TheInventor';
+import Docs from './pages/Docs';
 import Toast from './components/Toast';
 import { AppProvider } from './context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,7 +41,7 @@ function DashboardLayout() {
     compare:'Model Compare', codehelper:'Code Helper', datawizard: 'Data Wizard', chatdata: 'Chat With Data',
     vault: 'Generation Vault', keys:'API Keys', 
     sellearn:'Sell & Earn', seo: 'SEO Optimizer', library: 'Prompt Library', search: 'The Spider',
-    inventor: 'The Inventor'
+    inventor: 'The Inventor', docs: 'Documentation Hub'
   };
 
   useEffect(() => {
@@ -108,6 +109,7 @@ function DashboardLayout() {
                 <Route path="/library" element={<PromptLibrary onNavigate={handleNavigate} />} />
                 <Route path="/search" element={<TheSpider />} />
                 <Route path="/inventor" element={<TheInventor />} />
+                <Route path="/docs" element={<Docs />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
             </motion.div>

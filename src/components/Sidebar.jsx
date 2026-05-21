@@ -3,7 +3,7 @@ import {
   LayoutDashboard, PenTool, GitCompare, Code2, MessageSquare, 
   Key, Share2, Image as ImageIcon, Video, Languages, DollarSign,
   Zap, Search, Library, Wand2, Database, Archive, FileText,
-  PanelLeftClose, PanelRightClose, Globe, Lightbulb
+  PanelLeftClose, PanelRightClose, Globe, Lightbulb, BookOpen
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -64,6 +64,7 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
         <NavItem id="inventor" icon={Lightbulb} label="The Inventor" badge="Future" badgeClass="badge-new" />
         <NavItem id="vault" icon={Archive} label="History Vault" />
         <NavItem id="keys" icon={Key} label="API Keys" />
+        <NavItem id="docs" icon={BookOpen} label="Docs" badge="New" badgeClass="badge-new" />
       </div>
 
       <div className="nav-section">

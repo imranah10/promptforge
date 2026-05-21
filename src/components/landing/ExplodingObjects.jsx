@@ -96,40 +96,51 @@ const ExplodingObjects = () => {
         backgroundImage: 'url("/ai_neural_nodes_visual_1778616393421.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        opacity: 0.1,
-        filter: 'grayscale(1) brightness(0.5)',
+        opacity: 0.88,
+        filter: 'brightness(1.1) saturate(1.3) contrast(1.1)',
         pointerEvents: 'none'
       }}></div>
 
-      <div style={{ position: 'absolute', top: '60px', left: '60px', zIndex: 10 }}>
-        <div style={{ color: '#7c5cfc', fontWeight: 700, letterSpacing: '4px', fontSize: '14px', marginBottom: '12px' }}>INTERACTIVE SYSTEM</div>
-        <h3 style={{ fontSize: '42px', fontWeight: 900, marginBottom: '16px', color: 'white', letterSpacing: '-1px' }}>Neural Architecture</h3>
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '18px', maxWidth: '450px', lineHeight: 1.6 }}>
-          A zero-trust, model-agnostic workbench built for the next generation of AI engineering.
+      {/* Elegant glass overlay to ensure high readability of text on top of the image */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'linear-gradient(135deg, rgba(3, 3, 8, 0.85) 0%, rgba(3, 3, 8, 0.35) 60%, rgba(3, 3, 8, 0.9) 100%)',
+        pointerEvents: 'none',
+        zIndex: 1
+      }}></div>
+
+      <div style={{ position: 'absolute', top: '50px', left: '50px', zIndex: 10 }}>
+        <div style={{ color: '#7c5cfc', fontWeight: 800, letterSpacing: '3px', fontSize: '11px', marginBottom: '8px', fontFamily: 'Space Grotesk, sans-serif' }}>INTERACTIVE SYSTEM</div>
+        <h3 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '10px', color: 'white', letterSpacing: '-0.03em', fontFamily: 'Outfit, sans-serif' }}>Interactive 3D Blueprint Mesh</h3>
+        <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '14.5px', maxWidth: '400px', lineHeight: 1.5, fontFamily: 'Outfit, sans-serif', margin: 0 }}>
+          A zero-trust, model-agnostic workbench built for the next generation of AI engineering. Click and drag nodes.
         </p>
       </div>
       
-      <Suspense fallback={<div style={{ color: 'white', textAlign: 'center', paddingTop: '350px', opacity: 0.5 }}>Synchronizing Neural Nodes...</div>}>
-        <Canvas dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
-          <PerspectiveCamera makeDefault position={[0, 0, 12]} />
-          <ambientLight intensity={1.5} />
-          <pointLight position={[10, 10, 10]} intensity={2.5} color="#7c5cfc" />
-          <pointLight position={[-10, -10, 10]} intensity={2} color="#38bdf8" />
-          <group position={[0, -0.5, 0]}>
-            {features.map((f, i) => (
-              <FeatureSphere 
-                key={i} 
-                index={i}
-                position={[ (i - 1.5) * 3.8, 0, 0 ]} 
-                title={f.title} 
-                desc={f.desc} 
-              />
-            ))}
-          </group>
-          <ContactShadows position={[0, -4, 0]} opacity={0.6} scale={20} blur={2.5} far={4.5} color="#7c5cfc" />
-          <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={1.5} />
-        </Canvas>
-      </Suspense>
+      <div style={{ position: 'absolute', inset: 0, zIndex: 2 }}>
+        <Suspense fallback={<div style={{ color: 'white', textAlign: 'center', paddingTop: '350px', opacity: 0.5 }}>Synchronizing Neural Nodes...</div>}>
+          <Canvas dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
+            <PerspectiveCamera makeDefault position={[0, 0, 12]} />
+            <ambientLight intensity={2.2} />
+            <pointLight position={[10, 10, 10]} intensity={4.5} color="#7c5cfc" />
+            <pointLight position={[-10, -10, 10]} intensity={3.5} color="#38bdf8" />
+            <group position={[0, -0.5, 0]}>
+              {features.map((f, i) => (
+                <FeatureSphere 
+                  key={i} 
+                  index={i}
+                  position={[ (i - 1.5) * 3.8, 0, 0 ]} 
+                  title={f.title} 
+                  desc={f.desc} 
+                />
+              ))}
+            </group>
+            <ContactShadows position={[0, -4, 0]} opacity={0.6} scale={20} blur={2.5} far={4.5} color="#7c5cfc" />
+            <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={1.5} />
+          </Canvas>
+        </Suspense>
+      </div>
 
       <style>{`
         @keyframes revealScale {
