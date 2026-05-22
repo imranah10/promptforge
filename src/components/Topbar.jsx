@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, Sun, Moon } from 'lucide-react';
 
-const Topbar = ({ title, onToggleSidebar }) => {
+const Topbar = ({ title, onToggleSidebar, theme, onToggleTheme }) => {
   return (
     <div className="topbar">
       <div className="topbar-left">
@@ -14,6 +14,9 @@ const Topbar = ({ title, onToggleSidebar }) => {
         </div>
       </div>
       <div className="topbar-right">
+        <button onClick={onToggleTheme} className="theme-toggle-btn" title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
         <div className="status-dot">
           <div className="dot"></div>
           <span style={{ fontSize: '12px', color: 'var(--text3)' }}>All systems live</span>
@@ -22,7 +25,7 @@ const Topbar = ({ title, onToggleSidebar }) => {
 
       <style jsx>{`
         .topbar {
-          background: rgba(5, 5, 8, 0.7);
+          background: var(--card);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
           border-bottom: 1px solid var(--border);
@@ -32,8 +35,23 @@ const Topbar = ({ title, onToggleSidebar }) => {
           position: sticky; top: 0; z-index: 50;
         }
         .topbar-left { display: flex; align-items: center; gap: 16px; }
-        .page-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .page-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--text); }
         .topbar-right { display: flex; align-items: center; gap: 12px; }
+        
+        .theme-toggle-btn {
+          background: rgba(124, 92, 252, 0.08);
+          border: 1px solid var(--border);
+          border-radius: 50%;
+          width: 36px; height: 36px;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; transition: all 0.2s;
+          color: var(--text);
+        }
+        .theme-toggle-btn:hover {
+          background: rgba(124, 92, 252, 0.15);
+          border-color: var(--accent);
+          box-shadow: 0 0 12px var(--glow);
+        }
         
         .menu-toggle { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
         .status-dot {
@@ -43,10 +61,7 @@ const Topbar = ({ title, onToggleSidebar }) => {
 
         @media (max-width: 900px) {
           .menu-toggle { display: flex; }
-          .topbar { padding: 0 16px; display: flex; }
-        }
-        @media (min-width: 901px) {
-          .topbar { display: none; }
+          .topbar { padding: 0 16px; }
         }
       `}</style>
     </div>

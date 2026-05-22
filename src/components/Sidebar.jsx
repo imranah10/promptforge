@@ -3,11 +3,12 @@ import {
   LayoutDashboard, PenTool, GitCompare, Code2, MessageSquare, 
   Key, Share2, Image as ImageIcon, Video, Languages, DollarSign,
   Zap, Search, Library, Wand2, Database, Archive, FileText,
-  PanelLeftClose, PanelRightClose, Globe, Lightbulb, BookOpen
+  PanelLeftClose, PanelRightClose, Globe, Lightbulb, BookOpen,
+  Sun, Moon
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse }) => {
+const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse, theme, onToggleTheme }) => {
   const [tooltip, setTooltip] = React.useState(null);
 
   const handleMouseEnter = (e, label) => {
@@ -49,37 +50,45 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
         </button>
       </div>
 
-      <div className="nav-section">
-        {!isCollapsed && <div className="nav-label">Studio</div>}
-        <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
-        <NavItem id="chatdata" icon={FileText} label="Chat With Data" badge="Pro" badgeClass="badge-hot" />
-        <NavItem id="optimizer" icon={Wand2} label="Prompt Optimizer" badge="Magic" badgeClass="badge-pro" />
-        <NavItem id="aiwriter" icon={PenTool} label="AI Writer" />
-        <NavItem id="library" icon={Library} label="Prompt Library" badge="60+" badgeClass="badge-pro" />
-        <NavItem id="compare" icon={GitCompare} label="Model Compare" />
-        <NavItem id="codehelper" icon={Code2} label="Code Helper" />
-        <NavItem id="datawizard" icon={Database} label="Data Wizard" badge="New" badgeClass="badge-new" />
-        <NavItem id="seo" icon={Search} label="SEO Optimizer" />
-        <NavItem id="search" icon={Globe} label="The Spider" badge="Deep" badgeClass="badge-hot" />
-        <NavItem id="inventor" icon={Lightbulb} label="The Inventor" badge="Future" badgeClass="badge-new" />
-        <NavItem id="vault" icon={Archive} label="History Vault" />
-        <NavItem id="keys" icon={Key} label="API Keys" />
-        <NavItem id="docs" icon={BookOpen} label="Docs" badge="New" badgeClass="badge-new" />
-      </div>
+      <div className="sidebar-menu-container">
+        <div className="nav-section">
+          {!isCollapsed && <div className="nav-label">Studio</div>}
+          <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
+          <NavItem id="chatdata" icon={FileText} label="Chat With Data" badge="Pro" badgeClass="badge-hot" />
+          <NavItem id="optimizer" icon={Wand2} label="Prompt Optimizer" badge="Magic" badgeClass="badge-pro" />
+          <NavItem id="aiwriter" icon={PenTool} label="AI Writer" />
+          <NavItem id="library" icon={Library} label="Prompt Library" badge="60+" badgeClass="badge-pro" />
+          <NavItem id="compare" icon={GitCompare} label="Model Compare" />
+          <NavItem id="codehelper" icon={Code2} label="Code Helper" />
+          <NavItem id="datawizard" icon={Database} label="Data Wizard" badge="New" badgeClass="badge-new" />
+          <NavItem id="seo" icon={Search} label="SEO Optimizer" />
+          <NavItem id="search" icon={Globe} label="The Spider" badge="Deep" badgeClass="badge-hot" />
+          <NavItem id="inventor" icon={Lightbulb} label="The Inventor" badge="Future" badgeClass="badge-new" />
+          <NavItem id="vault" icon={Archive} label="History Vault" />
+          <NavItem id="keys" icon={Key} label="API Keys" />
+          <NavItem id="docs" icon={BookOpen} label="Docs" badge="New" badgeClass="badge-new" />
+        </div>
 
-      <div className="nav-section">
-        {!isCollapsed && <div className="nav-label">Creator Studio</div>}
-        <NavItem id="creator" icon={Share2} label="Social Media AI" />
-        <NavItem id="imageprompt" icon={ImageIcon} label="Image Prompt" />
-        <NavItem id="videoprompt" icon={Video} label="Video Prompt" />
-      </div>
+        <div className="nav-section">
+          {!isCollapsed && <div className="nav-label">Creator Studio</div>}
+          <NavItem id="creator" icon={Share2} label="Social Media AI" />
+          <NavItem id="imageprompt" icon={ImageIcon} label="Image Prompt" />
+          <NavItem id="videoprompt" icon={Video} label="Video Prompt" />
+        </div>
 
-      <div className="nav-section">
-        {!isCollapsed && <div className="nav-label">Business</div>}
-        <NavItem id="sellearn" icon={DollarSign} label="Sell & Earn" />
+        <div className="nav-section">
+          {!isCollapsed && <div className="nav-label">Business</div>}
+          <NavItem id="sellearn" icon={DollarSign} label="Sell & Earn" />
+        </div>
       </div>
 
       <div className="sidebar-footer">
+        <div className="theme-switcher-wrapper" style={{ marginBottom: isCollapsed ? '16px' : '12px' }}>
+          <button onClick={onToggleTheme} className="sidebar-theme-btn" title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            {!isCollapsed && <span className="theme-btn-label">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
+          </button>
+        </div>
         <div className="status-dot">
           <div className="dot"></div> {!isCollapsed && "All systems live"}
         </div>
@@ -117,12 +126,36 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
           position: fixed;
           top: 0; left: 0; bottom: 0;
           z-index: 100;
-          overflow-y: auto;
-          overflow-x: hidden;
+          overflow: hidden;
           transition: width 0.3s ease, transform 0.3s ease;
         }
-        .sidebar.collapsed { width: 80px; scrollbar-width: none; }
-        .sidebar.collapsed::-webkit-scrollbar { display: none; }
+        .sidebar-menu-container {
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(124, 92, 252, 0.2) transparent;
+        }
+        .sidebar-menu-container::-webkit-scrollbar {
+          width: 5px;
+        }
+        .sidebar-menu-container::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .sidebar-menu-container::-webkit-scrollbar-thumb {
+          background: rgba(124, 92, 252, 0.2);
+          border-radius: 10px;
+        }
+        .sidebar-menu-container::-webkit-scrollbar-thumb:hover {
+          background: rgba(124, 92, 252, 0.4);
+        }
+        .sidebar.collapsed .sidebar-menu-container {
+          scrollbar-width: none;
+        }
+        .sidebar.collapsed .sidebar-menu-container::-webkit-scrollbar {
+          display: none;
+        }
+        .sidebar.collapsed { width: 80px; }
         .sidebar.collapsed .nav-item { justify-content: center !important; padding: 14px 0 !important; }
         .sidebar.collapsed .nav-section { padding: 16px 8px 8px; }
         .sidebar.collapsed .status-dot { justify-content: center; }
@@ -196,6 +229,33 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
         .sidebar-footer {
           margin-top: auto; padding: 16px;
           border-top: 1px solid var(--border2);
+        }
+        .sidebar-theme-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 12px;
+          border-radius: 8px;
+          cursor: pointer;
+          background: rgba(124, 92, 252, 0.08);
+          border: 1px solid var(--border);
+          color: var(--text2);
+          font-size: 13px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+        }
+        .sidebar-theme-btn:hover {
+          background: rgba(124, 92, 252, 0.15);
+          color: var(--text);
+          border-color: var(--accent);
+        }
+        .sidebar.collapsed .sidebar-theme-btn {
+          justify-content: center;
+          padding: 8px 0;
+        }
+        .theme-btn-label {
+          white-space: nowrap;
         }
         .status-dot {
           display: flex; align-items: center; gap: 8px;

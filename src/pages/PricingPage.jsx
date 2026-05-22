@@ -36,7 +36,7 @@ const PricingPage = () => {
             <li><CheckCircle2 size={18} /> Unlimited Dashboard Access</li>
             <li><CheckCircle2 size={18} /> BYOK (Bring Your Own Key) Support</li>
             <li><CheckCircle2 size={18} /> God Mode Intelligence Core</li>
-            <li><CheckCircle2 size={18} /> Singularity Council (Multi-Model)</li>
+            <li><CheckCircle2 size={18} /> Elite Model Council (Multi-Model)</li>
             <li><CheckCircle2 size={18} /> Custom Neural Personas</li>
             <li><CheckCircle2 size={18} /> Priority Feature Updates</li>
           </ul>

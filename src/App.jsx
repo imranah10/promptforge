@@ -27,7 +27,7 @@ import { AppProvider } from './context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingPage from './pages/LandingPage';
 
-function DashboardLayout() {
+function DashboardLayout({ theme, onToggleTheme }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
   const navigate = useNavigate();
@@ -73,13 +73,15 @@ function DashboardLayout() {
         isOpen={sidebarOpen} 
         isCollapsed={isDesktopCollapsed}
         onToggleCollapse={() => setIsDesktopCollapsed(!isDesktopCollapsed)}
+        theme={theme}
+        onToggleTheme={onToggleTheme}
       />
       
       <div className="main" style={{ 
-        marginLeft: window.innerWidth > 900 ? (isDesktopCollapsed ? '80px' : '260px') : '0',
-        width: 'auto'
+        '--sidebar-width': isDesktopCollapsed ? '80px' : '260px',
+        '--content-max-width': isDesktopCollapsed ? '100%' : '1650px'
       }}>
-        <Topbar title={titles[activePage] || 'Studio'} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        <Topbar title={titles[activePage] || 'Studio'} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} theme={theme} onToggleTheme={onToggleTheme} />
         <ModelSelector activePage={activePage} />
         
         <div className="content">
@@ -121,7 +123,16 @@ function DashboardLayout() {
 }
 
 function App() {
-  // No Auth/SaaS requirements needed
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const handleToggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   return (
     <AppProvider>
@@ -132,7 +143,7 @@ function App() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route 
             path="/dashboard/*" 
-            element={<DashboardLayout />} 
+            element={<DashboardLayout theme={theme} onToggleTheme={handleToggleTheme} />} 
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

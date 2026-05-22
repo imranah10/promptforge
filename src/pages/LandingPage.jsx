@@ -174,7 +174,7 @@ const DimensionalParallaxGlide = () => {
             <div className="dpg-glass-panel">
               <div className="dpg-glass-shine" />
               <img src="/promptforge_nexus_core.png" alt="PromptForge Workbench Core" className="dpg-clear-img" />
-              <div className="dpg-floating-tag">3D DIMENSIONAL PARALLAX GLIDE ACTIVE</div>
+              <div className="dpg-floating-tag">PROMPTFORGE CORE WORKBENCH ACTIVE</div>
             </div>
           </motion.div>
 
@@ -185,13 +185,13 @@ const DimensionalParallaxGlide = () => {
           >
             <div className="dpg-narrative-card">
               <span className="tag-premium" style={{ borderColor: 'var(--lp-cyan)', color: '#fff', background: 'rgba(6, 182, 212, 0.08)' }}>
-                ⚡ NEW INVENTED SYSTEM VISUAL EFFECT
+                ⚡ SECURE DECOUPLED OPERATIONS
               </span>
               <h3 style={{ fontSize: '26px', fontWeight: 800, color: 'white', margin: '20px 0 12px', letterSpacing: '-0.03em', fontFamily: 'var(--lp-font)' }}>
-                Dimensional Parallax Glide
+                All-in-One AI Studio
               </h3>
-              <p style={{ color: 'var(--lp-text-muted)', fontSize: '14px', lineHeight: 1.5, margin: 0, fontFamily: 'var(--lp-font)' }}>
-                To satisfy the highest creative standards, we have invented the <strong style={{ color: '#fff', fontWeight: 800 }}>Dimensional Parallax Glide</strong> engine. It seamlessly merges mouse-driven <strong style={{ color: '#fff', fontWeight: 800 }}>3D Hover Tilt</strong> dynamics with scroll-driven <strong style={{ color: '#fff', fontWeight: 800 }}>Parallax Storytelling</strong> layers. Experience volumetric spatial interface motion that flows beautifully in perfect hardware-accelerated precision.
+              <p style={{ color: 'var(--lp-text-muted)', fontSize: '14px', lineHeight: 1.6, margin: 0, fontFamily: 'var(--lp-font)' }}>
+                PromptForge is engineered to give you absolute control over your AI operations. By combining a beautiful client-side workspace with direct BYOK routing, you can run prompts, analyze complex datasets, optimize instructions, and construct secure code in parallel. Since everything executes locally in your browser sandbox, your keys and data never touch third-party servers. It is the ultimate workspace for builders, developers, and creators who value privacy, speed, and cost efficiency.
               </p>
             </div>
           </motion.div>
@@ -1657,10 +1657,10 @@ const LandingPage = () => {
       {/* --- INVENTED DUAL-SYSTEM MOTION CENTER (DIMENSIONAL PARALLAX GLIDE) --- */}
       <section style={{ position: 'relative', overflow: 'hidden', padding: '25px 0' }}>
         <div style={{ textAlign: 'center', marginBottom: '25px' }}>
-          <span className="tag-premium" style={{ color: 'var(--lp-cyan)', borderColor: 'var(--lp-cyan-glow)' }}>ADVANCED MOTION MATRIX</span>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 800, marginTop: '16px', letterSpacing: '-0.03em', fontFamily: 'var(--lp-font)' }}>Dimensional Parallax Glide</h2>
-          <p style={{ color: 'var(--lp-text-muted)', fontSize: '14.5px', marginTop: '8px', maxWidth: '600px', margin: '0 auto', fontFamily: 'var(--lp-font)' }}>
-            Hover over the screen mockup to experience real 3D Hover/Tilt while scrolling down.
+          <span className="tag-premium" style={{ color: 'var(--lp-cyan)', borderColor: 'var(--lp-cyan-glow)' }}>ALL-IN-ONE SYSTEM CORE</span>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 800, marginTop: '16px', letterSpacing: '-0.03em', fontFamily: 'var(--lp-font)' }}>Dynamic Studio Control Center</h2>
+          <p style={{ color: 'var(--lp-text-muted)', fontSize: '14.5px', marginTop: '8px', maxWidth: '650px', margin: '0 auto', fontFamily: 'var(--lp-font)' }}>
+            Hover over the interactive workspace mockup below to see how PromptForge organizes all your AI workflows in a single, high-fidelity browser client.
           </p>
         </div>
         <DimensionalParallaxGlide />

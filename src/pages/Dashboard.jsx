@@ -2,7 +2,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, Bot, Globe, Zap, Image, Video, Share2, Code, FileText, Search, Brain, Lightbulb } from 'lucide-react';
+import { Sparkles, ArrowRight, Bot, Globe, Zap, Image, Video, Share2, Code, FileText, Search, Brain, Lightbulb, Database } from 'lucide-react';
 
 const Dashboard = ({ onNavigate }) => {
   return (
@@ -14,7 +14,7 @@ const Dashboard = ({ onNavigate }) => {
           transition={{ duration: 0.5 }}
           className="hero-badge"
         >
-          <Sparkles size={14} /> World's Most Powerful AI Studio
+          <Sparkles size={14} /> Your Private, Multi-Model Studio Workspace
         </motion.div>
         
         <motion.h1
@@ -22,7 +22,7 @@ const Dashboard = ({ onNavigate }) => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          One tool for<br/>every AI task on earth
+          Empower your workflow<br/>with unified AI intelligence
         </motion.h1>
         
         <motion.p
@@ -70,35 +70,25 @@ const Dashboard = ({ onNavigate }) => {
         ))}
       </div>
 
-      <div className="god-mode-cta glass-card singularity-style" style={{ padding: '30px', margin: '40px 0', border: '1px solid #ef4444', background: 'linear-gradient(135deg, rgba(239,68,68,0.1), transparent)' }}>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <div className="brain-glow singularity"><Brain size={40} color="#ef4444" /></div>
-          <div style={{ flex: 1 }}>
-            <h3 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '8px' }}>Neural <span style={{ color: '#ef4444' }}>Singularity</span> Active</h3>
-            <p style={{ color: 'var(--text2)', fontSize: '15px' }}>Deploy Recursive Self-Correction (RSC). The AI now reviews and fixes its own logic flaws before responding. Unbeatable intelligence.</p>
-          </div>
-          <button className="btn btn-primary" style={{ background: '#ef4444', border: 'none' }} onClick={() => onNavigate('aichat')}>Deploy Singularity <Zap size={16} /></button>
-        </div>
-      </div>
-
       <motion.div 
         className="section-card"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+        style={{ marginTop: '20px' }}
       >
         <h3 style={{ fontFamily: 'var(--font-head)', fontSize: '18px', fontWeight: 700, marginBottom: '20px' }}>
           ✦ Elite Command Center
         </h3>
         <div className="quickstart-chips">
           {[
-            { label: 'Singularity Chat', id: 'aichat', icon: Brain },
+            { label: 'Chat With Data', id: 'chatdata', icon: FileText },
             { label: 'The Inventor', id: 'inventor', icon: Lightbulb },
             { label: 'The Spider', id: 'search', icon: Globe },
-            { label: 'Data Factory', id: 'datawizard', icon: FileText },
+            { label: 'Data Wizard', id: 'datawizard', icon: Database },
             { label: 'Prompt Optimizer', id: 'optimizer', icon: Zap },
             { label: 'Staff Engineer Code', id: 'codehelper', icon: Code },
-            { label: 'Universal Translator', id: 'translator', icon: Globe },
+            { label: 'SEO Optimizer', id: 'seo', icon: Search },
             { label: 'Cinematic Prompter', id: 'imageprompt', icon: Image }
           ].map((item, i) => (
             <motion.div 

@@ -236,7 +236,7 @@ const PromptLibrary = ({ onNavigate }) => {
 
       <style jsx>{`
         .cat-pill {
-          background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+          background: var(--bg3); border: 1px solid var(--border);
           color: var(--text3); font-size: 11px; font-weight: 600; padding: 6px 14px;
           border-radius: 20px; cursor: pointer; transition: all 0.2s;
         }
@@ -254,7 +254,7 @@ const PromptLibrary = ({ onNavigate }) => {
         .prompt-text {
           font-size: 12px; color: var(--text2); line-height: 1.5;
           max-height: 100px; overflow-y: auto; padding: 10px;
-          background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border2);
+          background: var(--bg3); border-radius: 8px; border: 1px solid var(--border2);
           font-family: var(--font-body);
         }
         .prompt-actions { display: flex; gap: 8px; margin-top: auto; }

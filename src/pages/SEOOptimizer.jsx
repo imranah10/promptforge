@@ -28,7 +28,7 @@ const ScoreRing = ({ score, label, color }) => (
     }}>
       <span style={{ fontSize: 20, fontWeight: 800, color }}>{score}</span>
     </div>
-    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>{label}</div>
+    <div style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 600 }}>{label}</div>
   </div>
 );
 
@@ -386,13 +386,13 @@ Make all values realistic and helpful — not placeholder text. Base them on the
               onClick={() => { setActiveTool(t.id); setResult(''); setScores(null); }}
               style={{
                 padding: '12px 10px', borderRadius: 12, cursor: 'pointer', textAlign: 'center',
-                border: `1.5px solid ${isActive ? t.color : 'rgba(255,255,255,0.1)'}`,
-                background: isActive ? `${t.color}14` : 'rgba(255,255,255,0.03)',
+                border: `1.5px solid ${isActive ? t.color : 'var(--border)'}`,
+                background: isActive ? `${t.color}14` : 'var(--bg3)',
                 boxShadow: isActive ? `0 4px 16px ${t.color}25` : 'none',
                 transition: 'all 0.2s',
               }}>
-              <Icon size={20} color={isActive ? t.color : 'rgba(255,255,255,0.4)'} style={{ margin: '0 auto 6px' }} />
-              <div style={{ fontSize: 11, fontWeight: 700, color: isActive ? t.color : 'rgba(255,255,255,0.6)', lineHeight: 1.3 }}>{t.label}</div>
+              <Icon size={20} color={isActive ? t.color : 'var(--text3)'} style={{ margin: '0 auto 6px' }} />
+              <div style={{ fontSize: 11, fontWeight: 700, color: isActive ? t.color : 'var(--text2)', lineHeight: 1.3 }}>{t.label}</div>
             </motion.div>
           );
         })}
@@ -402,7 +402,7 @@ Make all values realistic and helpful — not placeholder text. Base them on the
       <div style={{ padding: '10px 14px', marginBottom: 16, background: `${activeTool_?.color}10`, border: `1px solid ${activeTool_?.color}30`, borderRadius: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
         {activeTool_ && React.createElement(activeTool_.icon, { size: 15, color: activeTool_?.color })}
         <span style={{ fontSize: 13, fontWeight: 600, color: activeTool_?.color }}>{activeTool_?.label}</span>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginLeft: 4 }}>{activeTool_?.desc}</span>
+        <span style={{ fontSize: 12, color: 'var(--text3)', marginLeft: 4 }}>{activeTool_?.desc}</span>
       </div>
 
       {/* Inputs */}
@@ -539,8 +539,8 @@ Make all values realistic and helpful — not placeholder text. Base them on the
         {/* Content Scores */}
         {scores && !loading && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            style={{ marginTop: 20, padding: '20px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 20, textAlign: 'center' }}>
+            style={{ marginTop: 20, padding: '20px', background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 20, textAlign: 'center' }}>
               CONTENT SEO SCORES
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: 16 }}>

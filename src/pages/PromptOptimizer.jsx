@@ -315,7 +315,7 @@ Now forge it and provide the full analysis.`;
 
             {/* Audit grid — 100% AI generated */}
             {audit && (audit.risks?.length > 0 || audit.improvements?.length > 0) && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+              <div className="po-audit-grid">
                 <div style={{ padding: '14px 16px', background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: 12 }}>
                   <div style={{ fontSize: 11, fontWeight: 800, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <AlertCircle size={12} /> Weaknesses Found
@@ -349,7 +349,7 @@ Now forge it and provide the full analysis.`;
             {/* Forged prompt — PLAIN TEXT */}
             <div style={{ background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(167,139,250,0.35)', borderLeft: '3px solid #a78bfa', borderRadius: 12, padding: '20px', marginBottom: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '1px' }}>
                   ⚡ Forged Prompt — Ready to use
                 </span>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -361,7 +361,7 @@ Now forge it and provide the full analysis.`;
                   </button>
                 </div>
               </div>
-              <div style={{ fontSize: 14, lineHeight: 1.9, color: 'rgba(255,255,255,0.9)', whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
+              <div style={{ fontSize: 14, lineHeight: 1.9, color: 'var(--text)', whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
                 {forgedPrompt}
               </div>
             </div>
@@ -373,14 +373,14 @@ Now forge it and provide the full analysis.`;
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#60a5fa', display: 'flex', alignItems: 'center', gap: 7 }}>
                     <Play size={15} /> Test This Prompt Live
                   </div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>
+                  <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 3 }}>
                     Run the forged prompt through AI — see actual output instantly
                   </div>
                 </div>
                 <button onClick={handleTest} disabled={testing} style={{
                   display: 'flex', alignItems: 'center', gap: 7, padding: '9px 22px', borderRadius: 10,
                   background: 'rgba(96,165,250,0.15)', border: '1.5px solid rgba(96,165,250,0.45)',
-                  color: '#93c5fd', fontSize: 13, fontWeight: 700, cursor: testing ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+                  color: '#60a5fa', fontSize: 13, fontWeight: 700, cursor: testing ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
                 }}>
                   {testing ? <><Loader2 size={14} className="animate-spin" /> Running...</> : <><Play size={14} /> Run Test</>}
                 </button>
@@ -397,9 +397,9 @@ Now forge it and provide the full analysis.`;
               {testResult && !testing && (
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
                   <div style={{
-                    background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(96,165,250,0.15)',
+                    background: 'var(--bg3)', border: '1px solid var(--border)',
                     borderRadius: 10, padding: '14px 16px', marginBottom: 14,
-                    fontSize: 13, lineHeight: 1.8, color: 'rgba(255,255,255,0.85)',
+                    fontSize: 13, lineHeight: 1.8, color: 'var(--text)',
                     whiteSpace: 'pre-wrap', maxHeight: 300, overflowY: 'auto', fontFamily: 'inherit',
                   }}>
                     {testResult}
@@ -407,7 +407,7 @@ Now forge it and provide the full analysis.`;
 
                   {testDone && satisfied === null && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>Satisfied with this result?</span>
+                      <span style={{ fontSize: 13, color: 'var(--text2)', fontWeight: 600 }}>Satisfied with this result?</span>
                       <button onClick={() => handleSatisfied(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px', borderRadius: 8, background: 'rgba(74,222,128,0.12)', border: '1.5px solid rgba(74,222,128,0.4)', color: '#4ade80', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                         <Check size={14} /> Yes — Save to Vault
                       </button>
@@ -426,7 +426,7 @@ Now forge it and provide the full analysis.`;
               )}
             </div>
 
-            <button onClick={resetAll} style={{ padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700, background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5 }}>
+            <button onClick={resetAll} style={{ padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700, background: 'transparent', border: '1px solid var(--border)', color: 'var(--text3)', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5 }}>
               <RefreshCw size={12} /> Start over
             </button>
           </motion.div>

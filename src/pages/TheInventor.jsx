@@ -162,7 +162,7 @@ const AgentCard = ({ agent, content, isTyping, index }) => {
           }}>
             {agent.name}
           </div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>
+          <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 1 }}>
             {agent.role}
           </div>
         </div>
@@ -207,7 +207,7 @@ const AgentCard = ({ agent, content, isTyping, index }) => {
           <div style={{
             fontSize: isSynthesis ? 15 : 14,
             lineHeight: 1.85,
-            color: 'rgba(255,255,255,0.88)',
+            color: 'var(--text)',
           }} className="markdown-council">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
           </div>
@@ -408,7 +408,7 @@ const TheInventor = () => {
                   </div>
                   <div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: agent.color }}>{agent.name}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>{agent.role}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 1 }}>{agent.role}</div>
                   </div>
                 </div>
               );
@@ -427,7 +427,7 @@ const TheInventor = () => {
             <div style={{ marginBottom: 16 }}>
               <label style={{
                 fontSize: 11, fontWeight: 800, letterSpacing: '0.8px',
-                color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase',
+                color: 'var(--text3)', textTransform: 'uppercase',
               }}>
                 YOUR MASSIVE GOAL
               </label>
@@ -439,30 +439,30 @@ const TheInventor = () => {
               placeholder="e.g. Build a $1M/year SaaS as a solo founder..."
               rows={3}
               style={{
-                width: '100%', background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(167,139,250,0.3)',
+                width: '100%', background: 'var(--bg3)',
+                border: '1px solid var(--border)',
                 borderRadius: 12, padding: '16px 18px',
-                color: '#fff', fontSize: 16, fontFamily: 'inherit',
+                color: 'var(--text)', fontSize: 16, fontFamily: 'inherit',
                 resize: 'none', outline: 'none',
                 transition: 'border-color 0.2s',
                 lineHeight: 1.6,
               }}
-              onFocus={e => e.target.style.borderColor = 'rgba(167,139,250,0.7)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(167,139,250,0.3)'}
+              onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
 
             {/* Example chips */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14, marginBottom: 24 }}>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', alignSelf: 'center' }}>Examples:</span>
+              <span style={{ fontSize: 11, color: 'var(--text3)', alignSelf: 'center' }}>Examples:</span>
               {EXAMPLES.map((ex, i) => (
                 <button
                   key={i}
                   onClick={() => setGoal(ex)}
                   style={{
                     padding: '5px 12px', borderRadius: 20,
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    color: 'rgba(255,255,255,0.6)', fontSize: 12,
+                    background: 'var(--bg3)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text2)', fontSize: 12,
                     cursor: 'pointer', transition: 'all 0.2s',
                     fontFamily: 'inherit',
                   }}
@@ -472,9 +472,9 @@ const TheInventor = () => {
                     e.target.style.color = '#a78bfa';
                   }}
                   onMouseLeave={e => {
-                    e.target.style.background = 'rgba(255,255,255,0.05)';
-                    e.target.style.borderColor = 'rgba(255,255,255,0.12)';
-                    e.target.style.color = 'rgba(255,255,255,0.6)';
+                    e.target.style.background = 'var(--bg3)';
+                    e.target.style.borderColor = 'var(--border)';
+                    e.target.style.color = 'var(--text2)';
                   }}
                 >
                   {ex.length > 42 ? ex.slice(0, 42) + '…' : ex}
@@ -489,9 +489,9 @@ const TheInventor = () => {
                 width: '100%', padding: '14px 24px',
                 background: goal.trim()
                   ? 'linear-gradient(135deg, #a78bfa, #7c3aed)'
-                  : 'rgba(255,255,255,0.06)',
+                  : 'var(--bg3)',
                 border: 'none', borderRadius: 12,
-                color: goal.trim() ? '#fff' : 'rgba(255,255,255,0.3)',
+                color: goal.trim() ? '#fff' : 'var(--text3)',
                 fontSize: 15, fontWeight: 800, cursor: goal.trim() ? 'pointer' : 'not-allowed',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                 fontFamily: 'inherit',
@@ -520,7 +520,7 @@ const TheInventor = () => {
             <div style={{
               display: 'flex', justifyContent: 'space-between',
               marginBottom: 10, fontSize: 12,
-              color: 'rgba(255,255,255,0.5)',
+              color: 'var(--text2)',
             }}>
               <span style={{ fontWeight: 700, color: '#a78bfa' }}>
                 {currentAgentIdx >= 0 && currentAgentIdx < 5
@@ -530,7 +530,7 @@ const TheInventor = () => {
               <span>{Math.round(((currentAgentIdx + 1) / 5) * 100)}%</span>
             </div>
             <div style={{
-              height: 4, background: 'rgba(255,255,255,0.08)',
+              height: 4, background: 'var(--bg3)',
               borderRadius: 2, overflow: 'hidden',
             }}>
               <motion.div
@@ -557,15 +557,15 @@ const TheInventor = () => {
                       ? `${agent.color}18`
                       : status === 'active'
                         ? `${agent.color}22`
-                        : 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${status !== 'pending' ? agent.border : 'rgba(255,255,255,0.08)'}`,
+                        : 'var(--bg3)',
+                    border: `1px solid ${status !== 'pending' ? agent.border : 'var(--border)'}`,
                     opacity: status === 'pending' ? 0.4 : 1,
                     transition: 'all 0.3s',
                   }}>
-                    <Icon size={11} color={status !== 'pending' ? agent.color : 'rgba(255,255,255,0.3)'} />
+                    <Icon size={11} color={status !== 'pending' ? agent.color : 'var(--text3)'} />
                     <span style={{
                       fontSize: 11, fontWeight: 600,
-                      color: status !== 'pending' ? agent.color : 'rgba(255,255,255,0.3)',
+                      color: status !== 'pending' ? agent.color : 'var(--text3)',
                     }}>
                       {agent.name.split(' ')[1]}
                       {status === 'done' && ' ✓'}
@@ -581,12 +581,12 @@ const TheInventor = () => {
         {(running || messages.length > 0) && goal && (
           <div style={{
             marginBottom: 20, padding: '12px 18px',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
             borderRadius: 10,
-            fontSize: 14, color: 'rgba(255,255,255,0.6)',
+            fontSize: 14, color: 'var(--text)',
           }}>
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700, marginRight: 8 }}>GOAL:</span>
+            <span style={{ color: 'var(--text3)', fontSize: 11, fontWeight: 700, marginRight: 8 }}>GOAL:</span>
             {goal}
           </div>
         )}
@@ -658,9 +658,9 @@ const TheInventor = () => {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 7,
                   padding: '9px 18px', borderRadius: 9,
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 700,
+                  background: 'var(--bg3)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text2)', fontSize: 13, fontWeight: 700,
                   cursor: 'pointer', fontFamily: 'inherit',
                   transition: 'all 0.2s',
                   marginLeft: 'auto',
@@ -680,27 +680,29 @@ const TheInventor = () => {
         .markdown-council p { margin: 0 0 10px; }
         .markdown-council p:last-child { margin-bottom: 0; }
         .markdown-council h1, .markdown-council h2, .markdown-council h3 {
-          color: #fff; font-weight: 800; margin: 20px 0 10px;
+          color: var(--text); font-weight: 800; margin: 20px 0 10px;
           letter-spacing: -0.3px;
         }
         .markdown-council h1 { font-size: 20px; }
-        .markdown-council h2 { font-size: 17px; color: rgba(255,255,255,0.9); }
-        .markdown-council h3 { font-size: 15px; color: rgba(255,255,255,0.8); }
+        .markdown-council h2 { font-size: 17px; color: var(--accent2); }
+        .markdown-council h3 { font-size: 15px; color: var(--accent3); }
         .markdown-council ul, .markdown-council ol {
           padding-left: 0; list-style: none; margin: 8px 0;
         }
         .markdown-council li {
           padding: 8px 14px; margin-bottom: 6px;
-          background: rgba(255,255,255,0.04);
-          border-left: 2px solid rgba(255,255,255,0.15);
+          background: var(--bg3);
+          border-left: 2px solid var(--accent);
           border-radius: 0 8px 8px 0;
           font-size: 14px; line-height: 1.7;
+          color: var(--text);
         }
         .markdown-council strong { color: #fbbf24; font-weight: 700; }
-        .markdown-council em { color: rgba(255,255,255,0.6); font-style: italic; }
+        .markdown-council em { color: var(--text2); font-style: italic; }
         .markdown-council code {
-          background: rgba(255,255,255,0.08); padding: 2px 7px;
+          background: var(--bg3); padding: 2px 7px;
           border-radius: 5px; font-size: 13px; font-family: monospace;
+          color: var(--pink);
         }
         .markdown-council table {
           width: 100%; border-collapse: collapse; margin: 14px 0;
@@ -709,14 +711,14 @@ const TheInventor = () => {
         .markdown-council th {
           background: rgba(251,191,36,0.1); color: #fbbf24;
           padding: 8px 12px; text-align: left; font-weight: 700;
-          border: 1px solid rgba(255,255,255,0.08);
+          border: 1px solid var(--border);
         }
         .markdown-council td {
-          padding: 8px 12px; border: 1px solid rgba(255,255,255,0.06);
-          color: rgba(255,255,255,0.8);
+          padding: 8px 12px; border: 1px solid var(--border);
+          color: var(--text);
         }
         .markdown-council tr:nth-child(even) td {
-          background: rgba(255,255,255,0.02);
+          background: var(--bg2);
         }
         .markdown-council blockquote {
           border-left: 3px solid #a78bfa;
@@ -724,11 +726,11 @@ const TheInventor = () => {
           background: rgba(167,139,250,0.06);
           border-radius: 0 8px 8px 0;
           margin: 12px 0;
-          color: rgba(255,255,255,0.7);
+          color: var(--text2);
           font-style: italic;
         }
         .markdown-council hr {
-          border: none; border-top: 1px solid rgba(255,255,255,0.08);
+          border: none; border-top: 1px solid var(--border);
           margin: 16px 0;
         }
         @media (max-width: 600px) {

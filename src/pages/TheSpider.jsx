@@ -156,24 +156,24 @@ At the very end, append this metadata in a JSON block:
   };
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#030308', padding:'40px', gap:'28px', boxSizing:'border-box' }}>
+    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'var(--bg)', padding:'40px', gap:'28px', boxSizing:'border-box' }}>
 
       {/* ── HEADER ── */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'16px' }}>
         <div style={{ borderLeft:'4px solid var(--accent)', paddingLeft:'20px' }}>
           <div style={{ fontSize:'10px', fontWeight:900, color:'var(--accent)', letterSpacing:'4px', display:'flex', alignItems:'center', gap:'7px', marginBottom:'8px' }}><Network size={11}/> NEURAL WEB INTELLIGENCE v3.0</div>
-          <h2 style={{ fontSize:'38px', fontWeight:900, color:'#fff', letterSpacing:'-2px', margin:0 }}>The <span style={{ color:'var(--accent)' }}>Spider</span></h2>
-          <p style={{ color:'#555', fontSize:'13px', marginTop:'5px', maxWidth:'480px' }}>Real-time web extraction → AI synthesis → Multi-format intelligence reports.</p>
+          <h2 style={{ fontSize:'38px', fontWeight:900, color:'var(--text)', letterSpacing:'-2px', margin:0 }}>The <span style={{ color:'var(--accent)' }}>Spider</span></h2>
+          <p style={{ color:'var(--text3)', fontSize:'13px', marginTop:'5px', maxWidth:'480px' }}>Real-time web extraction → AI synthesis → Multi-format intelligence reports.</p>
         </div>
 
         {/* Mini history */}
         {history.length > 0 && (
-          <div style={{ background:'rgba(0,0,0,0.4)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'14px', padding:'14px', minWidth:'220px', maxWidth:'280px' }}>
-            <div style={{ fontSize:'9px', fontWeight:900, color:'#333', letterSpacing:'2px', marginBottom:'8px' }}>RECENT</div>
+          <div style={{ background:'var(--bg3)', border:'1px solid var(--border)', borderRadius:'14px', padding:'14px', minWidth:'220px', maxWidth:'280px' }}>
+            <div style={{ fontSize:'9px', fontWeight:900, color:'var(--text3)', letterSpacing:'2px', marginBottom:'8px' }}>RECENT</div>
             {history.slice(0,4).map(h => (
               <div key={h.id} onClick={() => { setResult(h.result); setQuery(h.query); setActiveTab('report'); }}
-                style={{ fontSize:'12px', color:'#666', padding:'5px 7px', borderRadius:'7px', cursor:'pointer', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', transition:'.2s' }}
-                onMouseEnter={e=>e.target.style.color='var(--accent)'} onMouseLeave={e=>e.target.style.color='#666'}>
+                style={{ fontSize:'12px', color:'var(--text2)', padding:'5px 7px', borderRadius:'7px', cursor:'pointer', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', transition:'.2s' }}
+                onMouseEnter={e=>e.target.style.color='var(--accent)'} onMouseLeave={e=>e.target.style.color='var(--text2)'}>
                 {h.query}
               </div>
             ))}
@@ -187,10 +187,10 @@ At the very end, append this metadata in a JSON block:
         {/* Mode selector */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:'8px' }}>
           {MODES.map(m => (
-            <button key={m.id} onClick={() => setMode(m.id)} style={{ background: mode===m.id ? 'rgba(124,92,252,0.12)' : 'rgba(255,255,255,0.02)', border:`1px solid ${mode===m.id?'var(--accent)':'rgba(255,255,255,0.06)'}`, borderRadius:'13px', padding:'12px 10px', cursor:'pointer', color:'#fff', display:'flex', flexDirection:'column', gap:'5px', textAlign:'left', transition:'all .2s' }}>
+            <button key={m.id} onClick={() => setMode(m.id)} style={{ background: mode===m.id ? 'rgba(124,92,252,0.12)' : 'var(--bg3)', border:`1px solid ${mode===m.id?'var(--accent)':'var(--border)'}`, borderRadius:'13px', padding:'12px 10px', cursor:'pointer', color: mode===m.id ? 'var(--accent)' : 'var(--text)', display:'flex', flexDirection:'column', gap:'5px', textAlign:'left', transition:'all .2s' }}>
               {m.icon}
               <span style={{ fontSize:'11px', fontWeight:700 }}>{m.label}</span>
-              <span style={{ fontSize:'9px', color:'#555' }}>{m.desc}</span>
+              <span style={{ fontSize:'9px', color:'var(--text3)' }}>{m.desc}</span>
             </button>
           ))}
         </div>
@@ -199,22 +199,22 @@ At the very end, append this metadata in a JSON block:
         <div style={{ display:'flex', gap:'10px', alignItems:'stretch' }}>
           <div style={{ display:'flex', flexDirection:'column', gap:'5px' }}>
             {[['quick','⚡ Quick'],['deep','🔬 Deep']].map(([id,label]) => (
-              <button key={id} onClick={() => setDepth(id)} style={{ background: depth===id?'rgba(124,92,252,0.15)':'rgba(255,255,255,0.02)', border:`1px solid ${depth===id?'var(--accent)':'rgba(255,255,255,0.06)'}`, color: depth===id?'var(--accent)':'#555', padding:'9px 14px', borderRadius:'10px', fontSize:'11px', fontWeight:800, cursor:'pointer', whiteSpace:'nowrap', transition:'.2s' }}>
+              <button key={id} onClick={() => setDepth(id)} style={{ background: depth===id?'rgba(124,92,252,0.15)':'var(--bg3)', border:`1px solid ${depth===id?'var(--accent)':'var(--border)'}`, color: depth===id?'var(--accent)':'var(--text2)', padding:'9px 14px', borderRadius:'10px', fontSize:'11px', fontWeight:800, cursor:'pointer', whiteSpace:'nowrap', transition:'.2s' }}>
                 {label}
               </button>
             ))}
           </div>
 
-          <div style={{ flex:1, display:'flex', alignItems:'center', background:'rgba(0,0,0,0.6)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:'15px', padding:'0 18px', gap:'10px' }}>
-            <Search size={17} style={{ color:'#444', flexShrink:0 }}/>
+          <div style={{ flex:1, display:'flex', alignItems:'center', background:'var(--bg3)', border:'1px solid var(--border)', borderRadius:'15px', padding:'0 18px', gap:'10px' }}>
+            <Search size={17} style={{ color:'var(--text3)', flexShrink:0 }}/>
             <input
-              style={{ flex:1, background:'none', border:'none', color:'#fff', fontSize:'15px', padding:'17px 0', outline:'none' }}
+              style={{ flex:1, background:'none', border:'none', color:'var(--text)', fontSize:'15px', padding:'17px 0', outline:'none' }}
               placeholder="Enter URL, topic, company, person, question..."
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key==='Enter' && !loading && handleSearch()}
             />
-            {query && <button onClick={() => setQuery('')} style={{ background:'none', border:'none', color:'#444', cursor:'pointer', fontSize:'15px' }}>✕</button>}
+            {query && <button onClick={() => setQuery('')} style={{ background:'none', border:'none', color:'var(--text3)', cursor:'pointer', fontSize:'15px' }}>✕</button>}
           </div>
 
           <button onClick={handleSearch} disabled={loading} style={{ background:'var(--accent)', border:'none', color:'#fff', padding:'0 26px', borderRadius:'15px', fontSize:'14px', fontWeight:800, cursor:'pointer', display:'flex', alignItems:'center', gap:'8px', boxShadow:'0 8px 25px rgba(124,92,252,0.3)', opacity:loading?0.6:1, whiteSpace:'nowrap', transition:'.3s' }}>
@@ -227,14 +227,14 @@ At the very end, append this metadata in a JSON block:
       <AnimatePresence>
         {loading && steps.length > 0 && (
           <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
-            style={{ background:'rgba(124,92,252,0.04)', border:'1px solid rgba(124,92,252,0.15)', borderRadius:'18px', padding:'30px', display:'flex', alignItems:'center', gap:'32px' }}>
+            style={{ background:'rgba(124,92,252,0.04)', border:'1px solid var(--border)', borderRadius:'18px', padding:'30px', display:'flex', alignItems:'center', gap:'32px' }}>
             <div style={{ position:'relative', width:'80px', height:'80px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
               {[0,1].map(i => <div key={i} style={{ position:'absolute', inset:0, border:'2px solid var(--accent)', borderRadius:'50%', animation:`radarPing 2s ease-out ${i*0.7}s infinite`, opacity:0 }}/>)}
               <Globe size={26} style={{ color:'var(--accent)', animation:'slowSpin 8s linear infinite', zIndex:2 }}/>
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:'9px' }}>
               {steps.map((s,i) => (
-                <motion.div key={i} initial={{ opacity:0, x:-15 }} animate={{ opacity:1, x:0 }} style={{ display:'flex', alignItems:'center', gap:'9px', fontSize:'13px', color: s.done?'#34d399':'#666' }}>
+                <motion.div key={i} initial={{ opacity:0, x:-15 }} animate={{ opacity:1, x:0 }} style={{ display:'flex', alignItems:'center', gap:'9px', fontSize:'13px', color: s.done?'#34d399':'var(--text3)' }}>
                   {s.done
                     ? <CheckCircle2 size={13} color="#34d399"/>
                     : <div style={{ width:'13px', height:'13px', border:'2px solid rgba(124,92,252,0.4)', borderTopColor:'var(--accent)', borderRadius:'50%', flexShrink:0, animation:'spin 0.8s linear infinite' }}/>}
@@ -249,10 +249,10 @@ At the very end, append this metadata in a JSON block:
       {/* ── RESULTS ── */}
       <AnimatePresence>
         {result && !loading && (
-          <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} style={{ background:'#000', border:'1px solid rgba(124,92,252,0.25)', borderRadius:'22px', overflow:'hidden', boxShadow:'0 20px 60px rgba(0,0,0,0.5)' }}>
+          <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:'22px', overflow:'hidden', boxShadow:'0 20px 60px rgba(0,0,0,0.1)' }}>
 
             {/* Results header */}
-            <div style={{ background:'rgba(124,92,252,0.06)', padding:'16px 22px', borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', flexWrap:'wrap', gap:'10px', alignItems:'center' }}>
+            <div style={{ background:'rgba(124,92,252,0.06)', padding:'16px 22px', borderBottom:'1px solid var(--border2)', display:'flex', flexWrap:'wrap', gap:'10px', alignItems:'center' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'11px', fontWeight:900, color:'var(--accent)', letterSpacing:'2px' }}>
                 <Shield size={13}/> INTELLIGENCE REPORT
                 <span style={{ background:'rgba(124,92,252,0.15)', color:'#a78bfa', padding:'2px 9px', borderRadius:'20px', fontSize:'9px', fontWeight:700 }}>
@@ -268,7 +268,7 @@ At the very end, append this metadata in a JSON block:
                     [meta.credibility && `${meta.credibility} credibility`, meta.credibility==='High'?'#34d399':'#fbbf24'],
                     [meta.freshness && meta.freshness],
                   ].filter(([v])=>v).map(([v,c],i) => (
-                    <div key={i} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)', color:c||'#555', padding:'3px 9px', borderRadius:'20px', fontSize:'10px', fontWeight:700 }}>{v}</div>
+                    <div key={i} style={{ background:'var(--bg3)', border:'1px solid var(--border2)', color:c||'var(--text2)', padding:'3px 9px', borderRadius:'20px', fontSize:'10px', fontWeight:700 }}>{v}</div>
                   ))}
                 </div>
               )}
@@ -283,13 +283,13 @@ At the very end, append this metadata in a JSON block:
             </div>
 
             {/* Tabs */}
-            <div style={{ display:'flex', gap:'2px', padding:'7px 10px', background:'rgba(0,0,0,0.3)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ display:'flex', gap:'2px', padding:'7px 10px', background:'var(--bg3)', borderBottom:'1px solid var(--border2)' }}>
               {[
                 ['report',  <FileText size={12}/>,  'Report'],
                 followUps.length > 0 && ['followup', <Brain size={12}/>,    `Follow-up (${followUps.length})`],
                 rawContent && ['raw', <Code2 size={12}/>, 'Raw Feed'],
               ].filter(Boolean).map(([id,icon,label]) => (
-                <button key={id} onClick={() => setActiveTab(id)} style={{ background:activeTab===id?'var(--accent)':'transparent', border:'none', color:activeTab===id?'#fff':'#555', padding:'7px 14px', borderRadius:'7px', fontSize:'11px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', transition:'.2s' }}>
+                <button key={id} onClick={() => setActiveTab(id)} style={{ background:activeTab===id?'var(--accent)':'transparent', border:'none', color:activeTab===id?'#fff':'var(--text3)', padding:'7px 14px', borderRadius:'7px', fontSize:'11px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', transition:'.2s' }}>
                   {icon} {label}
                 </button>
               ))}
@@ -297,7 +297,7 @@ At the very end, append this metadata in a JSON block:
 
             {/* Tab content */}
             {activeTab === 'report' && (
-              <div style={{ padding:'32px', fontSize:'15px', lineHeight:'1.85', color:'rgba(255,255,255,0.87)', maxHeight:'800px', overflowY:'auto' }} className="sp-md-body">
+              <div style={{ padding:'32px', fontSize:'15px', lineHeight:'1.85', color:'var(--text)', maxHeight:'800px', overflowY:'auto' }} className="sp-md-body">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
               </div>
             )}
@@ -305,10 +305,10 @@ At the very end, append this metadata in a JSON block:
             {activeTab === 'followup' && (
               <div style={{ padding:'22px', display:'flex', flexDirection:'column', gap:'16px' }}>
                 <div>
-                  <div style={{ fontSize:'9px', fontWeight:900, color:'#333', letterSpacing:'2px', marginBottom:'10px' }}>SUGGESTED FOLLOW-UPS</div>
+                  <div style={{ fontSize:'9px', fontWeight:900, color:'var(--text3)', letterSpacing:'2px', marginBottom:'10px' }}>SUGGESTED FOLLOW-UPS</div>
                   <div style={{ display:'flex', flexDirection:'column', gap:'7px' }}>
                     {followUps.map((fq,i) => (
-                      <button key={i} onClick={() => handleFollowUp(fq)} style={{ background:'rgba(124,92,252,0.06)', border:'1px solid rgba(124,92,252,0.14)', color:'#aaa', padding:'11px 15px', borderRadius:'11px', fontSize:'13px', cursor:'pointer', textAlign:'left', display:'flex', alignItems:'center', gap:'8px', transition:'.2s' }}>
+                      <button key={i} onClick={() => handleFollowUp(fq)} style={{ background:'rgba(124,92,252,0.06)', border:'1px solid var(--border)', color:'var(--text2)', padding:'11px 15px', borderRadius:'11px', fontSize:'13px', cursor:'pointer', textAlign:'left', display:'flex', alignItems:'center', gap:'8px', transition:'.2s' }}>
                         <Zap size={11}/> {fq}
                       </button>
                     ))}
@@ -316,7 +316,7 @@ At the very end, append this metadata in a JSON block:
                 </div>
                 <div style={{ display:'flex', gap:'8px' }}>
                   <input
-                    style={{ flex:1, background:'rgba(0,0,0,0.5)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', padding:'13px 16px', borderRadius:'13px', fontSize:'14px', outline:'none' }}
+                    style={{ flex:1, background:'var(--bg3)', border:'1px solid var(--border)', color:'var(--text)', padding:'13px 16px', borderRadius:'13px', fontSize:'14px', outline:'none' }}
                     placeholder="Ask anything about the extracted data..."
                     value={followInput}
                     onChange={e => setFollowInput(e.target.value)}
@@ -337,7 +337,7 @@ At the very end, append this metadata in a JSON block:
               </div>
             )}
 
-            <div style={{ padding:'11px 22px', background:'rgba(0,0,0,0.3)', borderTop:'1px solid rgba(255,255,255,0.04)', fontSize:'10px', color:'#333', textAlign:'center', fontStyle:'italic' }}>
+            <div style={{ padding:'11px 22px', background:'var(--bg2)', borderTop:'1px solid var(--border2)', fontSize:'10px', color:'var(--text3)', textAlign:'center', fontStyle:'italic' }}>
               Live data extracted via Jina AI · Synthesized by {activeModel || 'AI'} · {new Date().toLocaleString()}
             </div>
           </motion.div>
@@ -348,18 +348,18 @@ At the very end, append this metadata in a JSON block:
       {!result && !loading && (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'18px', padding:'70px 30px', textAlign:'center' }}>
           <div style={{ position:'relative', width:'100px', height:'100px', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <div style={{ position:'absolute', inset:0, border:'2px solid rgba(124,92,252,0.1)', borderRadius:'50%', animation:'radarPing 3s ease-out infinite' }}/>
-            <Globe size={38} style={{ color:'#1a1a2e' }}/>
+            <div style={{ position:'absolute', inset:0, border:'2px solid var(--border)', borderRadius:'50%', animation:'radarPing 3s ease-out infinite' }}/>
+            <Globe size={38} style={{ color:'var(--border)' }}/>
           </div>
-          <p style={{ color:'#444', fontSize:'14px', maxWidth:'460px', lineHeight:'1.7' }}>
+          <p style={{ color:'var(--text3)', fontSize:'14px', maxWidth:'460px', lineHeight:'1.7' }}>
             Spider awaits. Enter any URL, topic, company, technology, or question to extract live web intelligence.
           </p>
           <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', justifyContent:'center' }}>
             {['https://openai.com','Latest AI research 2025','Tesla earnings Q4','React vs Vue 2025','Elon Musk companies'].map(ex => (
               <button key={ex} onClick={() => setQuery(ex)}
-                style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)', color:'#555', padding:'7px 15px', borderRadius:'20px', fontSize:'12px', cursor:'pointer', transition:'.2s' }}
+                style={{ background:'var(--bg3)', border:'1px solid var(--border)', color:'var(--text2)', padding:'7px 15px', borderRadius:'20px', fontSize:'12px', cursor:'pointer', transition:'.2s' }}
                 onMouseEnter={e=>{ e.target.style.borderColor='var(--accent)'; e.target.style.color='var(--accent)'; }}
-                onMouseLeave={e=>{ e.target.style.borderColor='rgba(255,255,255,0.06)'; e.target.style.color='#555'; }}>
+                onMouseLeave={e=>{ e.target.style.borderColor='var(--border)'; e.target.style.color='var(--text2)'; }}>
                 {ex}
               </button>
             ))}
@@ -371,23 +371,23 @@ At the very end, append this metadata in a JSON block:
         @keyframes spin      { to { transform:rotate(360deg); } }
         @keyframes radarPing { 0%{transform:scale(.3);opacity:.7} 100%{transform:scale(1.5);opacity:0} }
         @keyframes slowSpin  { to { transform:rotate(360deg); } }
-        .sp-md-body h1,.sp-md-body h2,.sp-md-body h3{color:#fff;font-weight:800;margin:24px 0 10px;letter-spacing:-.5px}
-        .sp-md-body h2{border-bottom:1px solid rgba(124,92,252,.15);padding-bottom:9px}
+        .sp-md-body h1,.sp-md-body h2,.sp-md-body h3{color:var(--text);font-weight:800;margin:24px 0 10px;letter-spacing:-.5px}
+        .sp-md-body h2{border-bottom:1px solid var(--border);padding-bottom:9px}
         .sp-md-body h3{color:var(--accent);font-size:1em}
-        .sp-md-body p{margin-bottom:12px;color:rgba(255,255,255,.75)}
-        .sp-md-body strong{color:#fff;font-weight:800}
-        .sp-md-body a{color:var(--accent);text-decoration:none;border-bottom:1px dashed rgba(124,92,252,.4)}
+        .sp-md-body p{margin-bottom:12px;color:var(--text2)}
+        .sp-md-body strong{color:var(--text);font-weight:800}
+        .sp-md-body a{color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent)}
         .sp-md-body ul{padding-left:0;list-style:none;margin-bottom:14px}
-        .sp-md-body li{padding:7px 12px 7px 13px;border-left:2px solid rgba(124,92,252,.3);margin-bottom:5px;color:rgba(255,255,255,.7);background:rgba(124,92,252,.02);border-radius:0 7px 7px 0}
+        .sp-md-body li{padding:7px 12px 7px 13px;border-left:2px solid var(--accent);margin-bottom:5px;color:var(--text2);background:var(--bg3);border-radius:0 7px 7px 0}
         .sp-md-body table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
-        .sp-md-body th{background:rgba(124,92,252,.1);color:var(--accent);padding:9px 13px;text-align:left;font-size:10px;letter-spacing:1px;border:1px solid rgba(255,255,255,.05)}
-        .sp-md-body td{padding:9px 13px;border:1px solid rgba(255,255,255,.04);color:rgba(255,255,255,.7)}
-        .sp-md-body code{background:rgba(124,92,252,.1);color:#a78bfa;padding:2px 5px;border-radius:4px;font-size:12px;font-family:'DM Mono',monospace}
-        .sp-md-body pre{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:14px;overflow-x:auto;margin:14px 0}
-        .sp-md-body pre code{background:none;color:#e2e8f0;font-size:12px}
+        .sp-md-body th{background:var(--bg3);color:var(--accent);padding:9px 13px;text-align:left;font-size:10px;letter-spacing:1px;border:1px solid var(--border)}
+        .sp-md-body td{padding:9px 13px;border:1px solid var(--border2);color:var(--text2)}
+        .sp-md-body code{background:var(--bg3);color:var(--accent2);padding:2px 5px;border-radius:4px;font-size:12px;font-family:'DM Mono',monospace}
+        .sp-md-body pre{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:14px;overflow-x:auto;margin:14px 0}
+        .sp-md-body pre code{background:none;color:var(--text);font-size:12px}
       `}</style>
     </div>
   );
 }
 
-const spBtn = { background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', color:'#aaa', padding:'6px 12px', borderRadius:'9px', fontSize:'11px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', whiteSpace:'nowrap' };
+const spBtn = { background:'var(--bg3)', border:'1px solid var(--border)', color:'var(--text2)', padding:'6px 12px', borderRadius:'9px', fontSize:'11px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', whiteSpace:'nowrap' };

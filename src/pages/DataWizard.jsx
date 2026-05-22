@@ -396,8 +396,8 @@ export default function DataWizard() {
       setStep(4, 'running');
       await new Promise(r => setTimeout(r, 200));
       setStep(4, 'done');
-
-      setHistory(prev => [{ id: Date.now(), type, query: query.slice(0, 60), content: cleanPrimary, audit }, ...prev].slice(0, 20));
+ 
+      setHistory(prev => [{ id: Date.now(), type, query: query.slice(0, 60), content: cleanPrimary, audit, fullQuery: query }, ...prev].slice(0, 20));
       saveToVault?.('DataWizard', query, cleanPrimary);
       showToast('Artifact synthesized!');
     } catch (e) {
@@ -419,22 +419,22 @@ export default function DataWizard() {
   };
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'#030308', padding:'40px', boxSizing:'border-box' }}>
+    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'var(--bg)', padding:'40px', boxSizing:'border-box' }}>
 
       {/* ── HEADER ── */}
       <div style={{ borderLeft:'4px solid var(--accent)', paddingLeft:'20px', marginBottom:'40px' }}>
         <div style={{ fontSize:'10px', fontWeight:900, color:'var(--accent)', letterSpacing:'4px', display:'flex', alignItems:'center', gap:'8px', marginBottom:'8px' }}>
           <Cpu size={11}/> APEX DATA ARCHITECT v3.0
         </div>
-        <h2 style={{ fontSize:'38px', fontWeight:900, color:'#fff', letterSpacing:'-2px', margin:0 }}>
+        <h2 style={{ fontSize:'38px', fontWeight:900, color:'var(--text)', letterSpacing:'-2px', margin:0 }}>
           Data <span style={{ color:'var(--accent)' }}>Wizard</span>
         </h2>
-        <p style={{ color:'#555', fontSize:'14px', marginTop:'6px' }}>
+        <p style={{ color:'var(--text3)', fontSize:'14px', marginTop:'6px' }}>
           Production-grade data artifacts · Multi-variant output · Security audit trail
         </p>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1.2fr', gap:'36px', maxWidth:'1600px', margin:'0 auto', width:'100%' }}>
+      <div className="dw-main-grid">
 
         {/* ── LEFT ── */}
         <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
@@ -461,7 +461,7 @@ export default function DataWizard() {
           {/* Optimization mode */}
           <div>
             <div style={sLabel}>OPTIMIZATION MODE</div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'8px' }}>
+            <div className="dw-opt-grid">
               {OPT_MODES.map(m => (
                 <button key={m.id} onClick={() => setOptMode(m.id)}
                   style={{ ...optBtn, borderColor: optMode===m.id?'var(--accent)':'rgba(255,255,255,0.06)', background: optMode===m.id?'rgba(124,92,252,0.12)':'rgba(255,255,255,0.02)' }}>
@@ -520,11 +520,18 @@ export default function DataWizard() {
                     style={{ overflow:'hidden', display:'flex', flexDirection:'column', gap:'6px' }}>
                     {history.map(h => (
                       <div key={h.id}
-                        onClick={() => { setVariants([{ content:h.content, label:h.type }]); setAudit(h.audit); setActiveVar(0); }}
+                        onClick={() => {
+                          setQuery(h.fullQuery || h.query.replace(/&quot;/g, '"'));
+                          setType(h.type);
+                          setVariants([{ content:h.content, label:h.type }]);
+                          setAudit(h.audit);
+                          setActiveVar(0);
+                          setShowHist(false);
+                        }}
                         style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:'10px', cursor:'pointer' }}>
                         <span style={{ fontSize:'10px', fontWeight:800, color:'var(--accent)', background:'rgba(124,92,252,0.1)', padding:'2px 8px', borderRadius:'6px', flexShrink:0 }}>{h.type.split(' ')[0]}</span>
-                        <span style={{ fontSize:'12px', color:'#666', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{h.query}</span>
-                        <ArrowRight size={12} style={{ color:'#333', flexShrink:0 }}/>
+                        <span style={{ fontSize:'12px', color:'var(--text2)', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{h.query.replace(/&quot;/g, '"')}</span>
+                        <ArrowRight size={12} style={{ color:'var(--text3)', flexShrink:0 }}/>
                       </div>
                     ))}
                   </motion.div>
@@ -561,7 +568,7 @@ export default function DataWizard() {
           <AnimatePresence>
             {(variants.length > 0 || loading) && (
               <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }}
-                style={{ background:'#000', border:'2px solid var(--accent)', borderRadius:'22px', overflow:'hidden', boxShadow:'0 20px 60px rgba(124,92,252,0.1)' }}>
+                style={{ background:'var(--card)', border:'2px solid var(--accent)', borderRadius:'22px', overflow:'hidden', boxShadow:'0 20px 60px rgba(124,92,252,0.1)' }}>
 
                 <div style={{ background:'rgba(124,92,252,0.08)', padding:'14px 20px', borderBottom:'1px solid rgba(255,255,255,0.06)', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'8px' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'11px', fontWeight:900, color:'#fff', letterSpacing:'1px' }}>
@@ -588,7 +595,7 @@ export default function DataWizard() {
                   </div>
                 )}
 
-                <div style={{ padding:'24px', fontSize:'14px', lineHeight:'1.8', color:'#ddd', maxHeight:'550px', overflowY:'auto' }}>
+                <div style={{ padding:'24px', fontSize:'14px', lineHeight:'1.8', color:'var(--text)', maxHeight:'550px', overflowY:'auto' }}>
                   {loading && !activeContent ? (
                     <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
                       {[80,65,90,55,75].map((w,i)=>(

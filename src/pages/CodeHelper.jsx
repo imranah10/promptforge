@@ -274,9 +274,9 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                 display: 'flex', alignItems: 'center', gap: 7,
                 padding: '8px 18px', borderRadius: 20, fontSize: 12, fontWeight: 700,
                 cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
-                background: isActive ? `${t.color}20` : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${isActive ? t.color : 'rgba(255,255,255,0.1)'}`,
-                color: isActive ? t.color : 'rgba(255,255,255,0.5)',
+                background: isActive ? `${t.color}20` : 'var(--bg3)',
+                border: `1px solid ${isActive ? t.color : 'var(--border)'}`,
+                color: isActive ? t.color : 'var(--text2)',
               }}
             >
               <Icon size={13} />{t.label}
@@ -380,7 +380,7 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                 <GitCommit size={16} color="#4ade80" />
                 <div>
                   <span style={{ fontSize: 13, fontWeight: 700, color: '#4ade80' }}>Git Commit Generator</span>
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text3)', marginLeft: 8 }}>
                     Paste code changes → get perfect Conventional Commits
                   </span>
                 </div>
@@ -433,8 +433,8 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                   {gitResult.summary && (
                     <div style={{
                       padding: '8px 14px', marginBottom: 14, fontSize: 12,
-                      background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 8, color: 'rgba(255,255,255,0.6)',
+                      background: 'var(--bg3)', border: '1px solid var(--border)',
+                      borderRadius: 8, color: 'var(--text2)',
                     }}>
                       💡 {gitResult.summary}
                     </div>
@@ -453,17 +453,17 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.08 }}
                           style={{
-                            border: `1px solid ${isRecommended ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                            border: `1px solid ${isRecommended ? 'rgba(74,222,128,0.4)' : 'var(--border)'}`,
                             borderRadius: 12, overflow: 'hidden',
-                            background: isRecommended ? 'rgba(74,222,128,0.04)' : 'rgba(255,255,255,0.02)',
+                            background: isRecommended ? 'rgba(74,222,128,0.04)' : 'var(--bg2)',
                           }}
                         >
                           {/* Header */}
                           <div style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                             padding: '10px 14px',
-                            borderBottom: '1px solid rgba(255,255,255,0.06)',
-                            background: 'rgba(255,255,255,0.02)',
+                            borderBottom: '1px solid var(--border2)',
+                            background: 'var(--bg3)',
                           }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               <span style={{
@@ -471,7 +471,7 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                                 background: typeStyle.bg, border: `1px solid ${typeStyle.border}`, color: typeStyle.color,
                               }}>{c.type}</span>
                               {c.scope && (
-                                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>({c.scope})</span>
+                                <span style={{ fontSize: 12, color: 'var(--text3)' }}>({c.scope})</span>
                               )}
                               {isRecommended && (
                                 <span style={{
@@ -480,7 +480,7 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                                   color: '#4ade80',
                                 }}>★ RECOMMENDED</span>
                               )}
-                              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
+                              <span style={{ fontSize: 11, color: 'var(--text3)' }}>
                                 {i === 0 ? 'Concise' : i === 1 ? 'Standard' : 'Detailed'}
                               </span>
                             </div>
@@ -489,9 +489,9 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                               style={{
                                 display: 'flex', alignItems: 'center', gap: 5,
                                 padding: '5px 12px', borderRadius: 7, fontSize: 11, fontWeight: 700,
-                                background: copiedGit === i ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.06)',
-                                border: `1px solid ${copiedGit === i ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.12)'}`,
-                                color: copiedGit === i ? '#4ade80' : 'rgba(255,255,255,0.5)',
+                                background: copiedGit === i ? 'rgba(74,222,128,0.15)' : 'var(--bg3)',
+                                border: `1px solid ${copiedGit === i ? 'rgba(74,222,128,0.3)' : 'var(--border)'}`,
+                                color: copiedGit === i ? '#4ade80' : 'var(--text2)',
                                 cursor: 'pointer', fontFamily: 'inherit',
                               }}
                             >
@@ -503,14 +503,14 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                           <div style={{ padding: '12px 14px' }}>
                             <div style={{
                               fontFamily: 'var(--font-mono)', fontSize: 13,
-                              color: '#fff', fontWeight: 600, marginBottom: c.body ? 8 : 0,
+                              color: 'var(--text)', fontWeight: 600, marginBottom: c.body ? 8 : 0,
                             }}>
                               {c.type}{c.scope ? `(${c.scope})` : ''}: {c.message}
                             </div>
                             {c.body && (
                               <div style={{
                                 fontFamily: 'var(--font-mono)', fontSize: 12,
-                                color: 'rgba(255,255,255,0.5)', lineHeight: 1.7,
+                                color: 'var(--text2)', lineHeight: 1.7,
                                 whiteSpace: 'pre-wrap',
                               }}>
                                 {c.body}
@@ -524,8 +524,8 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
 
                   <button onClick={handleGitCommit} style={{
                     marginTop: 10, padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700,
-                    background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
-                    color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: 'inherit',
+                    background: 'transparent', border: '1px solid var(--border)',
+                    color: 'var(--text2)', cursor: 'pointer', fontFamily: 'inherit',
                     display: 'flex', alignItems: 'center', gap: 5,
                   }}>
                     <RefreshCw size={12} /> Regenerate
@@ -548,7 +548,7 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                 <Shield size={16} color="#f87171" />
                 <div>
                   <span style={{ fontSize: 13, fontWeight: 700, color: '#f87171' }}>Security Audit</span>
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text3)', marginLeft: 8 }}>
                     Find vulnerabilities — SQL injection, XSS, auth flaws, exposed secrets & more
                   </span>
                 </div>
@@ -596,7 +596,7 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
                     padding: '16px 20px', marginBottom: 16,
-                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'var(--bg3)', border: '1px solid var(--border)',
                     borderRadius: 14,
                   }}>
                     {/* Score circle */}
@@ -612,7 +612,7 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                           {secResult.overall_score}
                         </span>
                       </div>
-                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>Security Score</div>
+                      <div style={{ fontSize: 10, color: 'var(--text3)', marginTop: 4 }}>Security Score</div>
                     </div>
 
                     <div style={{ flex: 1 }}>
@@ -623,11 +623,11 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                           border: `1px solid ${getRiskColor(secResult.risk_level)}40`,
                           color: getRiskColor(secResult.risk_level),
                         }}>{secResult.risk_level} Risk</span>
-                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
+                        <span style={{ fontSize: 12, color: 'var(--text2)' }}>
                           {(secResult.vulnerabilities || []).length} vulnerabilities found
                         </span>
                       </div>
-                      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6 }}>
+                      <p style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>
                         {secResult.summary}
                       </p>
                     </div>
@@ -636,7 +636,7 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                   {/* Vulnerabilities */}
                   {(secResult.vulnerabilities || []).length > 0 && (
                     <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
                         VULNERABILITIES FOUND
                       </div>
                       {secResult.vulnerabilities.map((v, i) => {
@@ -662,13 +662,13 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                               }}>{v.severity}</span>
                               <span style={{ fontSize: 13, fontWeight: 700, color: sev.color }}>{v.type}</span>
                               {v.line && (
-                                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginLeft: 'auto' }}>
+                                <span style={{ fontSize: 11, color: 'var(--text2)', marginLeft: 'auto' }}>
                                   📍 {v.line}
                                 </span>
                               )}
                             </div>
                             <div style={{ padding: '10px 14px' }}>
-                              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 8, lineHeight: 1.6 }}>
+                              <p style={{ fontSize: 13, color: 'var(--text)', marginBottom: 8, lineHeight: 1.6 }}>
                                 {v.description}
                               </p>
                               <div style={{
@@ -686,7 +686,7 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                   )}
 
                   {/* Good practices + Quick wins */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="ch-audit-grid">
                     {(secResult.good_practices || []).length > 0 && (
                       <div style={{
                         padding: 14, background: 'rgba(74,222,128,0.04)',
@@ -696,7 +696,7 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                           ✅ GOOD PRACTICES
                         </div>
                         {secResult.good_practices.map((g, i) => (
-                          <div key={i} style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', padding: '3px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                          <div key={i} style={{ fontSize: 12, color: 'var(--text2)', padding: '3px 0', borderBottom: '1px solid var(--border2)' }}>
                             • {g}
                           </div>
                         ))}
@@ -711,7 +711,7 @@ Check for: SQL injection, XSS, CSRF, authentication flaws, authorization issues,
                           ⚡ QUICK WINS
                         </div>
                         {secResult.quick_wins.map((q, i) => (
-                          <div key={i} style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', padding: '3px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                          <div key={i} style={{ fontSize: 12, color: 'var(--text2)', padding: '3px 0', borderBottom: '1px solid var(--border2)' }}>
                             → {q}
                           </div>
                         ))}

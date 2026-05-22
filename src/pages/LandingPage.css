@@ -268,17 +268,33 @@ body {
   background: rgba(2, 2, 6, 0.99);
   backdrop-filter: blur(35px);
   z-index: 2000;
-  padding: 40px;
+  padding: clamp(24px, 4.5vh, 40px);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mobile-menu::-webkit-scrollbar-thumb {
+  background: rgba(124, 92, 252, 0.25);
+  border-radius: 10px;
+}
+
+.mobile-menu::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .mobile-menu-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 48px;
+  margin-bottom: clamp(24px, 5vh, 44px);
+  flex-shrink: 0;
 }
 
 .mobile-close {
@@ -305,11 +321,12 @@ body {
 .mobile-links {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: clamp(16px, 3vh, 26px);
+  padding-bottom: 40px;
 }
 
 .mobile-link {
-  font-size: 32px;
+  font-size: clamp(1.4rem, 4vh, 2.0rem);
   font-weight: 800;
   color: var(--lp-text);
   text-decoration: none;

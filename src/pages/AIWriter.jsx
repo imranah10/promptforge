@@ -208,10 +208,10 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
   const ScoreBar = ({ label, value, color }) => (
     <div style={{ marginBottom: 10 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12 }}>
-        <span style={{ color: 'rgba(255,255,255,0.6)' }}>{label}</span>
+        <span style={{ color: 'var(--text2)' }}>{label}</span>
         <span style={{ color, fontWeight: 700 }}>{value}%</span>
       </div>
-      <div style={{ height: 5, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ height: 5, background: 'var(--bg3)', borderRadius: 3, overflow: 'hidden' }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${value}%` }}
@@ -235,24 +235,27 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
         {[
           { id: 'write',    icon: '✍️', label: 'Write'         },
           { id: 'analyzer', icon: '🔍', label: 'Tone Analyzer' },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id === 'write' ? 'main' : 'analyzer')}
-            style={{
-              padding: '7px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600,
-              cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
-              background: (tab.id === 'write' ? activeTab === 'main' || activeTab === 'humanized' || activeTab === 'variants' : activeTab === 'analyzer')
-                ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
-              border: '1px solid',
-              borderColor: (tab.id === 'write' ? activeTab === 'main' || activeTab === 'humanized' || activeTab === 'variants' : activeTab === 'analyzer')
-                ? 'var(--accent)' : 'rgba(255,255,255,0.1)',
-              color: '#fff',
-            }}
-          >
-            {tab.icon} {tab.label}
-          </button>
-        ))}
+        ].map(tab => {
+          const isActive = tab.id === 'write'
+            ? activeTab === 'main' || activeTab === 'humanized' || activeTab === 'variants'
+            : activeTab === 'analyzer';
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id === 'write' ? 'main' : 'analyzer')}
+              style={{
+                padding: '7px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600,
+                cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+                background: isActive ? 'var(--accent)' : 'var(--bg3)',
+                border: '1px solid',
+                borderColor: isActive ? 'var(--accent)' : 'var(--border)',
+                color: isActive ? '#fff' : 'var(--text2)',
+              }}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* ════════════════════════════════════════
@@ -391,9 +394,9 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
                         style={{
                           padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600,
                           cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
-                          background: activeTab === t.id ? 'rgba(124,92,252,0.2)' : 'rgba(255,255,255,0.04)',
-                          border: `1px solid ${activeTab === t.id ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}`,
-                          color: activeTab === t.id ? 'var(--accent2)' : 'rgba(255,255,255,0.5)',
+                          background: activeTab === t.id ? 'rgba(124,92,252,0.15)' : 'var(--bg3)',
+                          border: `1px solid ${activeTab === t.id ? 'var(--accent)' : 'var(--border)'}`,
+                          color: activeTab === t.id ? 'var(--accent2)' : 'var(--text2)',
                         }}
                       >
                         {t.label}
@@ -488,7 +491,7 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
                                   }}>
                                     {i === 0 ? 'VARIANT A' : 'VARIANT B'}
                                   </span>
-                                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{v.label}</span>
+                                  <span style={{ fontSize: 12, color: 'var(--text3)' }}>{v.label}</span>
                                 </div>
                                 <button className="btn-copy" onClick={() => copyText(v.content)}><Copy size={13} /> Copy</button>
                               </div>
@@ -499,8 +502,8 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
                             onClick={handleVariants}
                             style={{
                               padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 700,
-                              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                              color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontFamily: 'inherit',
+                              background: 'var(--bg3)', border: '1px solid var(--border)',
+                              color: 'var(--text2)', cursor: 'pointer', fontFamily: 'inherit',
                               display: 'flex', alignItems: 'center', gap: 6, width: 'fit-content',
                             }}
                           >
@@ -529,7 +532,7 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
               }}>
                 <ScanText size={16} color="#60a5fa" />
                 <span style={{ fontSize: 13, color: '#60a5fa', fontWeight: 600 }}>Tone Analyzer</span>
-                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginLeft: 4 }}>
+                <span style={{ fontSize: 12, color: 'var(--text3)', marginLeft: 4 }}>
                   Paste any text — AI tells you its tone, readability, engagement score &amp; more
                 </span>
               </div>
@@ -574,16 +577,16 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
                         padding: '8px 14px', borderRadius: 10,
                         background: b.bg, border: `1px solid ${b.border}`,
                       }}>
-                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{b.label}</div>
+                        <div style={{ fontSize: 10, color: 'var(--text3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{b.label}</div>
                         <div style={{ fontSize: 13, color: b.color, fontWeight: 700, marginTop: 3 }}>{b.value}</div>
                       </div>
                     ))}
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="aw-tone-grid">
                     {/* Scores */}
-                    <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 16 }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 14 }}>SCORES</div>
+                    <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 14 }}>SCORES</div>
                       <ScoreBar label="Clarity"     value={toneReport.clarity_score}     color="#4ade80" />
                       <ScoreBar label="Engagement"  value={toneReport.engagement_score}  color="#60a5fa" />
                       <ScoreBar label="Formality"   value={toneReport.formality_score}   color="#a78bfa" />
@@ -596,8 +599,8 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
 
                     {/* Tips & patterns */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                      <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14 }}>
-                        <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>BEST SUITED FOR</div>
+                      <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+                        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>BEST SUITED FOR</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                           {(toneReport.best_suited_for || []).map((s, i) => (
                             <span key={i} style={{
@@ -608,12 +611,12 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
                         </div>
                       </div>
 
-                      <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 14, flex: 1 }}>
-                        <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>IMPROVEMENT TIPS</div>
+                      <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, flex: 1 }}>
+                        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>IMPROVEMENT TIPS</div>
                         {(toneReport.improvement_tips || []).map((tip, i) => (
                           <div key={i} style={{
-                            fontSize: 12, color: 'rgba(255,255,255,0.7)', padding: '6px 10px',
-                            borderLeft: '2px solid #fbbf24', background: 'rgba(251,191,36,0.04)',
+                            fontSize: 12, color: 'var(--text)', padding: '6px 10px',
+                            borderLeft: '2px solid #fbbf24', background: 'rgba(251,191,36,0.08)',
                             borderRadius: '0 6px 6px 0', marginBottom: 6, lineHeight: 1.5,
                           }}>
                             {tip}
@@ -625,14 +628,14 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
 
                   {/* Secondary tones + patterns */}
                   {toneReport.secondary_tones?.length > 0 && (
-                    <div style={{ marginTop: 14, padding: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 8 }}>SECONDARY TONES &amp; PATTERNS</div>
+                    <div style={{ marginTop: 14, padding: 14, background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 12 }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 8 }}>SECONDARY TONES &amp; PATTERNS</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {[...(toneReport.secondary_tones || []), ...(toneReport.detected_patterns || [])].map((t, i) => (
                           <span key={i} style={{
                             padding: '3px 10px', borderRadius: 12, fontSize: 11,
-                            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                            color: 'rgba(255,255,255,0.6)',
+                            background: 'var(--bg2)', border: '1px solid var(--border)',
+                            color: 'var(--text2)',
                           }}>{t}</span>
                         ))}
                       </div>

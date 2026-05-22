@@ -69,6 +69,7 @@ const Vault = () => {
           <AnimatePresence>
             {filteredHistory.map((item, i) => {
               const isExpanded = expandedId === item.id;
+              const cleanPrompt = item.prompt.replace(/\*\*|\*/g, '');
               return (
                 <motion.div 
                   key={item.id}
@@ -85,13 +86,13 @@ const Vault = () => {
                       <span className="vault-date"><Clock size={12} /> {item.date}</span>
                     </div>
                     <div className="vault-item-prompt">
-                      {item.prompt.length > 100 && !isExpanded ? item.prompt.substring(0, 100) + '...' : item.prompt}
+                      {cleanPrompt.length > 100 && !isExpanded ? cleanPrompt.substring(0, 100) + '...' : cleanPrompt}
                     </div>
                     <div className="vault-expand-icon">
                       {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </div>
                   </div>
-
+ 
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div 
@@ -100,12 +101,12 @@ const Vault = () => {
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                       >
-                        <div className="vault-result">
-                          {item.result}
+                        <div className="vault-result markdown-body" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', whiteSpace: 'normal', color: 'var(--text)' }}>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{(item.result || '').replace(/\*\*|\*/g, '')}</ReactMarkdown>
                         </div>
                         <div className="vault-actions">
                           <button className="btn btn-sm btn-ghost" onClick={() => handleDownload(item)}><Download size={14} /> Download</button>
-                          <button className="btn btn-sm btn-ghost" onClick={() => handleCopy(item.result)}><Copy size={14} /> Copy Result</button>
+                          <button className="btn btn-sm btn-ghost" onClick={() => handleCopy((item.result || '').replace(/\*\*|\*/g, ''))}><Copy size={14} /> Copy Result</button>
                           <button className="btn btn-sm btn-ghost" style={{ color: 'var(--pink)' }} onClick={() => deleteVaultItem(item.id)}><Trash2 size={14} /> Delete</button>
                         </div>
                       </motion.div>

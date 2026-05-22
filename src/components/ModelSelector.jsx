@@ -140,7 +140,7 @@ const ModelSelector = ({ activePage }) => {
 
       <style jsx>{`
         .model-bar {
-          background: rgba(10, 10, 20, 0.6);
+          background: var(--card);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           border-bottom: 1px solid var(--border);
@@ -150,22 +150,26 @@ const ModelSelector = ({ activePage }) => {
         }
         .model-bar.collapsed { padding: 12px 32px; }
         .model-bar.expanded { padding: 16px 32px; }
-        .model-bar-inner { max-width: 1200px; margin: 0 auto; }
+        .model-bar-inner { max-width: var(--content-max-width, 1650px); margin: 0 auto; }
         
         .model-bar-header { display: flex; align-items: center; justify-content: space-between; }
         .active-model-label {
           font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-          color: var(--accent2); background: rgba(124,92,252,0.15); padding: 6px 12px; border-radius: 8px;
-          border: 1px solid rgba(124,92,252,0.3);
-          box-shadow: 0 0 10px rgba(124,92,252,0.2);
+          color: var(--text2); background: var(--border2); padding: 6px 12px; border-radius: 8px;
+          border: 1px solid var(--border);
+          box-shadow: 0 0 10px var(--glow);
+        }
+        .active-model-label span {
+          color: var(--accent);
+          font-weight: 800;
         }
         .toggle-btn {
           display: flex; align-items: center; gap: 6px;
-          background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+          background: var(--bg3); border: 1px solid var(--border);
           color: var(--text2); font-size: 11px; font-weight: 600; text-transform: uppercase;
           padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
         }
-        .toggle-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); border-color: var(--text3); }
+        .toggle-btn:hover { background: var(--border); color: var(--text); border-color: var(--accent); }
         .chevron-icon { transition: transform 0.3s; }
 
         .model-bar-content { margin-top: 16px; animation: fadeIn 0.3s ease; }
@@ -184,11 +188,11 @@ const ModelSelector = ({ activePage }) => {
           display: flex; align-items: center; gap: 6px;
           padding: 6px 14px; border-radius: 20px;
           font-size: 12px; font-weight: 500; cursor: pointer;
-          border: 1px solid var(--border); background: var(--card);
+          border: 1px solid var(--border); background: var(--bg3);
           transition: all 0.2s; color: var(--text2);
           white-space: nowrap;
         }
-        .model-chip:hover { border-color: var(--accent); color: var(--text); background: rgba(124,92,252,0.1); }
+        .model-chip:hover { border-color: var(--accent); color: var(--text); background: var(--border2); }
         .model-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 16px var(--glow); }
         .chip-dot { width: 6px; height: 6px; border-radius: 50%; }
         

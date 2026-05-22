@@ -25,16 +25,16 @@ const CHART_COLORS = ['#7c5cfc','#34d399','#f472b6','#fbbf24','#38bdf8','#a78bfa
 function SmartChart({ chartData }) {
   if (!chartData?.data?.length) return null;
   const accent = '#7c5cfc';
-  const tip = { contentStyle:{ background:'#0a0a14', border:`1px solid ${accent}`, borderRadius:'10px', fontSize:'12px' } };
+  const tip = { contentStyle:{ background:'var(--bg2)', border:`1px solid ${accent}`, borderRadius:'10px', fontSize:'12px', color:'var(--text)' } };
   return (
     <div style={{ width:'100%' }}>
       {chartData.title && <div style={{ fontSize:'11px', fontWeight:900, color:accent, letterSpacing:'2px', textTransform:'uppercase', marginBottom:'14px' }}>{chartData.title}</div>}
       <ResponsiveContainer width="100%" height={260}>
         {chartData.chartType === 'bar' ? (
           <BarChart data={chartData.data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
-            <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={10}/>
-            <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10}/>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border2)"/>
+            <XAxis dataKey="name" stroke="var(--text3)" fontSize={10}/>
+            <YAxis stroke="var(--text3)" fontSize={10}/>
             <Tooltip {...tip}/>
             <Bar dataKey="value" radius={[4,4,0,0]}>
               {chartData.data.map((_,i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]}/>)}
@@ -50,9 +50,9 @@ function SmartChart({ chartData }) {
           </PieChart>
         ) : chartData.chartType === 'line' ? (
           <LineChart data={chartData.data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
-            <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={10}/>
-            <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10}/>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border2)"/>
+            <XAxis dataKey="name" stroke="var(--text3)" fontSize={10}/>
+            <YAxis stroke="var(--text3)" fontSize={10}/>
             <Tooltip {...tip}/>
             <Line type="monotone" dataKey="value" stroke={accent} strokeWidth={2} dot={{ fill:accent, r:4 }}/>
           </LineChart>
@@ -64,9 +64,9 @@ function SmartChart({ chartData }) {
                 <stop offset="95%" stopColor={accent} stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
-            <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={10}/>
-            <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10}/>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border2)"/>
+            <XAxis dataKey="name" stroke="var(--text3)" fontSize={10}/>
+            <YAxis stroke="var(--text3)" fontSize={10}/>
             <Tooltip {...tip}/>
             <Area type="monotone" dataKey="value" stroke={accent} fill="url(#af)" strokeWidth={2}/>
           </AreaChart>
@@ -83,8 +83,8 @@ function StatCards({ stats }) {
     <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }}>
       {stats.map((s,i) => (
         <motion.div key={i} initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay:i*0.06 }}
-          style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'13px', padding:'15px' }}>
-          <div style={{ fontSize:'9px', fontWeight:900, color:'#444', letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:'7px' }}>{s.label}</div>
+          style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:'13px', padding:'15px' }}>
+          <div style={{ fontSize:'9px', fontWeight:900, color:'var(--text3)', letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:'7px' }}>{s.label}</div>
           <div style={{ fontSize:'22px', fontWeight:900, letterSpacing:'-1px', color:s.color||'var(--accent)' }}>{s.value}</div>
           {s.change && <div style={{ fontSize:'11px', fontWeight:700, marginTop:'4px', color: s.change.startsWith('+')?'#34d399':'#f87171' }}>{s.change}</div>}
         </motion.div>
@@ -97,7 +97,7 @@ function StatCards({ stats }) {
 function KnowledgeMesh({ nodes=[], edges=[] }) {
   if (!nodes.length) return null;
   return (
-    <div style={{ position:'relative', width:'100%', minHeight:'320px', background:'#000', borderRadius:'14px', overflow:'hidden' }}>
+    <div style={{ position:'relative', width:'100%', minHeight:'320px', background:'var(--bg3)', borderRadius:'14px', overflow:'hidden', border:'1px solid var(--border)' }}>
       <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(124,92,252,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,252,0.03) 1px,transparent 1px)', backgroundSize:'28px 28px' }}/>
       <svg viewBox="-80 -80 960 720" style={{ width:'100%', height:'100%', position:'absolute' }}>
         {edges.map((e,i) => {
@@ -111,12 +111,12 @@ function KnowledgeMesh({ nodes=[], edges=[] }) {
         {nodes.map((n,i) => (
           <g key={i}>
             <circle cx={n.x} cy={n.y} r="12" fill="var(--accent)" opacity="0.9"/>
-            <text x={n.x+18} y={n.y+5} fill="#fff" fontSize="13" fontWeight="700">{n.label}</text>
+            <text x={n.x+18} y={n.y+5} fill="var(--text)" fontSize="13" fontWeight="700">{n.label}</text>
           </g>
         ))}
       </svg>
       <div style={{ position:'absolute', bottom:'10px', left:0, right:0, textAlign:'center' }}>
-        <span style={{ fontSize:'9px', fontWeight:900, color:'#333', letterSpacing:'2px', background:'rgba(0,0,0,0.8)', padding:'4px 12px', borderRadius:'20px', border:'1px solid rgba(124,92,252,0.15)' }}>KNOWLEDGE MESH</span>
+        <span style={{ fontSize:'9px', fontWeight:900, color:'var(--text2)', letterSpacing:'2px', background:'var(--bg2)', padding:'4px 12px', borderRadius:'20px', border:'1px solid var(--border)' }}>KNOWLEDGE MESH</span>
       </div>
     </div>
   );
@@ -329,7 +329,7 @@ ${dataContext.slice(0,600000)}`;
   const hasViz = chartData || statsData || meshData;
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', height:'100vh', background:'#030308', padding:'28px 36px', gap:'16px', boxSizing:'border-box' }}>
+    <div style={{ display:'flex', flexDirection:'column', height:'100vh', background:'var(--bg)', padding:'28px 36px', gap:'16px', boxSizing:'border-box' }}>
 
       {/* ── HEADER ── */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexShrink:0 }}>
@@ -337,7 +337,7 @@ ${dataContext.slice(0,600000)}`;
           <div style={{ fontSize:'10px', fontWeight:900, color:'var(--accent)', letterSpacing:'3px', display:'flex', alignItems:'center', gap:'6px', marginBottom:'5px' }}>
             <Sparkles size={10}/> NEURAL DATA SOVEREIGN v3.0
           </div>
-          <h2 style={{ fontSize:'30px', fontWeight:900, color:'#fff', letterSpacing:'-1.5px', margin:0 }}>Chat <span style={{ color:'var(--accent)' }}>With Data</span></h2>
+          <h2 style={{ fontSize:'30px', fontWeight:900, color:'var(--text)', letterSpacing:'-1.5px', margin:0 }}>Chat <span style={{ color:'var(--accent)' }}>With Data</span></h2>
         </div>
         <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
           <button onClick={saveSession} disabled={!messages.length} style={{ ...hdrBtn, opacity:!messages.length?0.4:1 }}><Plus size={12}/> Save</button>
@@ -348,9 +348,9 @@ ${dataContext.slice(0,600000)}`;
                 <div style={dropdown}>
                   {sessions.map(s => (
                     <div key={s.id} onClick={() => { loadSession(s); setExportMenu(null); }} style={{ padding:'9px 12px', cursor:'pointer', borderRadius:'7px', transition:'.2s' }}
-                      onMouseEnter={e=>e.currentTarget.style.background='rgba(124,92,252,0.1)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-                      <div style={{ fontSize:'10px', color:'#555', fontWeight:700 }}>{s.date}</div>
-                      <div style={{ fontSize:'12px', color:'#888', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'200px' }}>{s.files.join(', ')} · {s.msgCount} msgs</div>
+                      onMouseEnter={e=>e.currentTarget.style.background='var(--border2)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                      <div style={{ fontSize:'10px', color:'var(--text3)', fontWeight:700 }}>{s.date}</div>
+                      <div style={{ fontSize:'12px', color:'var(--text2)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'200px' }}>{s.files.join(', ')} · {s.msgCount} msgs</div>
                     </div>
                   ))}
                 </div>
@@ -362,13 +362,13 @@ ${dataContext.slice(0,600000)}`;
       </div>
 
       {/* ── LAYOUT ── */}
-      <div style={{ display:'flex', gap:'20px', flex:1, minHeight:0 }}>
+      <div className="cwd-container">
 
         {/* CHAT PANEL */}
-        <div style={{ display:'flex', flexDirection:'column', flex:1, background:'rgba(255,255,255,0.01)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'20px', overflow:'hidden', minHeight:0 }}>
+        <div style={{ display:'flex', flexDirection:'column', flex:1, background:'var(--card)', border:'1px solid var(--border)', borderRadius:'20px', overflow:'hidden', minHeight:0 }}>
 
           {/* File bar */}
-          <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 14px', background:'rgba(0,0,0,0.3)', borderBottom:'1px solid rgba(255,255,255,0.05)', flexShrink:0, flexWrap:'wrap' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'9px 14px', background:'var(--bg3)', borderBottom:'1px solid var(--border)', flexShrink:0, flexWrap:'wrap' }}>
             <input type="file" id="cwd-upload" hidden multiple accept=".csv,.txt,.pdf,.json,.md,.xml,.js,.ts,.py,.sql,.png,.jpg,.jpeg" onChange={handleFileUpload}/>
             <label htmlFor="cwd-upload" style={{ background:'rgba(124,92,252,0.15)', border:'1px solid rgba(124,92,252,0.3)', color:'var(--accent)', padding:'5px 13px', borderRadius:'20px', fontSize:'11px', fontWeight:800, cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
               {processing ? <Loader2 size={11} style={{ animation:'spin 1s linear infinite' }}/> : <UploadCloud size={11}/>}
@@ -376,9 +376,9 @@ ${dataContext.slice(0,600000)}`;
             </label>
             <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
               {files.map((f,i) => (
-                <div key={i} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', color:'#888', padding:'3px 9px', borderRadius:'20px', fontSize:'10px', display:'flex', alignItems:'center', gap:'5px' }}>
+                <div key={i} style={{ background:'var(--bg2)', border:'1px solid var(--border)', color:'var(--text2)', padding:'3px 9px', borderRadius:'20px', fontSize:'10px', display:'flex', alignItems:'center', gap:'5px' }}>
                   <FileText size={8}/> {f.name}
-                  <button onClick={() => setFiles(prev=>prev.filter((_,j)=>j!==i))} style={{ background:'none', border:'none', color:'#555', cursor:'pointer', padding:0, display:'flex', lineHeight:1 }}><X size={8}/></button>
+                  <button onClick={() => setFiles(prev=>prev.filter((_,j)=>j!==i))} style={{ background:'none', border:'none', color:'var(--text3)', cursor:'pointer', padding:0, display:'flex', lineHeight:1 }}><X size={8}/></button>
                 </div>
               ))}
             </div>
@@ -386,14 +386,14 @@ ${dataContext.slice(0,600000)}`;
 
           {/* Quick actions */}
           {files.length > 0 && messages.length === 0 && (
-            <div style={{ padding:'10px 14px', background:'rgba(124,92,252,0.03)', borderBottom:'1px solid rgba(255,255,255,0.04)', flexShrink:0 }}>
-              <div style={{ fontSize:'9px', fontWeight:900, color:'#333', letterSpacing:'2px', marginBottom:'7px' }}>QUICK ACTIONS</div>
+            <div style={{ padding:'10px 14px', background:'var(--border2)', borderBottom:'1px solid var(--border)', flexShrink:0 }}>
+              <div style={{ fontSize:'9px', fontWeight:900, color:'var(--text3)', letterSpacing:'2px', marginBottom:'7px' }}>QUICK ACTIONS</div>
               <div style={{ display:'flex', gap:'5px', flexWrap:'wrap' }}>
                 {QUICK_ACTIONS.map(qa => (
                   <button key={qa.label} onClick={() => setInput(qa.prompt)}
-                    style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)', color:'#666', padding:'4px 11px', borderRadius:'15px', fontSize:'11px', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', fontWeight:600, transition:'.2s' }}
+                    style={{ background:'var(--bg3)', border:'1px solid var(--border)', color:'var(--text2)', padding:'4px 11px', borderRadius:'15px', fontSize:'11px', cursor:'pointer', display:'flex', alignItems:'center', gap:'5px', fontWeight:600, transition:'.2s' }}
                     onMouseEnter={e=>{ e.currentTarget.style.borderColor='var(--accent)'; e.currentTarget.style.color='var(--accent)'; }}
-                    onMouseLeave={e=>{ e.currentTarget.style.borderColor='rgba(255,255,255,0.06)'; e.currentTarget.style.color='#666'; }}>
+                    onMouseLeave={e=>{ e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--text2)'; }}>
                     {qa.icon} {qa.label}
                   </button>
                 ))}
@@ -405,12 +405,12 @@ ${dataContext.slice(0,600000)}`;
           <div style={{ flex:1, overflowY:'auto', padding:'18px', display:'flex', flexDirection:'column', gap:'14px', minHeight:0 }}>
             {messages.length === 0 && !loading && (
               <div style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', padding:'40px 20px', gap:'12px' }}>
-                <Brain size={44} style={{ color:'#1a1a2e' }}/>
-                <h3 style={{ fontSize:'20px', fontWeight:800, color:'#fff', margin:0 }}>Neural Data Sovereign</h3>
-                <p style={{ color:'#555', fontSize:'13px', maxWidth:'380px', lineHeight:'1.65', margin:0 }}>Upload CSV, PDF, JSON, images, or any data file. Ask anything — get deep analysis with live charts, tables, and knowledge graphs.</p>
+                <Brain size={44} style={{ color:'var(--accent)', opacity: 0.8 }}/>
+                <h3 style={{ fontSize:'20px', fontWeight:800, color:'var(--text)', margin:0 }}>Neural Data Sovereign</h3>
+                <p style={{ color:'var(--text2)', fontSize:'13px', maxWidth:'380px', lineHeight:'1.65', margin:0 }}>Upload CSV, PDF, JSON, images, or any data file. Ask anything — get deep analysis with live charts, tables, and knowledge graphs.</p>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'6px', justifyContent:'center', marginTop:'6px' }}>
                   {['CSV · PDF · JSON · Images','Live charts & visualizations','Multi-file analysis','Export to CSV / Markdown'].map(f=>(
-                    <div key={f} style={{ background:'rgba(124,92,252,0.06)', border:'1px solid rgba(124,92,252,0.12)', color:'#555', padding:'4px 11px', borderRadius:'15px', fontSize:'10px', fontWeight:600, display:'flex', alignItems:'center', gap:'5px' }}>
+                    <div key={f} style={{ background:'var(--border2)', border:'1px solid var(--border)', color:'var(--text2)', padding:'4px 11px', borderRadius:'15px', fontSize:'10px', fontWeight:600, display:'flex', alignItems:'center', gap:'5px' }}>
                       <CheckCircle2 size={9}/> {f}
                     </div>
                   ))}
@@ -422,14 +422,14 @@ ${dataContext.slice(0,600000)}`;
               {messages.map((msg, i) => (
                 <motion.div key={i} initial={{ opacity:0, x:msg.role==='user'?20:-20, y:8 }} animate={{ opacity:1, x:0, y:0 }}
                   style={{ display:'flex', gap:'10px', flexDirection:msg.role==='user'?'row-reverse':'row' }}>
-                  <div style={{ width:'30px', height:'30px', borderRadius:'50%', background:'#000', border:'1px solid rgba(124,92,252,0.3)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--accent)', flexShrink:0 }}>
+                  <div style={{ width:'30px', height:'30px', borderRadius:'50%', background:'var(--bg3)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--accent)', flexShrink:0 }}>
                     {msg.role==='assistant' ? <Brain size={13}/> : <User size={13}/>}
                   </div>
                   <div style={{ display:'flex', flexDirection:'column', gap:'5px', maxWidth:'calc(100% - 42px)', width:'100%' }}>
                     <div className="cwd-bubble" style={{ padding:'13px 17px', borderRadius:'15px', fontSize:'14px', lineHeight:'1.75',
                       ...(msg.role==='user'
                         ? { background:'var(--accent)', color:'#fff', marginLeft:'auto', maxWidth:'75%', borderBottomRightRadius:'4px' }
-                        : { background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)', color:'#ddd', borderBottomLeftRadius:'4px' }) }}>
+                        : { background:'var(--bg3)', border:'1px solid var(--border)', color:'var(--text)', borderBottomLeftRadius:'4px' }) }}>
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
                     </div>
                     {msg.role==='assistant' && (
@@ -440,9 +440,9 @@ ${dataContext.slice(0,600000)}`;
                           {exportMenu===i && (
                             <div style={{ ...dropdown, bottom:'100%', top:'auto', marginBottom:'4px', marginTop:0 }}>
                               {['MD','TXT','CSV'].map(f=>(
-                                <div key={f} onClick={()=>handleExport(f,msg.text,i)} style={{ padding:'6px 12px', fontSize:'11px', color:'#aaa', cursor:'pointer', borderRadius:'6px', fontWeight:700, transition:'.2s' }}
-                                  onMouseEnter={e=>{ e.currentTarget.style.background='rgba(124,92,252,0.15)'; e.currentTarget.style.color='#fff'; }}
-                                  onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#aaa'; }}>
+                                <div key={f} onClick={()=>handleExport(f,msg.text,i)} style={{ padding:'6px 12px', fontSize:'11px', color:'var(--text2)', cursor:'pointer', borderRadius:'6px', fontWeight:700, transition:'.2s' }}
+                                  onMouseEnter={e=>{ e.currentTarget.style.background='var(--border2)'; e.currentTarget.style.color='var(--text)'; }}
+                                  onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color='var(--text2)'; }}>
                                   {f}
                                 </div>
                               ))}
@@ -457,7 +457,7 @@ ${dataContext.slice(0,600000)}`;
             </AnimatePresence>
 
             {loading && (
-              <div style={{ display:'flex', alignItems:'center', gap:'12px', color:'#555', fontSize:'13px', padding:'12px' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'12px', color:'var(--text2)', fontSize:'13px', padding:'12px' }}>
                 <div style={{ display:'flex', gap:'4px' }}>
                   {[0,1,2].map(i=><div key={i} style={{ width:'6px', height:'6px', background:'var(--accent)', borderRadius:'50%', animation:`dotBounce 1.2s ${i*0.2}s infinite` }}/>)}
                 </div>
@@ -471,14 +471,14 @@ ${dataContext.slice(0,600000)}`;
           </div>
 
           {/* Input */}
-          <div style={{ display:'flex', gap:'10px', padding:'14px', borderTop:'1px solid rgba(255,255,255,0.05)', background:'rgba(0,0,0,0.2)', flexShrink:0, alignItems:'flex-end' }}>
+          <div style={{ display:'flex', gap:'10px', padding:'14px', borderTop:'1px solid var(--border)', background:'var(--bg2)', flexShrink:0, alignItems:'flex-end' }}>
             <textarea
               rows={2}
               placeholder="Ask anything about your data — analysis, trends, SQL, summaries, visualizations... (Enter to send)"
               value={input}
               onChange={e=>setInput(e.target.value)}
               onKeyDown={e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); handleSend(); } }}
-              style={{ flex:1, background:'rgba(0,0,0,0.5)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', padding:'11px 15px', borderRadius:'13px', fontSize:'14px', resize:'none', outline:'none', fontFamily:'inherit', lineHeight:'1.5' }}
+              style={{ flex:1, background:'var(--bg3)', border:'1px solid var(--border)', color:'var(--text)', padding:'11px 15px', borderRadius:'13px', fontSize:'14px', resize:'none', outline:'none', fontFamily:'inherit', lineHeight:'1.5' }}
             />
             <button onClick={handleSend} disabled={loading||(!input.trim()&&!files.length)}
               style={{ width:'44px', height:'44px', background:'var(--accent)', border:'none', borderRadius:'13px', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0, opacity:loading||(!input.trim()&&!files.length)?0.4:1, transition:'.2s' }}>
@@ -490,8 +490,8 @@ ${dataContext.slice(0,600000)}`;
         {/* VIZ PANEL */}
         {hasViz && (
           <motion.div initial={{ opacity:0, x:20 }} animate={{ opacity:1, x:0 }}
-            style={{ width:'400px', flexShrink:0, background:'#000', border:'1px solid rgba(124,92,252,0.2)', borderRadius:'20px', overflow:'hidden', display:'flex', flexDirection:'column' }}>
-            <div style={{ display:'flex', gap:'2px', padding:'7px', background:'rgba(124,92,252,0.04)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+            className="cwd-viz-panel" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div style={{ display:'flex', gap:'2px', padding:'7px', background:'var(--border2)', borderBottom:'1px solid var(--border)' }}>
               {[
                 chartData  && ['chart',  <BarChart3 size={11}/>, 'Charts'],
                 statsData  && ['stats',  <Sigma size={11}/>,     'Stats'],
@@ -499,7 +499,7 @@ ${dataContext.slice(0,600000)}`;
                 files.length && ['raw',  <Code2 size={11}/>,     'Raw Data'],
               ].filter(Boolean).map(([id,icon,label]) => (
                 <button key={id} onClick={()=>setActiveViz(id)}
-                  style={{ flex:1, padding:'7px', background:activeViz===id?'var(--accent)':'transparent', border:'none', borderRadius:'7px', color:activeViz===id?'#fff':'#555', fontSize:'10px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px', transition:'.2s' }}>
+                  style={{ flex:1, padding:'7px', background:activeViz===id?'var(--accent)':'transparent', border:'none', borderRadius:'7px', color:activeViz===id?'#fff':'var(--text2)', fontSize:'10px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', justifycontent:'center', gap:'5px', transition:'.2s' }}>
                   {icon} {label}
                 </button>
               ))}
@@ -512,10 +512,10 @@ ${dataContext.slice(0,600000)}`;
                 <div style={{ display:'flex', flexDirection:'column', gap:'14px' }}>
                   {files.map((f,i) => (
                     <div key={i} style={{ border:'1px solid rgba(52,211,153,0.15)', borderRadius:'11px', overflow:'hidden' }}>
-                      <div style={{ background:'rgba(52,211,153,0.06)', color:'#34d399', padding:'7px 13px', fontSize:'10px', fontWeight:800, display:'flex', alignItems:'center', gap:'6px', borderBottom:'1px solid rgba(52,211,153,0.1)' }}>
-                        <FileText size={10}/> {f.name} <span style={{ marginLeft:'auto', color:'#555' }}>{(f.size/1024).toFixed(1)}KB</span>
+                      <div style={{ background:'rgba(52,211,153,0.06)', color:'var(--green)', padding:'7px 13px', fontSize:'10px', fontWeight:800, display:'flex', alignItems:'center', gap:'6px', borderBottom:'1px solid rgba(52,211,153,0.1)' }}>
+                        <FileText size={10}/> {f.name} <span style={{ marginLeft:'auto', color:'var(--text3)' }}>{(f.size/1024).toFixed(1)}KB</span>
                       </div>
-                      <pre style={{ padding:'10px', color:'#34d399', fontFamily:"'DM Mono',monospace", fontSize:'9px', lineHeight:'1.5', whiteSpace:'pre-wrap', maxHeight:'200px', overflowY:'auto', margin:0, background:'rgba(0,0,0,0.4)' }}>
+                      <pre style={{ padding:'10px', color:'var(--green)', fontFamily:"'DM Mono',monospace", fontSize:'9px', lineHeight:'1.5', whiteSpace:'pre-wrap', maxHeight:'200px', overflowY:'auto', margin:0, background:'var(--bg3)', border: 'none' }}>
                         {f.content.slice(0,2500)}{f.content.length>2500?'\n... (truncated)':''}
                       </pre>
                     </div>
@@ -532,25 +532,25 @@ ${dataContext.slice(0,600000)}`;
         @keyframes dotBounce { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(-4px);opacity:1} }
         .msg-actions { opacity:0 !important; }
         div:hover > div > .msg-actions { opacity:1 !important; }
-        .cwd-bubble h1,.cwd-bubble h2,.cwd-bubble h3{color:#fff;font-weight:800;margin:16px 0 8px;letter-spacing:-.5px}
-        .cwd-bubble h2{font-size:1.05em;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:7px}
+        .cwd-bubble h1,.cwd-bubble h2,.cwd-bubble h3{color:var(--accent);font-weight:800;margin:16px 0 8px;letter-spacing:-.5px}
+        .cwd-bubble h2{font-size:1.05em;border-bottom:1px solid var(--border);padding-bottom:7px}
         .cwd-bubble h3{font-size:.95em;color:var(--accent)}
-        .cwd-bubble p{margin-bottom:9px}
-        .cwd-bubble strong{color:#fff;font-weight:800}
+        .cwd-bubble p{margin-bottom:9px;color:inherit}
+        .cwd-bubble strong{color:var(--accent);font-weight:800}
         .cwd-bubble a{color:var(--accent)}
         .cwd-bubble table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
-        .cwd-bubble th{background:rgba(124,92,252,.1);color:var(--accent);padding:7px 11px;font-size:10px;letter-spacing:1px;text-align:left;border:1px solid rgba(255,255,255,.05)}
-        .cwd-bubble td{padding:7px 11px;border:1px solid rgba(255,255,255,.04);color:#ccc}
-        .cwd-bubble pre{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:12px;overflow-x:auto;margin:9px 0}
+        .cwd-bubble th{background:rgba(124,92,252,.1);color:var(--accent);padding:7px 11px;font-size:10px;letter-spacing:1px;text-align:left;border:1px solid var(--border)}
+        .cwd-bubble td{padding:7px 11px;border:1px solid var(--border);color:inherit}
+        .cwd-bubble pre{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:12px;overflow-x:auto;margin:9px 0}
         .cwd-bubble code{font-family:'DM Mono',monospace;color:var(--accent);font-size:12px}
-        .cwd-bubble pre code{color:#e2e8f0}
+        .cwd-bubble pre code{color:var(--text)}
         .cwd-bubble ul,.cwd-bubble ol{padding-left:18px;margin-bottom:9px}
-        .cwd-bubble li{margin-bottom:4px;color:#ccc}
+        .cwd-bubble li{margin-bottom:4px;color:inherit}
       `}</style>
     </div>
   );
 }
 
-const hdrBtn  = { background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', color:'#aaa', padding:'8px 14px', borderRadius:'11px', fontSize:'11px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', gap:'6px', transition:'.2s' };
-const msgBtn  = { background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)', color:'#555', padding:'3px 9px', borderRadius:'7px', fontSize:'10px', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px', transition:'.2s' };
-const dropdown= { position:'absolute', top:'100%', right:0, marginTop:'5px', background:'rgba(10,10,20,0.98)', border:'1px solid rgba(124,92,252,0.2)', borderRadius:'12px', padding:'5px', zIndex:100, minWidth:'120px', backdropFilter:'blur(20px)', boxShadow:'0 15px 40px rgba(0,0,0,0.6)' };
+const hdrBtn  = { background:'var(--bg3)', border:'1px solid var(--border)', color:'var(--text2)', padding:'8px 14px', borderRadius:'11px', fontSize:'11px', fontWeight:700, cursor:'pointer', display:'flex', alignItems:'center', gap:'6px', transition:'.2s' };
+const msgBtn  = { background:'var(--bg3)', border:'1px solid var(--border)', color:'var(--text2)', padding:'3px 9px', borderRadius:'7px', fontSize:'10px', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px', transition:'.2s' };
+const dropdown= { position:'absolute', top:'100%', right:0, marginTop:'5px', background:'var(--card)', border:'1px solid var(--border)', borderRadius:'12px', padding:'5px', zIndex:100, minWidth:'120px', backdropFilter:'blur(20px)', boxShadow:'0 15px 40px rgba(0,0,0,0.1)' };
