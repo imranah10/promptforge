@@ -2,7 +2,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, Bot, Globe, Zap, Image, Video, Share2, Code, FileText, Search, Brain, Lightbulb, Database } from 'lucide-react';
+import { Sparkles, ArrowRight, Bot, Globe, Zap, Code, FileText, Search, Lightbulb, Database } from 'lucide-react';
 
 const Dashboard = ({ onNavigate }) => {
   return (
@@ -89,7 +89,7 @@ const Dashboard = ({ onNavigate }) => {
             { label: 'Prompt Optimizer', id: 'optimizer', icon: Zap },
             { label: 'Staff Engineer Code', id: 'codehelper', icon: Code },
             { label: 'SEO Optimizer', id: 'seo', icon: Search },
-            { label: 'Cinematic Prompter', id: 'imageprompt', icon: Image }
+            { label: 'Model Compare', id: 'compare', icon: Bot }
           ].map((item, i) => (
             <motion.div 
               key={i} 

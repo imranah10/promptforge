@@ -6,12 +6,67 @@ import { callAI } from '../utils/ai';
 import {
   Copy, Zap, Loader2, Camera, PlayCircle, Hash,
   Briefcase, Users, MessageSquare, Music2, Download,
-  Flame, CalendarDays, Swords, RefreshCw, Check, ChevronRight
+  Flame, CalendarDays, Swords, RefreshCw, Check, ChevronRight,
+  AlertCircle, Info, Save
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { downloadText } from '../utils/helpers';
 
-// ─── PLATFORM CONFIG ─────────────────────────────────────────────────────────
+// ── Robust JSON extractor — handles markdown wrapping, AI prefixes, trailing junk ──
+const extractJSON = (raw) => {
+  if (!raw || typeof raw !== 'string') return null;
+  let text = raw.trim();
+
+  // Strip code fences
+  text = text.replace(/```(?:json|JSON)?\s*/g, '').replace(/```/g, '').trim();
+
+  // Try direct parse first
+  try { return JSON.parse(text); } catch (_) {}
+
+  // Find first valid JSON block — could be array [...] or object {...}
+  const tryParse = (str) => {
+    try { return JSON.parse(str); } catch (_) {
+      // Repair common AI quirks
+      const repaired = str
+        .replace(/,(\s*[}\]])/g, '$1')               // trailing commas
+        .replace(/:\s*'([^']*)'/g, ': "$1"')         // single-quoted strings
+        .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3'); // unquoted keys
+      try { return JSON.parse(repaired); } catch (_) { return null; }
+    }
+  };
+
+  // Try array first
+  const arrStart = text.indexOf('[');
+  const arrEnd   = text.lastIndexOf(']');
+  if (arrStart !== -1 && arrEnd > arrStart) {
+    const result = tryParse(text.slice(arrStart, arrEnd + 1));
+    if (result !== null) return result;
+  }
+
+  // Try object
+  const objStart = text.indexOf('{');
+  const objEnd   = text.lastIndexOf('}');
+  if (objStart !== -1 && objEnd > objStart) {
+    const result = tryParse(text.slice(objStart, objEnd + 1));
+    if (result !== null) return result;
+  }
+
+  return null;
+};
+
+// ── Heuristic hook fallback when AI returns garbage ──
+const heuristicHooks = (topic, lang) => {
+  const t = (topic || '').trim().slice(0, 60) || 'this topic';
+  return [
+    { type: 'question',    hook: `What if everything you knew about ${t} was wrong?` },
+    { type: 'stat',        hook: `9 out of 10 people fail at ${t}. Here's why.` },
+    { type: 'story',       hook: `I tried ${t} for 30 days. The results shocked me.` },
+    { type: 'controversy', hook: `Stop doing ${t}. It's destroying your results.` },
+    { type: 'challenge',   hook: `Can you master ${t} in 7 days? Most can't.` },
+  ];
+};
+
+// ── PLATFORM CONFIG ─────────────────────────────────────────────────────────
 const PLATFORMS = [
   { id: 'instagram', icon: Camera,        label: 'Instagram',  color: '#e1306c' },
   { id: 'youtube',   icon: PlayCircle,    label: 'YouTube',    color: '#ff0000' },
@@ -73,6 +128,7 @@ const CreatorStudio = () => {
   const [calGoal,     setCalGoal]     = useState('Grow followers');
   const [calLoading,  setCalLoading]  = useState(false);
   const [calendar,    setCalendar]    = useState([]); // [{day, time, type, caption, hashtags}]
+  const [calendarError, setCalendarError] = useState(null);
 
   // Competitor angle
   const [compUrl,     setCompUrl]     = useState('');
@@ -94,7 +150,7 @@ const CreatorStudio = () => {
 
   const handlePlatformChange = (p) => {
     setPlatform(p);
-    setResult(''); setHooks([]); setCalendar([]); setCompResult('');
+    setResult(''); setHooks([]); setCalendar([]); setCompResult(''); setCalendarError(null);
     if (p === 'whatsapp') { setGoal('Direct promotion / Sales'); setFormat('Short broadcast message'); }
     else if (platform === 'whatsapp') { setGoal('Viral / high engagement'); setFormat('Caption + hashtags'); }
   };
@@ -126,11 +182,13 @@ const CreatorStudio = () => {
     if (!topic.trim()) { showToast('Enter your topic first', 'warn'); return; }
     setHookLoading(true); setHooks([]);
 
-    const system = `You are the world's best viral hook writer. You create opening lines that STOP the scroll instantly. 
+    const system = `You are the world's best viral hook writer. You create opening lines that STOP the scroll instantly.
 Every hook you write is based on deep psychology — curiosity gaps, pattern interrupts, emotional triggers.
 You write for ${platform} content specifically.
 
-Respond ONLY in this exact JSON format (no markdown, no extra text):
+CRITICAL: Respond with ONLY a single JSON array. No markdown code fences. No prose before or after. Just the JSON.
+
+Use this exact shape (5 objects required):
 [
   {"type": "question", "hook": "..."},
   {"type": "stat", "hook": "..."},
@@ -143,23 +201,52 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
 Language: ${lang}
 Each hook must be under 15 words. Make them genuinely shocking, curiosity-inducing, or emotionally powerful.`;
 
+    let raw = '';
     try {
-      const raw = await callAI(system, prompt, null, activeModel, apiKey, providerKeys, customModels);
-      const clean = raw.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
-      setHooks(parsed);
+      raw = await callAI(system, prompt, null, activeModel, apiKey, providerKeys, customModels);
+      const parsed = extractJSON(raw);
+
+      // Validate: must be an array of 1-10 objects with hook field
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const valid = parsed
+          .filter(h => h && typeof h.hook === 'string' && h.hook.trim().length > 5)
+          .map((h, i) => ({
+            type: HOOK_TYPES.find(t => t.id === String(h.type || '').toLowerCase())?.id || HOOK_TYPES[i % HOOK_TYPES.length].id,
+            hook: String(h.hook).replace(/^["']|["']$/g, '').trim().slice(0, 200),
+          }))
+          .slice(0, 5);
+
+        if (valid.length >= 3) {
+          setHooks(valid);
+          return;
+        }
+      }
+
+      // JSON parse succeeded but data invalid → try regex extraction from raw
+      const regexHooks = [...raw.matchAll(/"hook"\s*:\s*"([^"]+)"/g)]
+        .map((m, i) => ({
+          type: HOOK_TYPES[i % HOOK_TYPES.length].id,
+          hook: m[1].trim().slice(0, 200),
+        }))
+        .filter(h => h.hook.length > 5)
+        .slice(0, 5);
+
+      if (regexHooks.length >= 3) {
+        setHooks(regexHooks);
+        showToast('AI response was non-standard — extracted hooks via fallback', 'warn');
+        return;
+      }
+
+      // Final fallback: heuristic hooks (always work, never break the UI)
+      setHooks(heuristicHooks(topic, lang));
+      showToast('AI returned unreadable response — showing template hooks. Try regenerating.', 'warn');
     } catch (e) {
-      // Fallback parse
-      try {
-        const lines = raw.split('\n').filter(l => l.includes('"hook"'));
-        const fallback = HOOK_TYPES.map((t, i) => ({
-          type: t.id,
-          hook: lines[i]?.match(/"hook":\s*"([^"]+)"/)?.[1] || `Hook ${i + 1} for: ${topic}`,
-        }));
-        setHooks(fallback);
-      } catch { showToast('Error generating hooks', 'error'); }
+      // Network / API error
+      setHooks(heuristicHooks(topic, lang));
+      showToast('API error: ' + e.message + '. Showing template hooks.', 'error');
+    } finally {
+      setHookLoading(false);
     }
-    finally { setHookLoading(false); }
   };
 
   const copyHook = (hook, idx) => {
@@ -179,10 +266,13 @@ Each hook must be under 15 words. Make them genuinely shocking, curiosity-induci
   const handleGenerateCalendar = async () => {
     const niche = calNiche || topic;
     if (!niche.trim()) { showToast('Enter your niche/topic for the calendar', 'warn'); return; }
-    setCalLoading(true); setCalendar([]);
+    setCalLoading(true); setCalendar([]); setCalendarError(null);
 
     const system = `You are a social media content strategist. Create a 7-day content calendar.
-Respond ONLY in this exact JSON format (no markdown, no extra text):
+
+CRITICAL: Respond with ONLY a single JSON array. No markdown code fences. No prose before or after. Just the JSON.
+
+Use this exact shape (exactly 7 objects, one per day):
 [
   {
     "day": "Monday",
@@ -194,33 +284,93 @@ Respond ONLY in this exact JSON format (no markdown, no extra text):
     "tip": "..."
   }
 ]
-Return exactly 7 objects, one per day.`;
+
+Days must be: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday (in this order).
+content_type must be one of: Post, Reel, Story, Carousel, Live, Video, Thread.`;
 
     const prompt = `Create a 7-day ${platform} content calendar for:
 Niche/Topic: ${niche}
 Goal: ${calGoal}
 Language: ${lang}
 
-Each day needs: best posting time, content type (Post/Reel/Story/Carousel), scroll-stopping hook, full caption, 5-8 hashtags, and one pro tip for that day's content.`;
+Each day needs: best posting time, content type, scroll-stopping hook, full caption, 5-8 hashtags, and one pro tip.`;
 
     try {
       const raw = await callAI(system, prompt, null, activeModel, apiKey, providerKeys, customModels);
-      const clean = raw.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
-      setCalendar(parsed);
-      saveToVault?.('Content Calendar', `${platform} | ${niche}`, JSON.stringify(parsed, null, 2));
+      const parsed = extractJSON(raw);
+
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        setCalendarError('AI did not return a valid calendar structure. Try regenerating or switching models.');
+        showToast('Calendar parse failed — try regenerating', 'error');
+        return;
+      }
+
+      // Sanitize each day — fill missing fields with sensible defaults
+      const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      const sanitized = parsed.slice(0, 7).map((d, i) => ({
+        day:          String(d?.day || DAYS[i] || `Day ${i + 1}`).slice(0, 20),
+        best_time:    String(d?.best_time || d?.time || '9:00 AM').slice(0, 30),
+        content_type: String(d?.content_type || d?.type || 'Post').slice(0, 30),
+        hook:         String(d?.hook || 'Hook missing — regenerate to retry').slice(0, 300),
+        caption:      String(d?.caption || 'Caption missing — regenerate to retry').slice(0, 2000),
+        hashtags:     String(d?.hashtags || '').slice(0, 500),
+        tip:          String(d?.tip || '').slice(0, 300),
+      }));
+
+      // Pad up to 7 days if AI gave fewer
+      while (sanitized.length < 7) {
+        const i = sanitized.length;
+        sanitized.push({
+          day: DAYS[i] || `Day ${i + 1}`,
+          best_time: '9:00 AM',
+          content_type: 'Post',
+          hook: '⚠️ AI did not generate this day — click regenerate',
+          caption: 'Click "Regenerate calendar" to fill missing days.',
+          hashtags: '',
+          tip: '',
+        });
+      }
+
+      setCalendar(sanitized);
+      saveToVault?.('Content Calendar', `${platform} | ${niche}`, JSON.stringify(sanitized, null, 2));
+
+      if (parsed.length < 7) {
+        showToast(`AI only returned ${parsed.length} days — padded to 7. Regenerate for full calendar.`, 'warn');
+      }
     } catch (e) {
-      showToast('Error generating calendar. Try again.', 'error');
+      setCalendarError(e.message || 'Failed to generate calendar.');
+      showToast('Error: ' + (e.message || 'Calendar generation failed'), 'error');
+    } finally {
+      setCalLoading(false);
     }
-    finally { setCalLoading(false); }
   };
 
   const copyCalendar = () => {
     const text = calendar.map(d =>
-      `${d.day} — ${d.best_time} | ${d.content_type}\nHook: ${d.hook}\nCaption: ${d.caption}\n${d.hashtags}\nTip: ${d.tip}`
+      `${d.day} — ${d.best_time} | ${d.content_type}\nHook: ${d.hook}\nCaption: ${d.caption}\n${d.hashtags}${d.tip ? `\nTip: ${d.tip}` : ''}`
     ).join('\n\n─────────────────\n\n');
     navigator.clipboard.writeText(text);
     showToast('Full calendar copied!');
+  };
+
+  const downloadCalendarCSV = () => {
+    if (!calendar.length) return;
+    const escapeCSV = (val) => {
+      const s = String(val ?? '');
+      if (s.includes('"') || s.includes(',') || s.includes('\n')) {
+        return `"${s.replace(/"/g, '""')}"`;
+      }
+      return s;
+    };
+    const headers = ['Day', 'Best Time', 'Content Type', 'Hook', 'Caption', 'Hashtags', 'Pro Tip'];
+    const rows = calendar.map(d => [d.day, d.best_time, d.content_type, d.hook, d.caption, d.hashtags, d.tip]);
+    const csv = [
+      headers.join(','),
+      ...rows.map(r => r.map(escapeCSV).join(','))
+    ].join('\n');
+    const niche = (calNiche || topic || 'calendar').slice(0, 30).replace(/[^a-z0-9]+/gi, '_');
+    downloadText(csv, `${platform}_calendar_${niche}.csv`);
+    showToast('Calendar downloaded as CSV!');
   };
 
   // ── 4. COMPETITOR ANGLE ──────────────────────────────────────────────────
@@ -586,9 +736,14 @@ Make the "superior version" ready to post — formatted perfectly for ${platform
                 <div className="form-group">
                   <label className="form-label">Your Niche / Topic</label>
                   <input className="form-input"
-                    placeholder="e.g. Personal finance for millennials, fitness coaching, tech reviews..."
-                    value={calNiche || topic}
+                    placeholder={topic ? `Default: "${topic.slice(0, 40)}${topic.length > 40 ? '…' : ''}" (or override)` : 'e.g. Personal finance for millennials, fitness coaching, tech reviews...'}
+                    value={calNiche}
                     onChange={e => setCalNiche(e.target.value)} />
+                  {!calNiche && topic && (
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                      Will use topic from Generate tab if you leave this blank
+                    </div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label className="form-label">Weekly Goal</label>
@@ -632,20 +787,55 @@ Make the "superior version" ready to post — formatted perfectly for ${platform
                 </div>
               )}
 
+              {calendarError && !calLoading && (
+                <div style={{
+                  marginTop: 16, padding: '14px 16px', borderRadius: 10,
+                  background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)',
+                  display: 'flex', alignItems: 'flex-start', gap: 10,
+                }}>
+                  <AlertCircle size={16} color="#f87171" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#f87171', marginBottom: 4 }}>Calendar generation failed</div>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>{calendarError}</div>
+                    <button
+                      onClick={handleGenerateCalendar}
+                      style={{
+                        marginTop: 10, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                        background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.35)',
+                        color: '#f87171', cursor: 'pointer', fontFamily: 'inherit',
+                        display: 'inline-flex', alignItems: 'center', gap: 5,
+                      }}
+                    >
+                      <RefreshCw size={12} /> Try again
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {calendar.length > 0 && !calLoading && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
                     <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>
                       7 DAYS — {activePlatform?.label.toUpperCase()} CONTENT CALENDAR
                     </span>
-                    <button onClick={copyCalendar} style={{
-                      padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700,
-                      background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)',
-                      color: '#4ade80', cursor: 'pointer', fontFamily: 'inherit',
-                      display: 'flex', alignItems: 'center', gap: 5,
-                    }}>
-                      <Copy size={12} /> Copy All
-                    </button>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <button onClick={downloadCalendarCSV} style={{
+                        padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                        background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.3)',
+                        color: '#60a5fa', cursor: 'pointer', fontFamily: 'inherit',
+                        display: 'flex', alignItems: 'center', gap: 5,
+                      }}>
+                        <Download size={12} /> CSV
+                      </button>
+                      <button onClick={copyCalendar} style={{
+                        padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                        background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)',
+                        color: '#4ade80', cursor: 'pointer', fontFamily: 'inherit',
+                        display: 'flex', alignItems: 'center', gap: 5,
+                      }}>
+                        <Copy size={12} /> Copy All
+                      </button>
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -797,6 +987,9 @@ Make the "superior version" ready to post — formatted perfectly for ${platform
                   <div className="output-header">
                     <span className="output-label" style={{ color: '#f87171' }}>⚔ Competitive Analysis + Superior Content</span>
                     <div className="output-actions">
+                      <button className="btn-copy" onClick={() => { downloadText(compResult, `${platform}_beat_competitor.txt`); showToast('Downloaded!'); }}>
+                        <Download size={14} /> Download
+                      </button>
                       <button className="btn-copy" onClick={() => { navigator.clipboard.writeText(compResult); showToast('Copied!'); }}>
                         <Copy size={14} /> Copy
                       </button>

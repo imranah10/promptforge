@@ -1,16 +1,44 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { ALL_MODELS } from '../utils/models';
+import { isChatCapable } from '../utils/modelFetcher';
 
 export const AppContext = createContext();
+
+// Known-good fallback if a user has a stale/invalid activeModel saved
+const SAFE_DEFAULT_ID   = 'claude-3-5-sonnet-20241022';
+const SAFE_DEFAULT_NAME = 'Claude 3.5 Sonnet';
+
+// ID safety check — strict validation against ALL_MODELS or chat-capable patterns
+function isProbablyChatModel(id) {
+  if (!id) return false;
+  // Static known models always pass
+  if (ALL_MODELS.some(m => m.id === id)) return true;
+  // Custom models pass (they're user-defined)
+  if (id.startsWith('custom:') || id === 'singularity' || id === 'inventor') return true;
+  // OpenRouter prefixed models — check the inner id
+  if (id.startsWith('openrouter:')) return isChatCapable('openrouter', id.split(':')[1] || '');
+  // Otherwise check provider-specific patterns
+  for (const provider of ['openai', 'groq', 'google', 'anthropic', 'mistral', 'deepseek', 'xai', 'perplexity']) {
+    if (isChatCapable(provider, id)) return true;
+  }
+  return false;
+}
 
 export const AppProvider = ({ children }) => {
   const initialProviderKeys = JSON.parse(localStorage.getItem('pf_provider_keys') || '{}');
   const initialGlobalKey = localStorage.getItem('pf_key') || '';
-  
-  let initialModelId = 'claude-3-5-sonnet-20241022';
-  let initialModelName = 'Claude 3.5 Sonnet';
 
-  if (!initialGlobalKey) {
+  // Restore previously selected model if it's still valid; else fall back safely
+  const savedModelId   = localStorage.getItem('pf_active_model')      || '';
+  const savedModelName = localStorage.getItem('pf_active_model_name') || '';
+
+  let initialModelId   = SAFE_DEFAULT_ID;
+  let initialModelName = SAFE_DEFAULT_NAME;
+
+  if (savedModelId && isProbablyChatModel(savedModelId)) {
+    initialModelId   = savedModelId;
+    initialModelName = savedModelName || savedModelId;
+  } else if (!initialGlobalKey) {
     const savedProviders = Object.keys(initialProviderKeys).filter(k => initialProviderKeys[k]);
     if (savedProviders.length > 0) {
       const firstProvider = savedProviders[0];
@@ -54,6 +82,15 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('pf_vault_history', JSON.stringify(vaultHistory));
   }, [vaultHistory]);
+
+  // Persist active model selection across reloads
+  useEffect(() => {
+    if (activeModel) localStorage.setItem('pf_active_model', activeModel);
+  }, [activeModel]);
+
+  useEffect(() => {
+    if (activeModelName) localStorage.setItem('pf_active_model_name', activeModelName);
+  }, [activeModelName]);
 
   const showToast = (message, type = 'success') => {
     setToastMsg({ message, type, id: Date.now() });

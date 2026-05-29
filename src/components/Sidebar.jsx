@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   LayoutDashboard, PenTool, GitCompare, Code2, MessageSquare, 
-  Key, Share2, Image as ImageIcon, Video, Languages, DollarSign,
+  Key, Share2, Languages, DollarSign,
   Zap, Search, Library, Wand2, Database, Archive, FileText,
   PanelLeftClose, PanelRightClose, Globe, Lightbulb, BookOpen,
   Sun, Moon
@@ -57,6 +57,7 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
           <NavItem id="chatdata" icon={FileText} label="Chat With Data" badge="Pro" badgeClass="badge-hot" />
           <NavItem id="optimizer" icon={Wand2} label="Prompt Optimizer" badge="Magic" badgeClass="badge-pro" />
           <NavItem id="aiwriter" icon={PenTool} label="AI Writer" />
+          <NavItem id="creator" icon={Share2} label="Social Media AI" />
           <NavItem id="library" icon={Library} label="Prompt Library" badge="60+" badgeClass="badge-pro" />
           <NavItem id="compare" icon={GitCompare} label="Model Compare" />
           <NavItem id="codehelper" icon={Code2} label="Code Helper" />
@@ -67,13 +68,6 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
           <NavItem id="vault" icon={Archive} label="History Vault" />
           <NavItem id="keys" icon={Key} label="API Keys" />
           <NavItem id="docs" icon={BookOpen} label="Docs" badge="New" badgeClass="badge-new" />
-        </div>
-
-        <div className="nav-section">
-          {!isCollapsed && <div className="nav-label">Creator Studio</div>}
-          <NavItem id="creator" icon={Share2} label="Social Media AI" />
-          <NavItem id="imageprompt" icon={ImageIcon} label="Image Prompt" />
-          <NavItem id="videoprompt" icon={Video} label="Video Prompt" />
         </div>
 
         <div className="nav-section">

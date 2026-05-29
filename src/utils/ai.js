@@ -9,17 +9,25 @@ export function getEffectiveKey(activeModel, apiKey, providerKeys, customModels 
   // If it's explicitly an OpenRouter model
   if (model.startsWith('openrouter:')) return pKeys.openrouter || apiKey || '';
 
+  // Groq-hosted families (must check BEFORE generic gpt match — gpt-oss runs on Groq)
+  if (
+    model.includes('llama') || model.includes('gemma') || model.includes('mixtral') ||
+    model.includes('qwen')  || model.includes('gpt-oss') || model.includes('compound') ||
+    model.includes('allam')
+  ) {
+    return pKeys.groq || pKeys.openrouter || apiKey || '';
+  }
+
   // Explicit Provider Checks
   if (model.includes('gpt') || model.includes('o1') || model.includes('o3')) return pKeys.openai || apiKey || '';
   if (model.includes('claude')) return pKeys.anthropic || apiKey || '';
   if (model.includes('gemini')) return pKeys.google || apiKey || '';
-  if (model.includes('llama') || model.includes('gemma') || model.includes('mixtral')) return pKeys.groq || pKeys.openrouter || apiKey || '';
-  if (model.includes('deepseek')) return pKeys.deepseek || pKeys.openrouter || apiKey || '';
+  if (model.includes('deepseek')) return pKeys.deepseek || pKeys.groq || pKeys.openrouter || apiKey || '';
   if (model.includes('grok')) return pKeys.xai || pKeys.openrouter || apiKey || '';
   if (model.includes('mistral')) return pKeys.mistral || pKeys.groq || pKeys.openrouter || apiKey || '';
   if (model.includes('sonar')) return pKeys.perplexity || apiKey || '';
   if (model.includes('command')) return pKeys.cohere || apiKey || '';
-  
+
   return pKeys.openrouter || pKeys.openai || apiKey || '';
 }
 
@@ -77,6 +85,13 @@ export async function callAI(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
     throw new Error(`API Key for ${model} is missing. Please add it in Settings.`);
   }
 
+  // ── Pre-flight: block known non-chat models with a clear, actionable error ──
+  // (Whisper, TTS, embeddings, safety classifiers, image-gen, OCR, reranker)
+  const nonChatPattern = /\b(whisper|tts|dall-?e|text-embed|embedding|moderation|prompt-guard|llama-?guard|safeguard|orpheus|stable-diffusion|sd-?xl|playai|reranker|rerank|asr|speech-to-text|text-to-speech|ocr|aqa)\b/i;
+  if (nonChatPattern.test(model)) {
+    throw new Error(`"${model}" is not a chat model — it is built for audio, embeddings, classification, or image generation. Pick a chat model (Llama, Claude, GPT, Gemini, Qwen, etc.) from the topbar Model Selector.`);
+  }
+
   const mLower = (model || '').toLowerCase();
 
   // ROUTING LOGIC
@@ -84,16 +99,22 @@ export async function callAI(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
   if (model === 'inventor') return callInventor(messages, apiKey, pKeys, customModels);
 
   if (model.startsWith('openrouter:')) return callOpenRouter(model.split('openrouter:')[1], messages, key);
-  if (mLower.includes('claude')) return callAnthropic(model, messages, key);
-  if (mLower.includes('gpt') || mLower.startsWith('o1') || mLower.startsWith('o3')) return callOpenAI(model, messages, key);
-  if (mLower.includes('gemini')) return callGemini(model, messages, key);
-  
-  // Groq Priority for Llama/Gemma/Mixtral
-  if (mLower.includes('llama') || mLower.includes('gemma') || mLower.includes('mixtral')) {
+
+  // Groq-hosted families MUST be checked BEFORE generic gpt/claude/etc patterns,
+  // because gpt-oss-120b runs on Groq (not OpenAI) and "gpt-oss" includes "gpt".
+  if (
+    mLower.includes('llama') || mLower.includes('gemma') || mLower.includes('mixtral') ||
+    mLower.includes('qwen')  || mLower.includes('gpt-oss') || mLower.includes('compound') ||
+    mLower.includes('allam')
+  ) {
     if (pKeys.groq) return callGroq(model, messages, pKeys.groq);
     return callOpenRouter(model, messages, key);
   }
-  
+
+  if (mLower.includes('claude')) return callAnthropic(model, messages, key);
+  if (mLower.includes('gpt') || mLower.startsWith('o1') || mLower.startsWith('o3')) return callOpenAI(model, messages, key);
+  if (mLower.includes('gemini')) return callGemini(model, messages, key);
+
   if (mLower.includes('deepseek')) {
     if (pKeys.deepseek) return callDeepSeek(model, messages, pKeys.deepseek);
     return callOpenRouter(model, messages, key);
@@ -278,21 +299,4 @@ async function callInventor(messages, apiKey, providerKeys, customModels) {
     { role: 'user', content: messages[messages.length - 1].content }
   ];
   return callAI(prompt, model, '', apiKey, providerKeys, customModels);
-}
-
-export async function generateImage(prompt, providerKeys, size = '1024x1024', tool = 'DALL-E 3') {
-  const pKeys = providerKeys || {};
-  if (tool === 'DALL-E 3') {
-    const key = pKeys.openai;
-    const res = await fetch('https://api.openai.com/v1/images/generations', { 
-      method: 'POST', 
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, 
-      body: JSON.stringify({ model: 'dall-e-3', prompt, n: 1, size }) 
-    });
-    const data = await res.json(); 
-    if (data.error) throw new Error(`DALL-E Error: ${data.error.message}`);
-    return data.data[0].url;
-  } 
-  const seed = Math.floor(Math.random() * 1000000);
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${size.split('x')[0]}&height=${size.split('x')[1]}&seed=${seed}&nologo=true&model=flux`;
 }

@@ -155,8 +155,6 @@ const Docs = () => {
       { id:'creator',  label:'Creator Studio' },
       { id:'seo',      label:'SEO Optimizer' },
       { id:'compare',  label:'Model Compare' },
-      { id:'imgprompt',label:'Image Prompt' },
-      { id:'vidprompt',label:'Video Prompt' },
     ]},
     { label:'MORE', items:[
       { id:'library', label:'Prompt Library' },
@@ -898,101 +896,10 @@ Jun,70000,210,North`}/>
           </section>
 
           {/* ══════════════════════════════════════════════════════════════ */}
-          {/* IMAGE PROMPT */}
-          {/* ══════════════════════════════════════════════════════════════ */}
-          <section id="imgprompt" data-section style={{ marginBottom:'70px' }}>
-            <div style={{ fontSize:'10px', fontWeight:800, color:'var(--accent)', letterSpacing:'4px', marginBottom:'10px' }}>TOOL 11</div>
-            <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'20px', overflow:'hidden' }}>
-              <div style={{ background:'rgba(167,139,250,0.06)', padding:'22px 28px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ display:'flex', gap:'16px', alignItems:'flex-start' }}>
-                  <div style={{ fontSize:'28px' }}>🖼️</div>
-                  <div>
-                    <h2 style={{ fontSize:'22px', fontWeight:800, color:'#fff', margin:'0 0 4px' }}>Image Prompt</h2>
-                    <p style={{ color:'#64748b', fontSize:'13px', margin:0 }}>Engineer expert image prompts for Midjourney, DALL-E 3, Stable Diffusion, Flux & more. Generate images directly when API available.</p>
-                    <div style={{ display:'flex', gap:'6px', marginTop:'10px', flexWrap:'wrap' }}>
-                      {['7 Tools Supported','12 Art Styles','9 Mood/Lighting Options','6 Aspect Ratios','Variation Generator','Direct Image Generation','Download Image'].map(t => (
-                        <span key={t} style={{ fontSize:'10px', fontWeight:700, padding:'2px 9px', borderRadius:'20px', background:'rgba(167,139,250,0.1)', color:'#a78bfa', border:'1px solid rgba(167,139,250,0.2)' }}>{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div style={{ padding:'28px' }}>
-                <SH id="imgprompt-tools" level={3}>7 Supported Image Tools</SH>
-                <p style={{ color:'#94a3b8', fontSize:'14px', lineHeight:1.8, marginBottom:'12px' }}>Each tool gets its own syntax tip and a different AI prompt strategy — Midjourney uses parameter syntax, DALL-E uses natural language, Stable Diffusion uses weighted tokens:</p>
-                <div style={{ display:'flex', flexWrap:'wrap', gap:'7px', marginBottom:'20px' }}>
-                  {['Midjourney','DALL-E 3','Stable Diffusion','Adobe Firefly','Ideogram','Leonardo AI','Flux'].map(t => (
-                    <code key={t} style={{ background:'rgba(167,139,250,0.08)', color:'#a78bfa', padding:'4px 10px', borderRadius:'7px', fontSize:'12px', border:'1px solid rgba(167,139,250,0.15)' }}>{t}</code>
-                  ))}
-                </div>
-                <SH id="imgprompt-output" level={3}>What The Prompt Includes</SH>
-                <ul style={{ color:'#94a3b8', fontSize:'14px', lineHeight:2.1, paddingLeft:'20px', marginBottom:'16px' }}>
-                  <li><strong style={{color:'#fff'}}>Main Prompt</strong> in a code block — copy directly into your tool</li>
-                  <li><strong style={{color:'#fff'}}>Negative Prompt</strong> — what to exclude</li>
-                  <li><strong style={{color:'#fff'}}>Recommended Settings</strong> — specific parameters for your tool</li>
-                  <li><strong style={{color:'#fff'}}>Why This Works</strong> — key design decisions explained</li>
-                  <li><strong style={{color:'#fff'}}>Variation button</strong> — same subject, different angle/lighting/palette</li>
-                </ul>
-                <SH id="imgprompt-generate" level={3}>Direct Image Generation</SH>
-                <p style={{ color:'#94a3b8', fontSize:'14px', lineHeight:1.8, marginBottom:'12px' }}>
-                  Click <strong style={{color:'#fff'}}>"Visualize Now"</strong> button after generating a prompt. Uses DALL-E 3 (if OpenAI key present) or Pollinations.ai (free, no key needed). Images can be downloaded.
-                </p>
-                <TipBox type="try">
-                  Tool: Midjourney | Style: Cinematic / Film | Mood: Dramatic / moody | Ratio: Landscape 16:9<br/>
-                  Describe: "A lone samurai standing on a cliff at sunset, cherry blossoms falling"<br/>
-                  → Get complete MJ prompt with --ar 16:9 --v 6.1 parameters<br/>
-                  → Click Visualize Now → image generates instantly
-                </TipBox>
-              </div>
-            </div>
-          </section>
-
-          {/* ══════════════════════════════════════════════════════════════ */}
-          {/* VIDEO PROMPT */}
-          {/* ══════════════════════════════════════════════════════════════ */}
-          <section id="vidprompt" data-section style={{ marginBottom:'70px' }}>
-            <div style={{ fontSize:'10px', fontWeight:800, color:'var(--accent)', letterSpacing:'4px', marginBottom:'10px' }}>TOOL 12</div>
-            <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'20px', overflow:'hidden' }}>
-              <div style={{ background:'rgba(251,146,60,0.06)', padding:'22px 28px', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ display:'flex', gap:'16px', alignItems:'flex-start' }}>
-                  <div style={{ fontSize:'28px' }}>🎬</div>
-                  <div>
-                    <h2 style={{ fontSize:'22px', fontWeight:800, color:'#fff', margin:'0 0 4px' }}>Video Prompt</h2>
-                    <p style={{ color:'#64748b', fontSize:'13px', margin:0 }}>Engineer cinematic video prompts for Sora, Runway, Kling, Pika, Luma & more with scene breakdowns and camera direction.</p>
-                    <div style={{ display:'flex', gap:'6px', marginTop:'10px', flexWrap:'wrap' }}>
-                      {['8 Video Tools','8 Camera Movements','8 Visual Styles','Scene Breakdown','Variation Generator','Shot-by-Shot Timeline'].map(t => (
-                        <span key={t} style={{ fontSize:'10px', fontWeight:700, padding:'2px 9px', borderRadius:'20px', background:'rgba(251,146,60,0.1)', color:'#fb923c', border:'1px solid rgba(251,146,60,0.2)' }}>{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div style={{ padding:'28px' }}>
-                <p style={{ color:'#94a3b8', fontSize:'14px', lineHeight:1.8, marginBottom:'16px' }}>
-                  Unlike image prompts, video prompts must describe <strong style={{color:'#fff'}}>motion</strong>, not just appearance. AI Video Prompt specializes in camera movement language, pacing, and shot-by-shot breakdowns.
-                </p>
-                <SH id="vidprompt-output" level={3}>What You Get</SH>
-                <ul style={{ color:'#94a3b8', fontSize:'14px', lineHeight:2.1, paddingLeft:'20px', marginBottom:'16px' }}>
-                  <li><strong style={{color:'#fff'}}>Main Video Prompt</strong> in code block — ready to paste</li>
-                  <li><strong style={{color:'#fff'}}>Scene Breakdown</strong> — shot by shot with timestamps (0-5s: ..., 5-10s: ...)</li>
-                  <li><strong style={{color:'#fff'}}>Camera & Motion Notes</strong> — specific technical direction</li>
-                  <li><strong style={{color:'#fff'}}>Negative Prompt</strong> — what to avoid</li>
-                  <li><strong style={{color:'#fff'}}>Tool-specific Settings</strong> — recommended parameters for your chosen tool</li>
-                </ul>
-                <TipBox type="try">
-                  Tool: Runway Gen-3 | Type: Short-form | Camera: Slow dolly in | Style: Cinematic / Film grain<br/>
-                  Describe: "A chef carefully plating a michelin-star dish, steam rising, golden kitchen light"<br/>
-                  → Get complete prompt with scene breakdown + camera direction + negative prompt
-                </TipBox>
-              </div>
-            </div>
-          </section>
-
-          {/* ══════════════════════════════════════════════════════════════ */}
           {/* PROMPT LIBRARY */}
           {/* ══════════════════════════════════════════════════════════════ */}
           <section id="library" data-section style={{ marginBottom:'70px' }}>
-            <div style={{ fontSize:'10px', fontWeight:800, color:'var(--accent)', letterSpacing:'4px', marginBottom:'10px' }}>TOOL 13</div>
+            <div style={{ fontSize:'10px', fontWeight:800, color:'var(--accent)', letterSpacing:'4px', marginBottom:'10px' }}>TOOL 11</div>
             <SH id="library-h" level={2}>Prompt Library</SH>
             <p style={{ color:'#94a3b8', fontSize:'14px', lineHeight:1.8, marginBottom:'16px' }}>60+ expert-crafted prompts organized by category. Filter, search, favorite, and copy with one click.</p>
             <DocTable
@@ -1074,7 +981,6 @@ Jun,70000,210,North`}/>
                 ['<strong>Connection Blocked / Failed to fetch</strong>','Ad-blocker, VPN, or firewall blocking the request','Disable ad-blocker for this site, or disable VPN temporarily'],
                 ['<strong>Spider: No data retrieved</strong>','Site blocks scraping OR too vague a query','Use a specific URL with https://, or use a more specific search term'],
                 ['<strong>PDF not extracting</strong>','PDF.js CDN loading slowly','Wait 3-5 seconds after page load, then re-upload the PDF'],
-                ['<strong>Image generation fails</strong>','No OpenAI key for DALL-E 3','Pollinations.ai (free, no key) is used as fallback automatically'],
                 ['<strong>Charts not appearing in Chat</strong>','AI didn\'t generate numerical data','Ask explicitly: "give me statistics" or click "Key Stats" quick action chip'],
                 ['<strong>Output has ** symbols</strong>','AI sent markdown but not rendering','This is a display bug in that component — copy to another tool or refresh'],
                 ['<strong>Very slow response</strong>','Model overloaded or large input','Switch to Groq/Llama 3.3 for speed, or reduce input size'],

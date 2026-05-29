@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext';
 import { callAI } from '../utils/ai';
 import {
   Copy, Loader2, ShieldCheck, Flame,
-  AlertCircle, Play, RefreshCw, Check, Download
+  AlertCircle, Play, RefreshCw, Check, Download, Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { downloadText } from '../utils/helpers';
@@ -12,6 +12,206 @@ import { downloadText } from '../utils/helpers';
 const strip = (t = '') =>
   t.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#{1,6}\s?/g, '')
    .replace(/`{1,3}/g, '').replace(/_{1,2}/g, '').replace(/~~.+~~/g, '').trim();
+
+// ── Robust forge response parser ──────────────────────────────────────────────
+// Handles: tagged blocks, markdown-wrapped tags, JSON fallback, free-form fallback.
+// Always returns { forged, audit, parseSource } — never throws, never silently
+// substitutes a fake score.
+const parseForgeResponse = (raw, basicPrompt, intensity) => {
+  const text = (raw || '').trim();
+  if (!text) {
+    return {
+      forged: '',
+      audit: null,
+      parseSource: 'empty',
+    };
+  }
+
+  // ── Step 1: try tagged blocks (===FORGED=== / ===ANALYSIS===) ──
+  // Tolerant to surrounding markdown like **===FORGED===** or `===FORGED===`
+  const cleanForRegex = text.replace(/\*\*|`{1,3}/g, '');
+
+  const forgedTag = cleanForRegex.match(/={3,}\s*FORGED\s*={3,}([\s\S]*?)={3,}\s*END_?FORGED\s*={3,}/i);
+  const analysisTag = cleanForRegex.match(/={3,}\s*ANALYSIS\s*={3,}([\s\S]*?)={3,}\s*END_?ANALYSIS\s*={3,}/i);
+
+  let forged = '';
+  let parseSource = 'tagged';
+
+  if (forgedTag) {
+    forged = strip(forgedTag[1]);
+  } else {
+    // Forged block is more critical — try splitting by ===ANALYSIS===
+    const splitByAnalysis = cleanForRegex.split(/={3,}\s*ANALYSIS\s*={3,}/i);
+    if (splitByAnalysis.length > 1) {
+      forged = strip(splitByAnalysis[0].replace(/={3,}\s*FORGED\s*={3,}/i, '').replace(/={3,}\s*END_?FORGED\s*={3,}/i, ''));
+      parseSource = 'split';
+    }
+  }
+
+  // ── Step 2: try JSON fallback if tagged failed ──
+  let audit = null;
+  if (!forged || !analysisTag) {
+    const jsonMatch = text.match(/\{[\s\S]*"score"[\s\S]*?\}/i);
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.forged && typeof parsed.forged === 'string') forged = strip(parsed.forged);
+        if (typeof parsed.score === 'number' || typeof parsed.score === 'string') {
+          audit = {
+            score:        clampScore(parsed.score),
+            reasoning:    String(parsed.reasoning || '').trim(),
+            risks:        Array.isArray(parsed.weaknesses) ? parsed.weaknesses.map(String).filter(Boolean).slice(0, 5) : [],
+            improvements: Array.isArray(parsed.fixes) ? parsed.fixes.map(String).filter(Boolean).slice(0, 5) : [],
+          };
+          parseSource = 'json';
+        }
+      } catch (_) { /* JSON parse failed, keep going */ }
+    }
+  }
+
+  // ── Step 3: parse analysis fields if we have an analysis block ──
+  if (!audit && analysisTag) {
+    audit = parseAnalysisFields(analysisTag[1]);
+    parseSource = audit ? 'tagged' : parseSource;
+  }
+
+  // ── Step 4: full-text scan as last structured attempt ──
+  if (!audit) {
+    const wholeAudit = parseAnalysisFields(cleanForRegex);
+    if (wholeAudit && wholeAudit.score !== null) {
+      audit = wholeAudit;
+      parseSource = 'scattered';
+    }
+  }
+
+  // ── Step 5: if forged still empty, take everything before any analysis-like marker ──
+  if (!forged) {
+    const cutMarkers = [/={3,}\s*ANALYSIS/i, /\bSCORE\s*:/i, /\bWEAK1\s*:/i];
+    let cut = cleanForRegex.length;
+    cutMarkers.forEach(m => {
+      const idx = cleanForRegex.search(m);
+      if (idx > 0 && idx < cut) cut = idx;
+    });
+    forged = strip(cleanForRegex.slice(0, cut));
+    if (forged) parseSource = parseSource === 'tagged' ? 'tagged' : 'free-form';
+  }
+
+  // ── Step 6: heuristic audit fallback if still nothing ──
+  // We do NOT invent a fake score silently — we mark it as estimated.
+  if (!audit && forged) {
+    audit = heuristicAudit(basicPrompt, forged, intensity);
+    parseSource = 'heuristic';
+  }
+
+  return { forged, audit, parseSource };
+};
+
+// ── Analysis field parser — multiline tolerant ────────────────────────────────
+const parseAnalysisFields = (block) => {
+  if (!block) return null;
+  const text = block.replace(/\*\*|`{1,3}/g, '');
+
+  const score = extractScore(text);
+  if (score === null) return null;
+
+  const reasoning = extractField(text, 'REASONING');
+  const weak1 = extractField(text, 'WEAK1');
+  const weak2 = extractField(text, 'WEAK2');
+  const weak3 = extractField(text, 'WEAK3');
+  const fix1  = extractField(text, 'FIX1');
+  const fix2  = extractField(text, 'FIX2');
+  const fix3  = extractField(text, 'FIX3');
+
+  const risks = [weak1, weak2, weak3].filter(Boolean);
+  const improvements = [fix1, fix2, fix3].filter(Boolean);
+
+  return {
+    score,
+    reasoning: reasoning || '',
+    risks,
+    improvements,
+  };
+};
+
+// ── Score extractor with validation + clamping ────────────────────────────────
+const extractScore = (text) => {
+  if (!text) return null;
+  // Try several patterns: "SCORE: 78", "Score = 78", "Score 78/100", "78%"
+  const patterns = [
+    /SCORE\s*[:=]\s*(\d{1,3})/i,
+    /\bSCORE\b[^\d]{0,8}(\d{1,3})\s*(?:\/\s*100)?/i,
+    /(\d{1,3})\s*%/,
+  ];
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m) {
+      const n = parseInt(m[1], 10);
+      if (!isNaN(n)) return clampScore(n);
+    }
+  }
+  return null;
+};
+
+const clampScore = (val) => {
+  const n = typeof val === 'number' ? val : parseInt(String(val).replace(/[^\d-]/g, ''), 10);
+  if (isNaN(n)) return null;
+  return Math.max(0, Math.min(100, n));
+};
+
+// ── Single-field extractor (multiline until next FIELD: or end) ───────────────
+const extractField = (text, fieldName) => {
+  if (!text) return '';
+  // Match FIELD: <content> until next FIELD-like marker or end of block
+  const stopWords = ['SCORE', 'REASONING', 'WEAK1', 'WEAK2', 'WEAK3', 'FIX1', 'FIX2', 'FIX3', 'WEAKNESS', 'FIX'];
+  const stopPattern = stopWords.filter(w => w !== fieldName).join('|');
+  const re = new RegExp(`${fieldName}\\s*[:=]\\s*([\\s\\S]*?)(?=\\n\\s*(?:${stopPattern})\\s*[:=]|={3,}|$)`, 'i');
+  const m = text.match(re);
+  if (!m) return '';
+  return m[1]
+    .replace(/^[\s\-•◈✓]+/, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 280); // cap length so UI stays clean
+};
+
+// ── Heuristic audit when AI didn't follow format ──────────────────────────────
+// This is honest: it reports an estimated score based on length/specificity gap,
+// and uses generic-but-truthful weaknesses tied to the actual basic prompt.
+const heuristicAudit = (basic, forged, intensity) => {
+  const basicLen = (basic || '').trim().length;
+  const forgedLen = (forged || '').trim().length;
+  const lengthRatio = basicLen > 0 ? forgedLen / basicLen : 0;
+
+  // Score: based on intensity setting + length expansion (rough proxy for engineering effort)
+  // We never fabricate beyond what we can defend.
+  const expansionScore = Math.min(100, Math.round(lengthRatio * 18));
+  const intensityBonus = Math.round(intensity * 0.35);
+  const score = clampScore(Math.min(95, 40 + Math.round((expansionScore + intensityBonus) / 2)));
+
+  // Generic-but-real weaknesses based on what's actually missing in the basic prompt
+  const risks = [];
+  const lower = (basic || '').toLowerCase();
+  if (basicLen < 60) risks.push('Original prompt is very short — lacks detail and context');
+  if (!/(act as|you are|expert|specialist)/i.test(lower)) risks.push('No AI persona or role defined in original prompt');
+  if (!/(format|structure|sections|bullet|table|json)/i.test(lower)) risks.push('No output format or structure specified');
+  if (!/(audience|reader|user|customer|target)/i.test(lower)) risks.push('Target audience not specified');
+  if (!/(length|words|paragraph|short|long|detailed)/i.test(lower) && risks.length < 3) risks.push('No length or depth requirement specified');
+
+  // Mirror improvements
+  const improvements = [];
+  if (/(act as|you are|expert)/i.test(forged.toLowerCase())) improvements.push('Added a specific expert persona for the AI to adopt');
+  if (/(format|structure|sections|##|step \d|^\d+\.)/im.test(forged)) improvements.push('Defined a clear output format and structure');
+  if (forgedLen > basicLen * 2) improvements.push('Expanded with concrete constraints and context');
+  if (/(audience|target|reader)/i.test(forged.toLowerCase())) improvements.push('Specified the target audience explicitly');
+  if (improvements.length === 0) improvements.push('Rewrote with clearer instructions and tighter scope');
+
+  return {
+    score,
+    reasoning: 'Score estimated from prompt expansion and intensity (AI did not return structured analysis).',
+    risks: risks.slice(0, 3),
+    improvements: improvements.slice(0, 3),
+  };
+};
 
 // ── Strength gauge ────────────────────────────────────────────────────────────
 const StrengthGauge = ({ score = 0 }) => {
@@ -33,22 +233,11 @@ const StrengthGauge = ({ score = 0 }) => {
   );
 };
 
-// ── Templates ─────────────────────────────────────────────────────────────────
-const TEMPLATES = [
-  { emoji: '✍️', label: 'Blog post',      prompt: 'Write a blog post about AI tools for small businesses' },
-  { emoji: '📧', label: 'Cold email',     prompt: 'Write an email to a potential client for my web design service' },
-  { emoji: '💻', label: 'Fix code',       prompt: 'Fix this Python code that is not working' },
-  { emoji: '📱', label: 'Instagram post', prompt: 'Write an Instagram caption for my fitness coaching page' },
-  { emoji: '📊', label: 'Summarize',      prompt: 'Summarize this long article for me' },
-  { emoji: '🎯', label: 'Ad copy',        prompt: 'Write a Facebook ad for my online course about digital marketing' },
-];
-
 // ── Main ──────────────────────────────────────────────────────────────────────
 const PromptOptimizer = () => {
   const { activeModel, apiKey, providerKeys, customModels, showToast, saveToVault } = useContext(AppContext);
 
   const [basicPrompt,  setBasicPrompt]  = useState('');
-  const [selectedTpl,  setSelectedTpl]  = useState(null); // index of selected template
   const [intensity,    setIntensity]    = useState(70);
   const [loading,      setLoading]      = useState(false);
   const [forgedPrompt, setForgedPrompt] = useState('');
@@ -61,14 +250,6 @@ const PromptOptimizer = () => {
   const [refineCount,  setRefineCount]  = useState(0);
 
   const seed = () => Math.random().toString(36).slice(2, 9).toUpperCase();
-
-  // ── Load template ──────────────────────────────────────────────────────────
-  const loadTemplate = (idx) => {
-    setSelectedTpl(idx);
-    setBasicPrompt(TEMPLATES[idx].prompt);
-    setForgedPrompt(''); setAudit(null);
-    setTestResult(''); setTestDone(false); setSatisfied(null); setRefineCount(0);
-  };
 
   // ── Forge ──────────────────────────────────────────────────────────────────
   const handleForge = async () => {
@@ -104,6 +285,9 @@ CRITICAL RULES:
 - The forged prompt must be PLAIN TEXT — absolutely no asterisks, no ** bold **, no # headers, no markdown
 - The weakness and improvement analysis must be SPECIFIC to THIS prompt — not generic
 - The score must reflect the actual quality gap between original and forged
+- Use ONLY the exact tags below. Do NOT wrap them in markdown. Do NOT add any text before ===FORGED=== or after ===END_ANALYSIS===.
+- Each WEAK and FIX must be ONE single line. No line breaks within a field.
+- SCORE must be a single integer between 0 and 100. No fractions, no /100 suffix.
 
 OUTPUT FORMAT (follow exactly, no deviations):
 
@@ -112,14 +296,14 @@ OUTPUT FORMAT (follow exactly, no deviations):
 ===END_FORGED===
 
 ===ANALYSIS===
-SCORE: [0-100 number representing how strong the forged prompt is]
+SCORE: [single integer 0-100]
 REASONING: [One sentence explaining the score]
-WEAK1: [Specific weakness #1 found in the original prompt]
-WEAK2: [Specific weakness #2 found in the original prompt]  
-WEAK3: [Specific weakness #3 found in the original prompt]
-FIX1: [Specific enhancement #1 you applied and why]
-FIX2: [Specific enhancement #2 you applied and why]
-FIX3: [Specific enhancement #3 you applied and why]
+WEAK1: [Specific weakness #1 found in the original prompt — single line]
+WEAK2: [Specific weakness #2 found in the original prompt — single line]
+WEAK3: [Specific weakness #3 found in the original prompt — single line]
+FIX1: [Specific enhancement #1 you applied and why — single line]
+FIX2: [Specific enhancement #2 you applied and why — single line]
+FIX3: [Specific enhancement #3 you applied and why — single line]
 ===END_ANALYSIS===`;
 
     const msg = `Weak prompt to forge: "${basicPrompt}"
@@ -132,30 +316,22 @@ Now forge it and provide the full analysis.`;
     try {
       const res = await callAI(system, msg, null, activeModel, apiKey, providerKeys, customModels);
 
-      // Parse forged prompt
-      const forgedMatch = res.match(/===FORGED===([\s\S]*?)===END_FORGED===/);
-      let forged = forgedMatch ? strip(forgedMatch[1]) : strip(res.split('===ANALYSIS===')[0]);
-      if (!forged) forged = strip(res);
-      setForgedPrompt(forged);
+      // Robust parsing — handles tagged blocks, JSON, scattered fields, and full fallback
+      const { forged, audit: parsedAudit, parseSource } = parseForgeResponse(res, basicPrompt, intensity);
 
-      // Parse analysis — everything is AI-generated and prompt-specific
-      const analysisMatch = res.match(/===ANALYSIS===([\s\S]*?)===END_ANALYSIS===/);
-      if (analysisMatch) {
-        const a = analysisMatch[1];
-        const scoreMatch = a.match(/SCORE:\s*(\d+)/);
-        const reasoning  = a.match(/REASONING:\s*(.+)/)?.[1]?.trim() || '';
-        const weak1  = a.match(/WEAK1:\s*(.+)/)?.[1]?.trim() || '';
-        const weak2  = a.match(/WEAK2:\s*(.+)/)?.[1]?.trim() || '';
-        const weak3  = a.match(/WEAK3:\s*(.+)/)?.[1]?.trim() || '';
-        const fix1   = a.match(/FIX1:\s*(.+)/)?.[1]?.trim() || '';
-        const fix2   = a.match(/FIX2:\s*(.+)/)?.[1]?.trim() || '';
-        const fix3   = a.match(/FIX3:\s*(.+)/)?.[1]?.trim() || '';
-        setAudit({
-          score:        parseInt(scoreMatch?.[1] || '78'),
-          reasoning,
-          risks:        [weak1, weak2, weak3].filter(Boolean),
-          improvements: [fix1,  fix2,  fix3 ].filter(Boolean),
-        });
+      if (!forged) {
+        // Genuine failure — show error instead of garbage
+        setForgedPrompt('');
+        setAudit(null);
+        showToast('AI response was unreadable. Try again.', 'error');
+        return;
+      }
+
+      setForgedPrompt(forged);
+      if (parsedAudit) {
+        setAudit({ ...parsedAudit, parseSource });
+      } else {
+        setAudit(null);
       }
 
       saveToVault?.('Prompt Optimizer', `Forged: ${basicPrompt.slice(0, 40)}`, forged);
@@ -207,7 +383,7 @@ Now forge it and provide the full analysis.`;
   };
 
   const resetAll = () => {
-    setBasicPrompt(''); setSelectedTpl(null); setForgedPrompt(''); setAudit(null);
+    setBasicPrompt(''); setForgedPrompt(''); setAudit(null);
     setTestResult(''); setTestDone(false); setSatisfied(null); setRefineCount(0);
   };
 
@@ -223,40 +399,21 @@ Now forge it and provide the full analysis.`;
         <div className="section-sub">Turn weak prompts into elite AI instructions. Test live. Refine until perfect.</div>
       </div>
 
-      {/* ── Template buttons ── */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
-          Quick examples — click to load
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {TEMPLATES.map((t, i) => {
-            const isSelected = selectedTpl === i;
-            return (
-              <button key={i} onClick={() => loadTemplate(i)} style={{
-                padding: '8px 16px', borderRadius: 22, fontSize: 13, fontWeight: 700,
-                cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
-                background: isSelected ? 'rgba(167,139,250,0.25)' : 'rgba(255,255,255,0.08)',
-                border: `1.5px solid ${isSelected ? '#a78bfa' : 'rgba(255,255,255,0.2)'}`,
-                color: isSelected ? '#c4b5fd' : 'rgba(255,255,255,0.8)',
-                boxShadow: isSelected ? '0 0 12px rgba(167,139,250,0.3)' : 'none',
-              }}>
-                {t.emoji} {t.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* ── Input card ── */}
       <div className="tool-card" style={{ marginBottom: 16 }}>
         <div className="form-group">
           <label className="form-label">Your weak / basic prompt</label>
           <textarea
-            className="form-textarea" rows="4"
-            placeholder="Type your basic prompt here... e.g. 'write a blog post about AI'"
+            className="form-textarea" rows="5"
+            placeholder="Type or paste anything here — a blog idea, email draft, code question, legal clause, research query, business plan, recipe, lesson plan, contract, social post, technical spec... Forge optimizes any prompt for any AI model."
             value={basicPrompt}
-            onChange={e => { setBasicPrompt(e.target.value); setSelectedTpl(null); }}
+            onChange={e => setBasicPrompt(e.target.value)}
           />
+          {basicPrompt.length > 0 && (
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4, textAlign: 'right' }}>
+              {basicPrompt.length.toLocaleString()} characters
+            </div>
+          )}
         </div>
 
         <div className="form-group">
@@ -301,6 +458,23 @@ Now forge it and provide the full analysis.`;
 
             {/* Strength gauge */}
             {audit && <StrengthGauge score={audit.score} />}
+
+            {/* Parse-source transparency hint (only for non-tagged) */}
+            {audit && audit.parseSource && audit.parseSource !== 'tagged' && audit.parseSource !== 'json' && (
+              <div style={{
+                display: 'flex', alignItems: 'flex-start', gap: 8,
+                padding: '8px 14px', marginBottom: 12, borderRadius: 10,
+                background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)',
+                fontSize: 11.5, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5,
+              }}>
+                <Info size={12} color="#fbbf24" style={{ flexShrink: 0, marginTop: 2 }} />
+                <span>
+                  {audit.parseSource === 'heuristic'
+                    ? 'AI returned a non-standard response. Score is estimated from prompt expansion and intensity.'
+                    : 'AI response was reformatted for consistency.'}
+                </span>
+              </div>
+            )}
 
             {/* AI reasoning */}
             {audit?.reasoning && (

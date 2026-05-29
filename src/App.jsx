@@ -6,8 +6,6 @@ import ModelSelector from './components/ModelSelector';
 import Dashboard from './pages/Dashboard';
 import AIWriter from './pages/AIWriter';
 import CreatorStudio from './pages/CreatorStudio';
-import ImagePrompt from './pages/ImagePrompt';
-import VideoPrompt from './pages/VideoPrompt';
 import ModelCompare from './pages/ModelCompare';
 import CodeHelper from './pages/CodeHelper';
 import ApiKeys from './pages/ApiKeys';
@@ -37,7 +35,7 @@ function DashboardLayout({ theme, onToggleTheme }) {
 
   const titles = {
     dashboard:'Dashboard', optimizer: 'Prompt Optimizer', aiwriter:'AI Writer', 
-    creator:'Creator Studio', imageprompt:'Image Prompt', videoprompt:'Video Prompt', 
+    creator:'Creator Studio',
     compare:'Model Compare', codehelper:'Code Helper', datawizard: 'Data Wizard', chatdata: 'Chat With Data',
     vault: 'Generation Vault', keys:'API Keys', 
     sellearn:'Sell & Earn', seo: 'SEO Optimizer', library: 'Prompt Library', search: 'The Spider',
@@ -98,8 +96,6 @@ function DashboardLayout({ theme, onToggleTheme }) {
                 <Route path="/optimizer" element={<PromptOptimizer />} />
                 <Route path="/aiwriter" element={<AIWriter />} />
                 <Route path="/creator" element={<CreatorStudio />} />
-                <Route path="/imageprompt" element={<ImagePrompt />} />
-                <Route path="/videoprompt" element={<VideoPrompt />} />
                 <Route path="/compare" element={<ModelCompare />} />
                 <Route path="/codehelper" element={<CodeHelper />} />
                 <Route path="/datawizard" element={<DataWizard />} />
