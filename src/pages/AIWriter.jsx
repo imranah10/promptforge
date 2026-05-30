@@ -886,8 +886,7 @@ const LandingPageRenderer = ({ content, preset, topic }) => {
             </span>
             <h1 style={{
               fontSize: '28px', fontWeight: 900, lineHeight: '1.2', marginTop: '14px', marginBottom: '10px',
-              backgro
-              und: 'linear-gradient(135deg, #fff, #c084fc, #38bdf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              background: 'linear-gradient(135deg, #fff, #c084fc, #38bdf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               textShadow: '0 0 20px rgba(167, 139, 250, 0.15)'
             }}>
               {cleanTextDisplay(mainTitle.replace(/^#\s*/, ''))}
