@@ -4,7 +4,7 @@ import { callAI } from '../utils/ai';
 import {
   Lightbulb, Zap, BarChart2, AlertTriangle, Crown,
   Rocket, Sparkles, Copy, Save, ChevronDown, Play,
-  Users, Brain, Target, Shield
+  Users, Brain, Target, Shield, Download, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
@@ -227,8 +227,13 @@ const TheInventor = () => {
   const [currentAgentIdx, setCurrentAgentIdx] = useState(-1);
   const [blueprint, setBlueprint] = useState('');
   const [done, setDone] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('pf_inventor_history') || '[]'); } catch { return []; }
+  });
   const bottomRef = useRef(null);
   const debateRef = useRef(null);
+  const cancelRef = useRef(false);
 
   const EXAMPLES = [
     'Launch a YouTube channel to 1 million subscribers in 12 months',
@@ -253,6 +258,7 @@ const TheInventor = () => {
     if (!goal.trim()) { showToast('Enter your goal first.', 'error'); return; }
     if (!hasKey()) { showToast('Add an API key in Settings first.', 'error'); return; }
 
+    cancelRef.current = false;
     setRunning(true);
     setMessages([]);
     setBlueprint('');
@@ -264,6 +270,7 @@ const TheInventor = () => {
     try {
       // Run agents 0-3 (debate agents)
       for (let i = 0; i < 4; i++) {
+        if (cancelRef.current) return;
         const agent = AGENTS[i];
         setCurrentAgentIdx(i);
 
@@ -281,6 +288,7 @@ const TheInventor = () => {
         ];
 
         const result = await callAI(msgs, activeModel, activeModel, apiKey, providerKeys, customModels);
+        if (cancelRef.current) return;
 
         fullTranscript += `--- ${agent.name.toUpperCase()} (${agent.role}) ---\n${result}\n\n`;
 
@@ -292,6 +300,8 @@ const TheInventor = () => {
         // Small pause between agents for dramatic effect
         await new Promise(r => setTimeout(r, 600));
       }
+
+      if (cancelRef.current) return;
 
       // Run synthesis agent
       const synthAgent = AGENTS[4];
@@ -307,6 +317,7 @@ const TheInventor = () => {
       ];
 
       const synthResult = await callAI(synthMsgs, activeModel, activeModel, apiKey, providerKeys, customModels);
+      if (cancelRef.current) return;
 
       setMessages(prev => prev.map((m, idx) =>
         idx === prev.length - 1 ? { agentId: synthAgent.id, content: synthResult, typing: false } : m
@@ -314,7 +325,17 @@ const TheInventor = () => {
 
       setBlueprint(synthResult);
       setDone(true);
+
+      // Save to localStorage history
+      const histItem = { id: Date.now(), goal: goal.slice(0, 100), blueprint: synthResult, time: new Date().toLocaleString() };
+      setHistory(prev => {
+        const updated = [histItem, ...prev].slice(0, 8);
+        try { localStorage.setItem('pf_inventor_history', JSON.stringify(updated)); } catch (_) {}
+        return updated;
+      });
+
     } catch (e) {
+      if (cancelRef.current) return;
       showToast('Error: ' + e.message, 'error');
     } finally {
       setRunning(false);
@@ -326,6 +347,25 @@ const TheInventor = () => {
     const clean = blueprint.replace(/#{1,6}\s/g, '').replace(/\*\*/g, '').replace(/\*/g, '').replace(/`/g, '');
     navigator.clipboard.writeText(clean);
     showToast('Blueprint copied!');
+  };
+
+  const downloadBlueprint = () => {
+    const safeGoal = goal.replace(/[^a-z0-9]+/gi, '_').slice(0, 40);
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(new Blob([blueprint], { type: 'text/markdown' })),
+      download: `blueprint_${safeGoal}_${Date.now()}.md`,
+    });
+    a.click(); URL.revokeObjectURL(a.href);
+    showToast('Blueprint downloaded!');
+  };
+
+  const handleCancel = () => {
+    cancelRef.current = true;
+    setRunning(false);
+    setCurrentAgentIdx(-1);
+    // Remove last typing indicator if present
+    setMessages(prev => prev.filter(m => !m.typing));
+    showToast('Council stopped', 'warn');
   };
 
   const saveBlueprint = () => {
@@ -340,13 +380,13 @@ const TheInventor = () => {
     setBlueprint('');
     setDone(false);
     setCurrentAgentIdx(-1);
-    setGoal('');
+    // keep goal so user can re-run without retyping
   };
 
   return (
     <div className="page active">
       {/* ── Header ── */}
-      <div className="section-header">
+      <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
           <div style={{
             width: 48, height: 48, borderRadius: 14,
@@ -373,7 +413,57 @@ const TheInventor = () => {
             </div>
           </div>
         </div>
+        {/* History button */}
+        {history.length > 0 && (
+          <button onClick={() => setShowHistory(h => !h)} style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'var(--bg3)', border: '1px solid var(--border)',
+            borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+            color: 'var(--text2)', fontSize: 12, fontWeight: 700, position: 'relative',
+          }}>
+            History
+            <span style={{
+              position: 'absolute', top: -6, right: -6,
+              background: '#a78bfa', color: '#fff', borderRadius: '50%',
+              width: 16, height: 16, fontSize: 9, fontWeight: 800,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>{history.length}</span>
+          </button>
+        )}
       </div>
+
+      {/* ── History Panel ── */}
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+            style={{
+              background: 'var(--bg3)', border: '1px solid rgba(167,139,250,0.3)',
+              borderRadius: 14, padding: 16, marginBottom: 20, maxWidth: 860, margin: '0 auto 20px',
+            }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#a78bfa', letterSpacing: '1px', marginBottom: 12 }}>RECENT BLUEPRINTS</div>
+            {history.map((h) => (
+              <div key={h.id} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 12px', borderRadius: 10, marginBottom: 6,
+                background: 'var(--bg)', border: '1px solid var(--border)',
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>{h.goal}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>{h.time}</div>
+                </div>
+                <button onClick={() => {
+                  setGoal(h.goal); setBlueprint(h.blueprint); setDone(true);
+                  setMessages([]); setShowHistory(false); showToast('Blueprint restored!');
+                }} style={{
+                  fontSize: 11, color: '#a78bfa', background: 'rgba(167,139,250,0.1)',
+                  border: '1px solid rgba(167,139,250,0.3)', borderRadius: 6,
+                  padding: '4px 10px', cursor: 'pointer', fontWeight: 700,
+                }}>Restore</button>
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div style={{ maxWidth: 860, margin: '0 auto' }}>
 
@@ -518,7 +608,7 @@ const TheInventor = () => {
             }}
           >
             <div style={{
-              display: 'flex', justifyContent: 'space-between',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               marginBottom: 10, fontSize: 12,
               color: 'var(--text2)',
             }}>
@@ -527,7 +617,15 @@ const TheInventor = () => {
                   ? `${AGENTS[currentAgentIdx].name} is speaking...`
                   : 'Initializing Council...'}
               </span>
-              <span>{Math.round(((currentAgentIdx + 1) / 5) * 100)}%</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span>{Math.round(((currentAgentIdx + 1) / 5) * 100)}%</span>
+                <button onClick={handleCancel} style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.35)',
+                  color: '#f87171', borderRadius: 7, padding: '4px 10px',
+                  fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                }}><X size={11}/> Stop</button>
+              </div>
             </div>
             <div style={{
               height: 4, background: 'var(--bg3)',
@@ -652,6 +750,21 @@ const TheInventor = () => {
                   <Save size={14} /> Save to Vault
                 </button>
               )}
+
+              <button
+                onClick={downloadBlueprint}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 7,
+                  padding: '9px 18px', borderRadius: 9,
+                  background: 'rgba(74,222,128,0.1)',
+                  border: '1px solid rgba(74,222,128,0.35)',
+                  color: '#4ade80', fontSize: 13, fontWeight: 700,
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <Download size={14} /> Download .md
+              </button>
 
               <button
                 onClick={reset}

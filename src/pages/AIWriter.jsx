@@ -1036,7 +1036,7 @@ const renderFormattedContent = (content, contentType, selectedSeoIdx, setSelecte
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'}`, paddingBottom: '10px', marginBottom: '18px' }}>
             <span style={{ fontSize: '10px', fontWeight: 900, color: isLight ? (preset.color || '#7c3aed') : (preset.color || '#a78bfa'), letterSpacing: '1.5px', textTransform: 'uppercase', background: isLight ? 'rgba(124,58,237,0.06)' : 'rgba(167,139,250,0.1)', padding: '3px 10px', borderRadius: '4px' }}>EDITORIAL INSIGHT</span>
-            <span style={{ fontSize: '11px', color: isLight ? '#64748b' : '#94a3b8' }}>⏱️ {Math.max(1, Math.round(content.split(/\s+/).length / 200))} min read</span>
+            <span style={{ fontSize: '11px', color: '#64748b' }}>⏱️ {Math.max(1, Math.round(content.split(/\s+/).length / 200))} min read</span>
           </div>
           <RichMarkdownRenderer content={content} presetOverrides={preset} themeIndex={0} dropCap={true} appTheme={appTheme} />
         </div>
@@ -1067,7 +1067,7 @@ const renderFormattedContent = (content, contentType, selectedSeoIdx, setSelecte
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: isLight ? '#0f766e' : '#10b981', boxShadow: isLight ? 'none' : '0 0 8px #10b981' }} />
               <span className="cyber-engine-text" style={{ fontSize: '11px', color: isLight ? '#0f766e' : '#10b981', fontFamily: 'monospace', fontWeight: 700 }}>CORE_ENGINE // STABLE</span>
             </div>
-            <span className="cyber-words-text" style={{ fontSize: '11px', color: isLight ? '#64748b' : '#94a3b8', fontFamily: 'monospace' }}>WORDS: {content.split(/\s+/).length}</span>
+            <span className="cyber-words-text" style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace' }}>WORDS: {content.split(/\s+/).length}</span>
           </div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <RichMarkdownRenderer content={content} presetOverrides={preset} themeIndex={1} appTheme={appTheme} />
@@ -2056,6 +2056,7 @@ const AIWriter = () => {
   const [toneReport, setToneReport] = useState(null);
 
   const [activeTab, setActiveTab] = useState('main');
+  const [sandboxOpen, setSandboxOpen] = useState(false);
   const [selectedSeoIdx, setSelectedSeoIdx] = useState(0);
   const [generatedType, setGeneratedType] = useState('Blog post / Article');
   
@@ -2400,13 +2401,13 @@ Scores are 0-100.`;
       switch (accentName) {
         case 'cyan':
           return {
-            bgLight: isLight ? '#f0f9ff' : '#061b2c',
+            bgLight: '#f0f9ff',
             border: isLight ? '#bae6fd' : '#0c4a6e',
             color: '#38bdf8'
           };
         case 'emerald':
           return {
-            bgLight: isLight ? '#f0fdf4' : '#042417',
+            bgLight: '#f0fdf4',
             border: isLight ? '#d1fae5' : '#064e3b',
             color: '#34d399'
           };
@@ -2431,7 +2432,7 @@ Scores are 0-100.`;
         case 'purple':
         default:
           return {
-            bgLight: isLight ? '#f5f3ff' : '#170c2a',
+            bgLight: '#f5f3ff',
             border: isLight ? '#e9d5ff' : '#3d1f6d',
             color: '#a78bfa'
           };
@@ -2457,15 +2458,15 @@ Scores are 0-100.`;
       .replace(/>/g, "&gt;");
 
     // Replace Markdown headers
-    html = html.replace(/^#{6}\s+(.*)$/gm, `<h6 style="color: ${isLight ? '#64748b' : '#94a3b8'}; font-family: ${headingFont}; font-size: 13px; margin: 12px 0 6px 0; font-weight: 700;">$1</h6>`);
-    html = html.replace(/^#{5}\s+(.*)$/gm, `<h5 style="color: ${isLight ? '#475569' : '#cbd5e1'}; font-family: ${headingFont}; font-size: 14px; margin: 14px 0 6px 0; font-weight: 700;">$1</h5>`);
-    html = html.replace(/^#{4}\s+(.*)$/gm, `<h4 style="color: ${isLight ? '#334155' : '#e2e8f0'}; font-family: ${headingFont}; font-size: 15px; margin: 16px 0 8px 0; font-weight: 700;">$1</h4>`);
-    html = html.replace(/^#{3}\s+(.*)$/gm, `<h3 style="color: ${headColor}; font-family: ${headingFont}; font-size: 16px; font-weight: 700; margin-top: 18px; margin-bottom: 8px;">$1</h3>`);
+    html = html.replace(/^#{6}\s+(.*)$/gm, `<h6 style="color: ${'#64748b'}; font-family: Arial, sans-serif; font-size: 13px; margin: 12px 0 6px 0; font-weight: 700;">$1</h6>`);
+    html = html.replace(/^#{5}\s+(.*)$/gm, `<h5 style="color: ${isLight ? '#475569' : '#cbd5e1'}; font-family: Arial, sans-serif; font-size: 14px; margin: 14px 0 6px 0; font-weight: 700;">$1</h5>`);
+    html = html.replace(/^#{4}\s+(.*)$/gm, `<h4 style="color: ${isLight ? '#334155' : '#e2e8f0'}; font-family: Arial, sans-serif; font-size: 15px; margin: 16px 0 8px 0; font-weight: 700;">$1</h4>`);
+    html = html.replace(/^#{3}\s+(.*)$/gm, `<h3 style="color: #6d28d9; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; margin-top: 18px; margin-bottom: 8px;">$1</h3>`);
     
     // Dynamic heading styles for H2 and H1
     if (themeIndex === 0) { // Editorial
-      html = html.replace(/^#{2}\s+(.*)$/gm, `<h2 style="color: ${headColor}; font-family: ${headingFont}; font-size: 18px; font-weight: 800; margin-top: 22px; margin-bottom: 12px; border-left: 4px solid ${headColor}; padding-left: 10px; display: block;">$1</h2>`);
-      html = html.replace(/^#{1}\s+(.*)$/gm, `<h1 style="color: ${headColor}; font-family: ${headingFont}; font-size: 22px; font-weight: 900; margin-top: 24px; margin-bottom: 14px; border-left: 5px solid ${headColor}; padding-left: 12px; display: block;">$1</h1>`);
+      html = html.replace(/^#{2}\s+(.*)$/gm, `<h2 style="color: #6d28d9; font-family: Arial, sans-serif; font-size: 18px; font-weight: 800; margin-top: 22px; margin-bottom: 12px; border-left: 4px solid ${headColor}; padding-left: 10px; display: block;">$1</h2>`);
+      html = html.replace(/^#{1}\s+(.*)$/gm, `<h1 style="color: #6d28d9; font-family: Arial, sans-serif; font-size: 22px; font-weight: 900; margin-top: 24px; margin-bottom: 14px; border-left: 5px solid ${headColor}; padding-left: 12px; display: block;">$1</h1>`);
     } else if (themeIndex === 1) { // Cyberpunk
       const cyberBg = isLight ? '#f0fbf9' : '#051610';
       const cyberBorder = isLight ? '#bfebe4' : '#0d4f3a';
@@ -2473,11 +2474,11 @@ Scores are 0-100.`;
       html = html.replace(/^#{1}\s+(.*)$/gm, `<h1 style="color: ${isLight ? '#0f766e' : '#34d399'}; font-family: monospace; font-size: 18px; font-weight: 800; margin-top: 22px; margin-bottom: 12px; background: ${isLight ? '#e6f7f4' : '#08251b'}; border: 1.5px solid ${cyberBorder}; padding: 8px 14px; border-radius: 10px; display: block;">$1</h1>`);
     } else if (themeIndex === 2) { // Startup
       const textFill = isLight ? '#7c3aed' : '#a78bfa';
-      html = html.replace(/^#{2}\s+(.*)$/gm, `<h2 style="font-family: ${headingFont}; font-size: 19px; font-weight: 900; margin-top: 22px; margin-bottom: 10px; color: ${textFill}; display: block;">$1</h2>`);
-      html = html.replace(/^#{1}\s+(.*)$/gm, `<h1 style="font-family: ${headingFont}; font-size: 24px; font-weight: 900; margin-top: 24px; margin-bottom: 14px; color: ${textFill}; border-bottom: 2px solid ${isLight ? '#ddd6fe' : '#4c3a80'}; padding-bottom: 8px; display: block;">$1</h1>`);
+      html = html.replace(/^#{2}\s+(.*)$/gm, `<h2 style="font-family: Arial, sans-serif; font-size: 19px; font-weight: 900; margin-top: 22px; margin-bottom: 10px; color: ${textFill}; display: block;">$1</h2>`);
+      html = html.replace(/^#{1}\s+(.*)$/gm, `<h1 style="font-family: Arial, sans-serif; font-size: 24px; font-weight: 900; margin-top: 24px; margin-bottom: 14px; color: ${textFill}; border-bottom: 2px solid ${isLight ? '#ddd6fe' : '#4c3a80'}; padding-bottom: 8px; display: block;">$1</h1>`);
     } else { // Classic Elegance
-      html = html.replace(/^#{2}\s+(.*)$/gm, `<h2 style="color: ${headColor}; font-family: ${headingFont}; font-size: 19px; font-weight: 700; margin-top: 22px; margin-bottom: 10px; border-bottom: 1px solid ${isLight ? '#ebdcb9' : '#573003'}; padding-bottom: 4px; display: block;">$1</h2>`);
-      html = html.replace(/^#{1}\s+(.*)$/gm, `<h1 style="color: ${headColor}; font-family: ${headingFont}; font-size: 24px; font-weight: 700; margin-top: 24px; margin-bottom: 14px; border-bottom: 2px solid ${headColor}; padding-bottom: 6px; text-align: center; display: block;">$1</h1>`);
+      html = html.replace(/^#{2}\s+(.*)$/gm, `<h2 style="color: #6d28d9; font-family: Arial, sans-serif; font-size: 19px; font-weight: 700; margin-top: 22px; margin-bottom: 10px; border-bottom: 1px solid ${isLight ? '#ebdcb9' : '#573003'}; padding-bottom: 4px; display: block;">$1</h2>`);
+      html = html.replace(/^#{1}\s+(.*)$/gm, `<h1 style="color: #6d28d9; font-family: Arial, sans-serif; font-size: 24px; font-weight: 700; margin-top: 24px; margin-bottom: 14px; border-bottom: 2px solid ${headColor}; padding-bottom: 6px; text-align: center; display: block;">$1</h1>`);
     }
 
     // Replace Markdown bold & italic
@@ -2488,19 +2489,19 @@ Scores are 0-100.`;
     // Replace Blockquotes based on dynamic active themes
     if (themeIndex === 0) { // Editorial Quote
       const editBorder = isLight ? '#cbd5e1' : '#334155';
-      html = html.replace(/^\s*&gt;\s+(.*)$/gm, `<div style="width: 100%; text-align: center; margin: 18px 0;"><table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-top: 1.5px solid ${editBorder}; border-bottom: 1.5px solid ${editBorder}; margin: 0 auto;"><tr><td style="padding: 14px 0; text-align: center; font-style: italic; font-size: 15px; color: ${textColor}; font-family: ${bodyFont};">$1</td></tr></table></div>`);
+      html = html.replace(/^\s*&gt;\s+(.*)$/gm, `<div style="width: 100%; text-align: center; margin: 18px 0;"><table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-top: 1.5px solid ${editBorder}; border-bottom: 1.5px solid ${editBorder}; margin: 0 auto;"><tr><td style="padding: 14px 0; text-align: center; font-style: italic; font-size: 15px; color: #1a1a1a; font-family: ${bodyFont};">$1</td></tr></table></div>`);
     } else if (themeIndex === 1) { // Cyberpunk Quote
       const quoteBg = isLight ? '#f1f5f9' : '#090d16';
       const quoteBorder = isLight ? '#0f766e' : '#34d399';
-      html = html.replace(/^\s*&gt;\s+(.*)$/gm, `<div style="width: 100%; text-align: center; margin: 14px 0;"><table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: ${quoteBg}; border-left: 4px solid ${quoteBorder}; margin: 0 auto;"><tr><td style="padding: 12px 16px; font-style: italic; color: ${textColor}; font-family: Courier New, Courier, monospace; text-align: left;">$1</td></tr></table></div>`);
+      html = html.replace(/^\s*&gt;\s+(.*)$/gm, `<div style="width: 100%; text-align: center; margin: 14px 0;"><table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: ${quoteBg}; border-left: 4px solid ${quoteBorder}; margin: 0 auto;"><tr><td style="padding: 12px 16px; font-style: italic; color: #1a1a1a; font-family: Courier New, Courier, monospace; text-align: left;">$1</td></tr></table></div>`);
     } else if (themeIndex === 2) { // Startup Quote
       const quoteBg = isLight ? '#f5f3ff' : '#140e28';
       const quoteBorder = presetStyles.color;
-      html = html.replace(/^\s*&gt;\s+(.*)$/gm, `<div style="width: 100%; text-align: center; margin: 16px 0;"><table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: ${quoteBg}; border-left: 4px solid ${quoteBorder}; margin: 0 auto;"><tr><td style="padding: 14px 18px; color: ${textColor}; font-style: italic; font-family: system-ui, sans-serif; text-align: left;">$1</td></tr></table></div>`);
+      html = html.replace(/^\s*&gt;\s+(.*)$/gm, `<div style="width: 100%; text-align: center; margin: 16px 0;"><table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: ${quoteBg}; border-left: 4px solid ${quoteBorder}; margin: 0 auto;"><tr><td style="padding: 14px 18px; color: #1a1a1a; font-style: italic; font-family: system-ui, sans-serif; text-align: left;">$1</td></tr></table></div>`);
     } else { // Classic Quote
       const quoteBg = isLight ? '#fafaf6' : '#23211f';
       const quoteBorder = isLight ? '#d97706' : '#fbbf24';
-      html = html.replace(/^\s*&gt;\s+(.*)$/gm, `<div style="width: 100%; text-align: center; margin: 16px 0;"><table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: ${quoteBg}; border-left: 3px solid ${quoteBorder}; margin: 0 auto;"><tr><td style="padding: 14px 18px; font-family: Georgia, serif; font-style: italic; color: ${textColor}; text-align: left;">$1</td></tr></table></div>`);
+      html = html.replace(/^\s*&gt;\s+(.*)$/gm, `<div style="width: 100%; text-align: center; margin: 16px 0;"><table cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: ${quoteBg}; border-left: 3px solid ${quoteBorder}; margin: 0 auto;"><tr><td style="padding: 14px 18px; font-family: Georgia, serif; font-style: italic; color: #1a1a1a; text-align: left;">$1</td></tr></table></div>`);
     }
 
     // Replace Inline Code
@@ -2522,14 +2523,14 @@ Scores are 0-100.`;
         } else if (contentType === 'Customer support reply') {
           bulletPrefix = `<span style="color: ${isLight ? '#10b981' : '#4ade80'}; margin-right: 6px; font-weight: bold;">✓</span> `;
         } else {
-          bulletPrefix = `<span style="color: ${headColor}; margin-right: 6px;">•</span> `;
+          bulletPrefix = `<span style="color: #6d28d9; margin-right: 6px;">•</span> `;
         }
         
         if (!inList) {
-          lines[i] = `<ul style="margin: 0 0 14px 0; padding-left: ${themeIndex === 2 ? '0' : '20px'}; list-style: none; font-family: ${bodyFont};">\n<li style="margin-bottom: 6px; line-height: 1.7; color: ${textColor};">${bulletPrefix}${content}</li>`;
+          lines[i] = `<ul style="margin: 0 0 14px 0; padding-left: ${themeIndex === 2 ? '0' : '20px'}; list-style: none; font-family: ${bodyFont};">\n<li style="margin-bottom: 6px; line-height: 1.7; color: #1a1a1a;">${bulletPrefix}${content}</li>`;
           inList = true;
         } else {
-          lines[i] = `<li style="margin-bottom: 6px; line-height: 1.7; color: ${textColor};">${bulletPrefix}${content}</li>`;
+          lines[i] = `<li style="margin-bottom: 6px; line-height: 1.7; color: #1a1a1a;">${bulletPrefix}${content}</li>`;
         }
       } else {
         if (inList) {
@@ -2544,7 +2545,7 @@ Scores are 0-100.`;
             !trimmed.startsWith('<ul') && 
             !trimmed.startsWith('<li') &&
             !trimmed.startsWith('<div')) {
-          lines[i] = `<p style="margin-bottom: 14px; line-height: 1.8; color: ${textColor}; font-family: ${bodyFont};">${line}</p>`;
+          lines[i] = `<p style="margin-bottom: 14px; line-height: 1.8; color: #1a1a1a; font-family: ${bodyFont};">${line}</p>`;
         }
       }
     }
@@ -2564,7 +2565,7 @@ Scores are 0-100.`;
         const fullText = pMatch[1];
         const firstChar = fullText.charAt(0);
         const rest = fullText.substring(1);
-        const dropCapSpan = `<span style="float: left; font-size: 38px; font-weight: 900; line-height: 30px; padding-top: 4px; padding-right: 8px; padding-left: 3px; color: ${headColor}; font-family: Georgia, serif;">${firstChar}</span>`;
+        const dropCapSpan = `<span style="float: left; font-size: 38px; font-weight: 900; line-height: 30px; padding-top: 4px; padding-right: 8px; padding-left: 3px; color: #6d28d9; font-family: Georgia, serif;">${firstChar}</span>`;
         html = html.replace(pMatch[0], pMatch[0].replace(fullText, dropCapSpan + rest));
       }
     }
@@ -2572,56 +2573,25 @@ Scores are 0-100.`;
     // Dynamic formatting based on content types
     if (contentType === 'Blog post / Article') {
       if (themeIndex === 0) { // Editorial
-        const cardBg = isLight ? '#fafaf9' : '#0a0a0f';
+        const cardBg = '#fafaf9';
         const cardBorder = isLight ? '#cbd5e1' : '#232329';
-        return `<div class="rich-copy-wrapper" style="width: 100%; clear: both; margin: 0 auto; text-align: center;">
-          <div style="background-color: ${cardBg}; border-left: 5px solid ${presetStyles.color}; border-top: 1px solid ${cardBorder}; border-right: 1px solid ${cardBorder}; border-bottom: 1px solid ${cardBorder}; border-radius: 4px; padding: 24px; font-family: ${bodyFont}; font-size: 14px; line-height: 1.85; color: ${textColor}; text-align: left; max-width: 650px; margin: 0 auto; display: inline-block; box-sizing: border-box; width: 100%;">
-            <div style="border-bottom: 1.5px solid ${isLight ? '#cbd5e1' : '#232329'}; padding-bottom: 8px; margin-bottom: 16px; font-size: 10px; font-weight: 900; color: ${presetStyles.color}; letter-spacing: 1px; text-transform: uppercase; font-family: system-ui, sans-serif;">EDITORIAL INSIGHT</div>
-            ${html}
-          </div>
-        </div>`;
+        return `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.85; color: #1a1a1a; max-width: 650px; text-align: left;">${html}</div>`;
       }
       if (themeIndex === 1) { // Cyberpunk
         const cardBg = isLight ? '#f8fafc' : '#05070c';
         const borderCol = isLight ? '#cbd5e1' : '#34d399';
         const codeRowBg = isLight ? '#0f172a' : '#0a0f1d';
-        return `<div class="rich-copy-wrapper" style="width: 100%; clear: both; margin: 0 auto; text-align: center;">
-          <div style="background-color: ${cardBg}; border: 1.5px solid ${borderCol}; border-radius: 8px; padding: 24px; font-family: Courier New, Courier, monospace; font-size: 13.5px; line-height: 1.8; color: ${textColor}; text-align: left; max-width: 650px; margin: 0 auto; display: inline-block; box-sizing: border-box; width: 100%;">
-            <table cellpadding="0" cellspacing="0" style="background-color: ${codeRowBg}; border-radius: 6px; margin-bottom: 16px;">
-              <tr>
-                <td style="padding: 6px 12px; color: #10b981; font-weight: bold; font-size: 11px; font-family: Courier New, Courier, monospace;">CORE_ENGINE // STABLE</td>
-              </tr>
-            </table>
-            ${html}
-          </div>
-        </div>`;
+        return `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.85; color: #1a1a1a; max-width: 650px; text-align: left;">${html}</div>`;
       }
       if (themeIndex === 2) { // Startup
         const cardBg = isLight ? '#ffffff' : '#0b0c16';
         const cardBorder = isLight ? '#cbd5e1' : '#4c3a80';
-        return `<div class="rich-copy-wrapper" style="width: 100%; clear: both; margin: 0 auto; text-align: center;">
-          <div style="background-color: ${cardBg}; border: 1.5px solid ${cardBorder}; border-radius: 16px; padding: 28px; font-family: ${bodyFont}; font-size: 14px; line-height: 1.8; color: ${textColor}; text-align: left; max-width: 650px; margin: 0 auto; display: inline-block; box-sizing: border-box; width: 100%;">
-            <table cellpadding="0" cellspacing="0" style="background-color: ${presetStyles.bgLight}; border-radius: 20px; margin-bottom: 16px;">
-              <tr>
-                <td style="padding: 4px 10px; color: ${presetStyles.color}; font-size: 10px; font-weight: 800; text-transform: uppercase; font-family: system-ui, sans-serif;">🚀 CREATIVE STARTUP BLOG</td>
-              </tr>
-            </table>
-            ${html}
-          </div>
-        </div>`;
+        return `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.85; color: #1a1a1a; max-width: 650px; text-align: left;">${html}</div>`;
       }
       if (themeIndex === 3) { // Classic
         const cardBg = isLight ? '#fdfdfb' : '#1a1816';
         const cardBorder = isLight ? '#ebdcb9' : '#573003';
-        return `<div class="rich-copy-wrapper" style="width: 100%; clear: both; margin: 0 auto; text-align: center;">
-          <div style="background-color: ${cardBg}; border: 1px solid ${cardBorder}; padding: 36px; font-family: Georgia, serif; font-size: 15.5px; line-height: 1.9; color: ${textColor}; text-align: left; max-width: 650px; margin: 0 auto; display: inline-block; box-sizing: border-box; width: 100%;">
-            <div style="text-align: center; margin-bottom: 24px; font-family: Georgia, serif;">
-              <span style="font-size: 10px; font-weight: 700; color: ${headColor}; text-transform: uppercase; letter-spacing: 2px;">Belles-Lettres Archive</span>
-              <div style="margin: 8px 0 0 0; color: ${headColor}; font-size: 11px;">◆   ◆   ◆</div>
-            </div>
-            ${html}
-          </div>
-        </div>`;
+        return `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.85; color: #1a1a1a; max-width: 650px; text-align: left;">${html}</div>`;
       }
     }
     
@@ -2632,18 +2602,13 @@ Scores are 0-100.`;
         const rawSub = emailLines[subjectIdx];
         let cleanedSub = rawSub.replace(/<p style=".*?">/g, '').replace(/<\/p>/g, '').replace(/^subject line:?/i, '').replace(/^subject:?/i, '').trim();
         cleanedSub = cleanTextDisplay(cleanedSub);
-        emailLines[subjectIdx] = `<table cellpadding="0" cellspacing="0" style="background-color: ${isLight ? '#f5f3ff' : '#170c2a'}; border: 1.5px solid ${isLight ? '#e9d5ff' : '#3d1f6d'}; border-radius: 10px; margin-bottom: 16px; width: 100%;">
+        emailLines[subjectIdx] = `<table cellpadding="0" cellspacing="0" style="background-color: ${'#f5f3ff'}; border: 1.5px solid ${isLight ? '#e9d5ff' : '#3d1f6d'}; border-radius: 10px; margin-bottom: 16px; width: 100%;">
           <tr>
             <td style="padding: 12px; font-weight: bold; font-size: 14px; color: ${isLight ? '#111' : '#fff'}; font-family: system-ui, sans-serif;">📧 Subject: ${cleanedSub}</td>
           </tr>
         </table>`;
       }
-      return `<div class="rich-copy-wrapper" style="width: 100%; clear: both; margin: 0 auto; text-align: center;">
-        <div style="background-color: ${isLight ? '#ffffff' : '#0f0f1c'}; border: 1px solid ${isLight ? '#cbd5e1' : '#232328'}; border-radius: 16px; padding: 24px; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.8; color: ${textColor}; text-align: left; max-width: 600px; margin: 0 auto; display: inline-block; box-sizing: border-box; width: 100%;">
-          <div style="font-size: 9px; font-weight: bold; color: ${isLight ? '#94a3b8' : '#64748b'}; border-bottom: 1px solid ${isLight ? '#e2e8f0' : '#232328'}; padding-bottom: 8px; margin-bottom: 16px; letter-spacing: 1px; font-family: system-ui, sans-serif;">📧 EMAIL CORRESPONDENCE SANDBOX</div>
-          ${html}
-        </div>
-      </div>`;
+      return `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.85; color: #1a1a1a; max-width: 650px; text-align: left;">${html}</div>`;
     }
     
     if (contentType === 'LinkedIn post') {
@@ -2653,29 +2618,7 @@ Scores are 0-100.`;
       const mainNameCol = isLight ? '#000000' : '#ffffff';
       const subTextCol = isLight ? '#666' : '#94a3b8';
       const lineCol = isLight ? '#f3f4f6' : '#232328';
-      return `<div class="rich-copy-wrapper" style="width: 100%; clear: both; margin: 0 auto; text-align: center;">
-        <div style="background-color: ${cardBg}; border: 1px solid ${borderCol}; border-radius: 16px; padding: 20px; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.85; color: ${textColor}; text-align: left; max-width: 550px; margin: 0 auto; display: inline-block; box-sizing: border-box; width: 100%;">
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px;">
-            <tr>
-              <td style="width: 42px; vertical-align: top; padding: 0;">
-                <table cellpadding="0" cellspacing="0" style="width: 40px; height: 40px; border-radius: 50%; background-color: ${presetStyles.color};">
-                  <tr>
-                    <td style="text-align: center; vertical-align: middle; font-size: 14px; font-weight: 900; color: #fff; font-family: system-ui, sans-serif;">${initials}</td>
-                  </tr>
-                </table>
-              </td>
-              <td style="padding-left: 12px; vertical-align: top;">
-                <div style="font-weight: 700; font-size: 14px; color: ${mainNameCol}; font-family: system-ui, sans-serif;">AI Content Architect <span style="background-color: #0a66c2; color: #fff; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 2px; margin-left: 4px;">IN</span></div>
-                <div style="font-size: 11px; color: ${subTextCol}; margin-top: 1px; font-family: system-ui, sans-serif;">Executive Copywriter • Following</div>
-                <div style="font-size: 10px; color: ${subTextCol}; margin-top: 1px; font-family: system-ui, sans-serif;">1h • Edited • 🌐</div>
-              </td>
-            </tr>
-          </table>
-          <div style="border-top: 1px solid ${lineCol}; padding-top: 12px; color: ${textColor}; font-family: system-ui, sans-serif;">
-            ${html}
-          </div>
-        </div>
-      </div>`;
+      return `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.85; color: #1a1a1a; max-width: 650px; text-align: left;">${html}</div>`;
     }
     
     if (contentType === 'Twitter/X thread') {
@@ -2694,7 +2637,7 @@ Scores are 0-100.`;
         if (cleanTweet.startsWith('ul') || cleanTweet.startsWith('&lt;ul')) return '';
         return `<table cellpadding="0" cellspacing="0" style="width: 100%; max-width: 550px; border-collapse: collapse; margin-bottom: 12px; margin-left: auto; margin-right: auto; text-align: left;">
           <tr>
-            <td style="background-color: ${cardBg}; border: 1px solid ${borderCol}; border-radius: 16px; padding: 16px; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.6; color: ${textColor}; text-align: left; vertical-align: top;">
+            <td style="background-color: ${cardBg}; border: 1px solid ${borderCol}; border-radius: 16px; padding: 16px; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.6; color: #1a1a1a; text-align: left; vertical-align: top;">
               <table cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 8px;">
                 <tr>
                   <td style="width: 34px; padding: 0; vertical-align: middle;">
@@ -2710,7 +2653,7 @@ Scores are 0-100.`;
                   </td>
                 </tr>
               </table>
-              <div style="color: ${textColor}; font-size: 14px; line-height: 1.6; font-family: system-ui, sans-serif;">
+              <div style="color: #1a1a1a; font-size: 14px; line-height: 1.6; font-family: system-ui, sans-serif;">
                 ${cleanTweet}
               </div>
             </td>
@@ -2757,7 +2700,7 @@ Scores are 0-100.`;
         
         const textBg = isLight ? '#f8fafc' : '#0d0d12';
         const textBorder = isLight ? '#e2e8f0' : '#232328';
-        return `<div style="background: ${textBg}; border: 1px solid ${textBorder}; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; font-size: 13.5px; line-height: 1.7; color: ${textColor}; font-family: system-ui, sans-serif;">${cleanTextDisplay(text)}</div>`;
+        return `<div style="background: ${textBg}; border: 1px solid ${textBorder}; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; font-size: 13.5px; line-height: 1.7; color: #1a1a1a; font-family: system-ui, sans-serif;">${cleanTextDisplay(text)}</div>`;
       }).join('\n');
       
       const scriptBg = isLight ? '#ffffff' : '#0a0a14';
@@ -2774,40 +2717,19 @@ Scores are 0-100.`;
       const letterBg = isLight ? '#ffffff' : '#0b0f19';
       const letterBorder = isLight ? '#cbd5e1' : '#232328';
       const barCol = isLight ? '#e2e8f0' : '#232328';
-      return `<div class="rich-copy-wrapper" style="width: 100%; clear: both; margin: 0 auto; text-align: center;">
-        <div style="background: ${letterBg}; color: ${textColor}; border: 1px solid ${letterBorder}; border-radius: 16px; padding: 36px 30px; font-family: system-ui, -apple-system, sans-serif; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin: 0 auto; text-align: left; display: inline-block; width: 100%;">
-          <div style="font-size: 9px; letter-spacing: 1px; font-weight: 700; border-bottom: 2px solid ${barCol}; padding-bottom: 8px; margin-bottom: 24px; color: ${isLight ? '#94a3b8' : '#64748b'}; display: flex; justify-content: space-between;">
-            <span>📄 HIGH-FIDELITY CANDIDATE CORRESPONDENCE</span>
-            <span>DATE: ${new Date().toLocaleDateString()}</span>
-          </div>
-          <div style="font-size: 13.5px; line-height: 1.8; color: ${textColor}; text-align: left;">
-            ${html}
-          </div>
-          <div style="margin-top: 28px; border-top: 2px solid ${barCol}; padding-top: 16px; font-size: 10px; font-weight: 600; color: ${isLight ? '#94a3b8' : '#64748b'}; display: flex; justify-content: space-between;">
-            <span>Formal Candidate Application</span>
-            <span style="font-style: italic; color: #64748b;">Verified Digital Signature</span>
-          </div>
-        </div>
-      </div>`;
+      return `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.85; color: #1a1a1a; max-width: 650px; text-align: left;">${html}</div>`;
     }
     
     if (contentType === 'Code documentation') {
       const docBg = isLight ? '#f8fafc' : '#05070c';
       const docBorder = isLight ? '#e2e8f0' : '#232328';
       const docTitleLine = isLight ? '#e2e8f0' : '#232328';
-      return `<div class="rich-copy-wrapper" style="width: 100%; clear: both; margin: 0 auto; text-align: center;">
-        <div style="font-family: monospace; font-size: 13px; line-height: 1.8; color: ${textColor}; background: ${docBg}; border: 1px solid ${docBorder}; border-radius: 12px; padding: 24px; text-align: left; max-width: 650px; margin: 0 auto; display: inline-block; width: 100%;">
-          <div style="font-size: 10px; font-weight: bold; color: ${isLight ? '#0284c7' : '#38bdf8'}; border-bottom: 1.5px solid ${docTitleLine}; padding-bottom: 8px; margin-bottom: 16px; letter-spacing: 0.5px;">📁 SOURCE_CODE_DOCUMENTATION.md</div>
-          ${html}
-        </div>
-      </div>`;
+      return `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.85; color: #1a1a1a; max-width: 650px; text-align: left;">${html}</div>`;
     }
 
-    const simpleBg = isLight ? '#ffffff' : '#0a0a0f';
+    const simpleBg = '#ffffff';
     const simpleBorder = isLight ? '#e2e8f0' : '#232328';
-    return `<div class="rich-copy-wrapper" style="width: 100%; clear: both; margin: 0 auto; text-align: center;">
-      <div style="font-family: system-ui, sans-serif; font-size: 14px; line-height: 1.85; color: ${textColor}; max-width: 650px; text-align: left; padding: 20px; border: 1px solid ${simpleBorder}; border-radius: 12px; background: ${simpleBg}; margin: 0 auto; display: inline-block; width: 100%;">${html}</div>
-    </div>`;
+    return `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.85; color: #1a1a1a; max-width: 650px; text-align: left;">${html}</div>`;
   };
 
   const copyText = (text) => {
@@ -3286,71 +3208,75 @@ Scores are 0-100.`;
         </motion.div>
       )}
 
-      {/* Interactive Rich Paste Sandbox */}
+      {/* Interactive Rich Paste Sandbox — OFF by default */}
       {(result || humanized || variants.length > 0) && (
-        <motion.div 
-          initial={{ opacity: 0, y: 15 }} 
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ marginTop: '24px', width: '100%', boxSizing: 'border-box' }}
+          style={{ marginTop: '16px', width: '100%', boxSizing: 'border-box' }}
         >
-          <div className="output-box" style={{ 
-            padding: '24px', 
-            border: '2.5px dashed var(--accent)', 
-            background: 'rgba(167, 139, 250, 0.03)',
-            borderRadius: '16px',
-            boxShadow: '0 8px 32px rgba(167, 139, 250, 0.05)',
-            width: '100%',
-            boxSizing: 'border-box',
-            marginTop: 0
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <span style={{ fontSize: '18px' }}>📋</span>
-              <span style={{ fontWeight: 800, fontSize: '14.5px', color: 'var(--text)' }}>Clipboard Rich Paste Sandbox</span>
-              <span style={{
-                fontSize: '9px',
-                fontWeight: 900,
-                color: '#fff',
-                background: 'var(--accent)',
-                padding: '2px 8px',
-                borderRadius: '20px',
-                textTransform: 'uppercase',
-                marginLeft: 'auto'
-              }}>Verify Real-Time Styling</span>
-            </div>
-            
-            <p style={{ fontSize: '12.5px', color: 'var(--text-sub)', marginBottom: '16px', lineHeight: '1.5' }}>
-              <strong>Immediate Local Test:</strong> Press <strong>Ctrl+V</strong> inside the container below. If it pastes with beautiful custom backgrounds, border grids, fonts, and drop-caps, it will paste exactly the same in <strong>Google Docs, Notion, MS Word, and WordPress!</strong>
-            </p>
-            
-            <div
-              contentEditable="true"
-              placeholder="Click here and press Ctrl+V to verify styling..."
-              style={{
-                width: '100%',
-                boxSizing: 'border-box',
-                minHeight: '200px',
-                maxHeight: '600px',
-                overflowY: 'auto',
-                background: 'var(--bg)',
-                border: '1.5px solid var(--border)',
-                borderRadius: '12px',
-                padding: '24px',
-                color: 'var(--text)',
-                fontSize: '13.5px',
-                outline: 'none',
-                transition: 'all 0.2s',
-                fontFamily: 'inherit'
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = 'var(--accent)';
-                e.target.style.boxShadow = '0 0 0 3px rgba(167, 139, 250, 0.15)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = 'var(--border)';
-                e.target.style.boxShadow = 'none';
-              }}
-            />
-          </div>
+          {/* Toggle button */}
+          <button
+            onClick={() => setSandboxOpen(p => !p)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700,
+              cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+              background: sandboxOpen ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.04)',
+              border: `1.5px solid ${sandboxOpen ? '#a78bfa' : 'rgba(255,255,255,0.12)'}`,
+              color: sandboxOpen ? '#a78bfa' : 'rgba(255,255,255,0.5)',
+              marginBottom: sandboxOpen ? 12 : 0,
+            }}
+          >
+            <span>📋</span>
+            Clipboard Rich Paste Sandbox
+            <span style={{
+              fontSize: 9, fontWeight: 900, color: '#fff',
+              background: sandboxOpen ? '#a78bfa' : 'rgba(255,255,255,0.2)',
+              padding: '2px 7px', borderRadius: 20, textTransform: 'uppercase', marginLeft: 4,
+            }}>
+              {sandboxOpen ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
+          {/* Sandbox content — only when open */}
+          <AnimatePresence>
+            {sandboxOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div style={{
+                  padding: '20px',
+                  border: '2px dashed rgba(167,139,250,0.4)',
+                  background: 'rgba(167,139,250,0.03)',
+                  borderRadius: 14,
+                  width: '100%', boxSizing: 'border-box',
+                }}>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 14, lineHeight: 1.6 }}>
+                    Copy your content above, then press <strong style={{ color: '#a78bfa' }}>Ctrl+V</strong> below to verify it pastes with styling in Google Docs, Notion, MS Word, and WordPress.
+                  </p>
+                  <div
+                    contentEditable="true"
+                    style={{
+                      width: '100%', boxSizing: 'border-box',
+                      minHeight: 180, maxHeight: 500, overflowY: 'auto',
+                      background: 'rgba(0,0,0,0.25)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 10, padding: 18,
+                      color: 'rgba(255,255,255,0.9)',
+                      fontSize: 13, outline: 'none',
+                      fontFamily: 'inherit', lineHeight: 1.7,
+                    }}
+                    onFocus={e => { e.target.style.borderColor = '#a78bfa'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
     </div>

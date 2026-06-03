@@ -7,8 +7,7 @@ import remarkGfm from 'remark-gfm';
 import {
   Search, Globe, Zap, Shield, Send, Loader2, Copy, Download,
   RefreshCw, FileText, Code2, Clock, Network, Brain, BarChart3,
-  CheckCircle2, Eye, X, Link2, Trash2, ExternalLink, Languages,
-  ShieldCheck,
+  CheckCircle2, Eye, X, Link2, Trash2, ExternalLink, Languages, BookMarked,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,7 +38,7 @@ const loadHistory = () => {
   try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch { return []; }
 };
 const saveHistory = (h) => {
-  try { localStorage.setItem(HIST_KEY, JSON.stringify(h)); } catch (_) {}
+  try { localStorage.setItem(HIST_KEY, JSON.stringify(h.slice(0, 25))); } catch (_) {}
 };
 
 // ── Robust JSON extractor for meta block ──
@@ -54,25 +53,6 @@ const extractMetaJSON = (text) => {
       return JSON.parse(repaired);
     } catch (_) { return null; }
   }
-};
-
-// ── Fallback Meta Generator when AI fails to supply JSON block ──
-const generateFallbackMeta = (text) => {
-  const wordCount = text ? text.split(/\s+/).length : 0;
-  const matches = text ? text.match(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g) : null;
-  const sourceCount = matches ? new Set(matches).size : 3;
-  return {
-    sourceCount,
-    wordCount,
-    credibility: 'High',
-    freshness: 'Live data',
-    suggestedFollowUps: [
-      'Can you explain the main findings in more detail?',
-      'What are the key takeaways of this report?',
-      'Who are the major entities/organizations mentioned?',
-      'Provide a technical summary of the data.',
-    ],
-  };
 };
 
 // ── Extract markdown links [text](url) from text — ONLY real ones from scraped data ──
@@ -100,20 +80,9 @@ const extractSources = (text, rawData = '') => {
       url,
       verified,
     });
-    if (sources.length >= 50) break;
+    if (sources.length >= 30) break;
   }
   return sources;
-};
-
-// ── Normalize Markdown for perfect ReactMarkdown rendering ──
-const normalizeMarkdown = (md) => {
-  if (!md) return '';
-  return md
-    // Ensure all markdown headings have double newlines before and after
-    .replace(/(^|\n)(#{1,6}\s+.+)(\n|$)/g, '\n\n$2\n\n')
-    // Remove any triple or more newlines created
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
 };
 
 // ── Fetch with timeout helper ──
@@ -145,14 +114,10 @@ export default function TheSpider() {
   const [activeTab,    setActiveTab]    = useState('report');
   const [history,      setHistory]      = useState(loadHistory());
 
-  const [qnaThread,    setQnaThread]    = useState([]);
-  const [savedToVault, setSavedToVault] = useState(false);
-  const [historyLimit, setHistoryLimit] = useState(25);
-  const [showFullRaw,  setShowFullRaw]  = useState(false);
-  const [progressPercent, setProgressPercent] = useState(0);
-
   const cancelRef     = useRef(false);
   const abortRef      = useRef(null);
+  const timerRef      = useRef(null);
+  const [elapsed,     setElapsed]      = useState(0);
 
   const isUrlInput = useMemo(() => /^https?:\/\//i.test(query.trim()), [query]);
 
@@ -164,17 +129,18 @@ export default function TheSpider() {
 
   // ── Step helpers ──
   const addStep  = (text) => setSteps(prev => [...prev, { text, done: false }]);
-  const doneStep = (i, extra = {}) => setSteps(prev => prev.map((s, idx) => idx === i ? { ...s, done: true, ...extra } : s));
+  const doneStep = (i)    => setSteps(prev => prev.map((s, idx) => idx === i ? { ...s, done: true } : s));
   const doneAll  = ()     => setSteps(prev => prev.map(s => ({ ...s, done: true })));
 
   // ── CANCEL handler ──
   const handleCancel = () => {
     cancelRef.current = true;
+    clearInterval(timerRef.current);
     if (abortRef.current) {
       try { abortRef.current.abort(); } catch (_) {}
     }
     setLoading(false);
-    setSteps(prev => prev.map(s => s.done ? s : { ...s, error: true, text: s.text + ' (Cancelled)' }));
+    setSteps([]);
     showToast('Spider cancelled', 'warn');
   };
 
@@ -209,9 +175,10 @@ export default function TheSpider() {
     if (!query.trim()) { showToast('Enter a query first', 'error'); return; }
     cancelRef.current = false;
     setLoading(true);
+    setElapsed(0);
+    timerRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
     setResult(''); setMeta(null); setFollowUps([]); setSteps([]); setRawContent('');
     setActiveTab('report'); setFollowCount(0);
-    setQnaThread([]); setSavedToVault(false); setShowFullRaw(false);
 
     try {
       const isUrl = isUrlInput;
@@ -238,32 +205,15 @@ export default function TheSpider() {
       let enriched = raw;
       if (depth === 'deep' && !isUrl) {
         addStep('Running secondary extraction pass...');
-        let secondaryFailed = false;
         try {
           const t2 = await fetchJina(`https://s.jina.ai/${encodeURIComponent(query.trim() + ' detailed analysis')}`);
-          if (t2?.length > 100) {
-            enriched = raw + '\n\n--- SECONDARY SOURCE ---\n\n' + t2;
-          } else {
-            secondaryFailed = true;
-          }
-        } catch (_) {
-          secondaryFailed = true;
-        }
+          if (t2?.length > 100) enriched = raw + '\n\n--- SECONDARY SOURCE ---\n\n' + t2;
+        } catch (_) {/* secondary failure is non-fatal */}
         if (cancelRef.current) return;
-        doneStep(1, secondaryFailed ? { warn: true, text: 'Secondary pass skipped (using primary pass data only)' } : {});
+        doneStep(1);
       }
 
       addStep('Synthesizing intelligence with AI...');
-      setProgressPercent(0);
-      const progInterval = setInterval(() => {
-        setProgressPercent(p => {
-          if (p < 30) return p + Math.floor(Math.random() * 8) + 4;
-          if (p < 70) return p + Math.floor(Math.random() * 4) + 2;
-          if (p < 90) return p + Math.floor(Math.random() * 2) + 1;
-          if (p < 99) return p + 1;
-          return p;
-        });
-      }, 700);
 
       const system = `You are SPIDER PRIME — the world's most advanced real-time web intelligence AI.
 You have just received live-scraped web data. Your task: ${MODE_PROMPTS[mode]}
@@ -292,24 +242,18 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
 
       const user = `LIVE WEB DATA:\n${enriched.substring(0, 50000)}\n\nORIGINAL QUERY: "${query}"`;
 
-      let res;
-      try {
-        res = await callAI(system, user, null, activeModel, apiKey, providerKeys, customModels);
-      } finally {
-        clearInterval(progInterval);
-        setProgressPercent(100);
-      }
-
+      const res = await callAI(system, user, null, activeModel, apiKey, providerKeys, customModels);
       if (cancelRef.current) return;
       doneAll();
 
+      const metaData = extractMetaJSON(res);
       const cleanRes = res.replace(/```json[\s\S]*?```/g, '').trim();
-      const metaData = extractMetaJSON(res) || generateFallbackMeta(cleanRes);
-      
       setResult(cleanRes);
-      setMeta(metaData);
-      if (Array.isArray(metaData.suggestedFollowUps)) {
-        setFollowUps(metaData.suggestedFollowUps.filter(Boolean).slice(0, 6));
+      if (metaData) {
+        setMeta(metaData);
+        if (Array.isArray(metaData.suggestedFollowUps)) {
+          setFollowUps(metaData.suggestedFollowUps.filter(Boolean).slice(0, 6));
+        }
       }
 
       // Save to history with full snapshot for restore
@@ -325,10 +269,9 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
         meta: metaData,
         followUps: metaData?.suggestedFollowUps || [],
         followCount: 0,
-        qnaThread: [],
         timestamp: new Date().toISOString(),
       };
-      setHistory(prev => [histItem, ...prev].slice(0, historyLimit));
+      setHistory(prev => [histItem, ...prev].slice(0, 25));
 
       showToast('Intelligence acquired!');
     } catch (e) {
@@ -337,20 +280,25 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
       setSteps(prev => prev.map(s => s.done ? s : { ...s, error: true }));
     } finally {
       setLoading(false);
+      clearInterval(timerRef.current);
       abortRef.current = null;
     }
   };
 
   // ── FOLLOW-UP ──
   const handleFollowUp = async (fq) => {
-    if (!fq.trim() || !rawContent) return;
+    if (!fq.trim() || loading) return;
     setFollowInput('');
+    setActiveTab('report');
     setLoading(true);
+    setElapsed(0);
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
     cancelRef.current = false;
 
     try {
-      const system = `You are SPIDER PRIME answering a follow-up question. Base your answer ONLY on the already-scraped web data. Be specific and detailed. Use markdown. Output language: ${lang}.`;
-      const user   = `ORIGINAL QUERY: "${query}"\nSCRAPED DATA: ${rawContent.substring(0, 30000)}\nFOLLOW-UP: "${fq}"`;
+      const system = `You are SPIDER PRIME answering a follow-up question. Base your answer on the already-scraped web data if available, otherwise use your knowledge. Be specific and detailed. Use plain text, no markdown asterisks. Output language: ${lang}.`;
+      const user   = `ORIGINAL QUERY: "${query}"\n${rawContent ? `SCRAPED DATA: ${rawContent.substring(0, 30000)}\n` : ''}FOLLOW-UP: "${fq}"`;
       const res    = await callAI(system, user, null, activeModel, apiKey, providerKeys, customModels);
       if (cancelRef.current) return;
 
@@ -358,19 +306,11 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
       setResult(updated);
       setFollowCount(c => c + 1);
 
-      const newChat = { question: fq, answer: res };
-      setQnaThread(prev => [...prev, newChat]);
-
-      // Update last history item with follow-up appended and thread saved
+      // Update last history item with follow-up appended
       setHistory(prev => {
         if (!prev.length) return prev;
         const [first, ...rest] = prev;
-        return [{ 
-          ...first, 
-          result: updated, 
-          followCount: (first.followCount || 0) + 1,
-          qnaThread: [...(first.qnaThread || []), newChat]
-        }, ...rest];
+        return [{ ...first, result: updated, followCount: (first.followCount || 0) + 1 }, ...rest];
       });
 
       showToast('Follow-up answered!');
@@ -379,10 +319,10 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
       showToast('Follow-up failed: ' + e.message, 'error');
     } finally {
       setLoading(false);
+      clearInterval(timerRef.current);
     }
   };
 
-  // ── COPY / DOWNLOAD ──
   const copyResult = (clean) => {
     const text = clean
       ? result.replace(/\*\*/g, '').replace(/#{1,3} /g, '').replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)')
@@ -412,9 +352,7 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
     setMeta(h.meta || null);
     setFollowUps(h.followUps || []);
     setFollowCount(h.followCount || 0);
-    setQnaThread(h.qnaThread || []);
     setActiveTab('report');
-    setSavedToVault(false);
     showToast('Restored from history');
   };
   const deleteHistoryItem = (id) => {
@@ -446,39 +384,16 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
 
         {/* Mini history with restore + delete */}
         {history.length > 0 && (
-          <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', minWidth: '280px', maxWidth: '320px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', gap: '8px' }}>
+          <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px', minWidth: '240px', maxWidth: '300px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text3)', letterSpacing: '2px' }}>
                 RECENT ({history.length})
               </span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
-                <span style={{ fontSize: '9px', color: 'var(--text3)' }}>Limit:</span>
-                <select 
-                  value={historyLimit} 
-                  onChange={e => {
-                    const newLim = Number(e.target.value);
-                    setHistoryLimit(newLim);
-                    setHistory(prev => prev.slice(0, newLim));
-                  }}
-                  style={{
-                    background: 'var(--bg2)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '4px',
-                    fontSize: '9px',
-                    color: 'var(--text2)',
-                    padding: '2px 4px',
-                    cursor: 'pointer',
-                    outline: 'none',
-                  }}
-                >
-                  {[10, 25, 50, 100].map(v => <option key={v} value={v}>{v}</option>)}
-                </select>
-                <button onClick={clearAllHistory}
-                  style={{ background: 'none', border: 'none', color: 'var(--text3)', cursor: 'pointer', fontSize: '10px', display: 'flex', alignItems: 'center', gap: '3px' }}
-                  title="Clear all history">
-                  <Trash2 size={10}/> Clear
-                </button>
-              </div>
+              <button onClick={clearAllHistory}
+                style={{ background: 'none', border: 'none', color: 'var(--text3)', cursor: 'pointer', fontSize: '10px', display: 'flex', alignItems: 'center', gap: '3px' }}
+                title="Clear all history">
+                <Trash2 size={10}/> Clear
+              </button>
             </div>
             {history.slice(0, 6).map(h => {
               const modeMeta = MODES.find(m => m.id === h.mode);
@@ -520,18 +435,7 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
         {/* Mode selector */}
         <div className="sp-mode-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: '8px' }}>
           {MODES.map(m => (
-            <button key={m.id} onClick={() => {
-              setMode(m.id);
-              if (result) {
-                setResult('');
-                setMeta(null);
-                setFollowUps([]);
-                setRawContent('');
-                setSteps([]);
-                setQnaThread([]);
-                setSavedToVault(false);
-              }
-            }}
+            <button key={m.id} onClick={() => { setMode(m.id); setResult(''); setMeta(null); setFollowUps([]); setActiveTab('report'); }}
               style={{
                 background: mode === m.id ? 'rgba(124,92,252,0.12)' : 'var(--bg3)',
                 border: `1px solid ${mode === m.id ? 'var(--accent)' : 'var(--border)'}`,
@@ -637,9 +541,25 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
 
       {/* ── LOADING STATE ── */}
       <AnimatePresence>
-        {((loading || cancelRef.current) && steps.length > 0 && !result) && (
+        {loading && steps.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            style={{ background: 'rgba(124,92,252,0.04)', border: '1px solid var(--border)', borderRadius: '18px', padding: '30px', display: 'flex', alignItems: 'center', gap: '32px', flexWrap: 'wrap' }}>
+            style={{ background: 'rgba(124,92,252,0.04)', border: '1px solid var(--border)', borderRadius: '18px', padding: '30px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+            {/* Progress bar + timer */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ flex: 1, background: 'var(--bg3)', borderRadius: '99px', height: '5px', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: '99px', background: 'var(--accent)',
+                  width: `${Math.min(95, (elapsed / 30) * 100)}%`,
+                  transition: 'width 1s linear',
+                }} />
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 800, fontFamily: "'DM Mono',monospace", flexShrink: 0 }}>
+                {elapsed < 30 ? `${elapsed}s` : 'Processing...'}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '32px', flexWrap: 'wrap' }}>
             <div style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {[0, 1].map(i => (
                 <div key={i} style={{ position: 'absolute', inset: 0, border: '2px solid var(--accent)', borderRadius: '50%', animation: `radarPing 2s ease-out ${i * 0.7}s infinite`, opacity: 0 }}/>
@@ -649,28 +569,27 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
             <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', flex: 1, minWidth: '200px' }}>
               {steps.map((s, i) => (
                 <motion.div key={i} initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }}
-                  style={{ display: 'flex', alignItems: 'center', gap: '9px', fontSize: '13px', color: s.done ? (s.warn ? '#fbbf24' : '#34d399') : s.error ? '#f87171' : 'var(--text3)' }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: '9px', fontSize: '13px', color: s.done ? '#34d399' : s.error ? '#f87171' : 'var(--text3)' }}>
                   {s.done
-                    ? (s.warn
-                        ? <span style={{ fontSize: '12px', marginRight: '2px' }}>⚠</span>
-                        : <CheckCircle2 size={13} color="#34d399"/>)
+                    ? <CheckCircle2 size={13} color="#34d399"/>
                     : s.error
                       ? <X size={13} color="#f87171"/>
                       : <div style={{ width: '13px', height: '13px', border: '2px solid rgba(124,92,252,0.4)', borderTopColor: 'var(--accent)', borderRadius: '50%', flexShrink: 0, animation: 'spin 0.8s linear infinite' }}/>}
-                  <span>
-                    {s.text}
-                    {s.text.includes('Synthesizing') && !s.done && !s.error && ` (${progressPercent}%)`}
-                  </span>
+                  {s.text}
+                  {!s.done && !s.error && elapsed > 8 && (
+                    <span style={{ fontSize: '10px', color: 'var(--text3)', fontStyle: 'italic' }}>working...</span>
+                  )}
                 </motion.div>
               ))}
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
         )}
       </AnimatePresence>
 
       {/* ── RESULTS ── */}
       <AnimatePresence>
-        {result && !loading && (
+        {result && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '22px', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.1)' }}>
 
@@ -704,26 +623,7 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
 
               <div style={{ display: 'flex', gap: '6px', marginLeft: 'auto', flexWrap: 'wrap' }}>
                 <button onClick={() => navigate('/dashboard/chatdata', { state: { spiderPayload: result, spiderQuery: query } })} style={spBtn}><Brain size={12}/> Send to Chat</button>
-                
-                <button 
-                  onClick={() => {
-                    if (savedToVault) return;
-                    saveToVault?.('TheSpider', query, result);
-                    setSavedToVault(true);
-                    showToast('Saved to Vault!', 'success');
-                  }} 
-                  style={{
-                    ...spBtn,
-                    background: savedToVault ? 'rgba(52,211,153,0.12)' : 'var(--bg3)',
-                    borderColor: savedToVault ? '#34d399' : 'var(--border)',
-                    color: savedToVault ? '#34d399' : 'var(--text2)',
-                    cursor: savedToVault ? 'default' : 'pointer',
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  <ShieldCheck size={12}/> {savedToVault ? 'Saved ✓' : 'Save to Vault'}
-                </button>
-
+                <button onClick={() => { saveToVault?.('TheSpider', query, result); showToast('Saved to Vault!'); }} style={spBtn}><BookMarked size={12}/> Save</button>
                 <button onClick={() => copyResult(false)} style={spBtn}><Copy size={12}/> Markdown</button>
                 <button onClick={() => copyResult(true)}  style={spBtn}><FileText size={12}/> Clean Text</button>
                 <button onClick={downloadResult}          style={spBtn}><Download size={12}/> Download</button>
@@ -754,7 +654,7 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
             {/* Tab content */}
             {activeTab === 'report' && (
               <div style={{ padding: '32px', fontSize: '15px', lineHeight: '1.85', color: 'var(--text)', maxHeight: '800px', overflowY: 'auto' }} className="sp-md-body">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{normalizeMarkdown(result)}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
               </div>
             )}
 
@@ -828,60 +728,27 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
             )}
 
             {activeTab === 'followup' && (
-              <div style={{ padding: '22px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                
-                {/* conversation thread */}
-                {qnaThread.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderBottom: '1px solid var(--border2)', paddingBottom: '20px' }}>
-                    <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text3)', letterSpacing: '2px' }}>
-                      CONVERSATION THREAD
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '400px', overflowY: 'auto', paddingRight: '4px' }}>
-                      {qnaThread.map((chat, idx) => (
-                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          {/* User Question */}
-                          <div style={{ alignSelf: 'flex-end', background: 'var(--accent)', color: '#fff', padding: '10px 16px', borderRadius: '16px 16px 2px 16px', maxWidth: '80%', fontSize: '13px', fontWeight: 600, display: 'inline-block', wordBreak: 'break-word', boxShadow: '0 4px 15px rgba(124,92,252,0.15)' }}>
-                            {chat.question}
-                          </div>
-                          
-                          {/* AI Answer */}
-                          <div style={{ alignSelf: 'flex-start', background: 'var(--bg3)', border: '1px solid var(--border)', color: 'var(--text2)', padding: '14px 18px', borderRadius: '16px 16px 16px 2px', maxWidth: '90%', fontSize: '13px', display: 'inline-block', lineHeight: '1.65', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }} className="sp-md-body">
-                            <div style={{ fontWeight: 800, fontSize: '10px', color: 'var(--accent)', letterSpacing: '1px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <Brain size={10}/> SPIDER PRIME REPLY
-                            </div>
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{normalizeMarkdown(chat.answer)}</ReactMarkdown>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Suggested followups */}
+              <div style={{ padding: '22px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
                   <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text3)', letterSpacing: '2px', marginBottom: '10px' }}>
-                    SUGGESTED QUESTIONS
+                    SUGGESTED FOLLOW-UPS
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
                     {followUps.map((fq, i) => (
-                      <button key={i} onClick={() => handleFollowUp(fq)}
+                      <button key={i} onClick={() => !loading && handleFollowUp(fq)}
+                        disabled={loading}
                         style={{
-                          background: 'rgba(124,92,252,0.05)', border: '1px solid var(--border)',
-                          color: 'var(--text2)', padding: '8px 14px', borderRadius: '20px',
-                          fontSize: '12px', cursor: 'pointer', textAlign: 'left',
-                          display: 'flex', alignItems: 'center', gap: '6px', transition: '.2s',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,92,252,0.12)'; e.currentTarget.style.borderColor = 'var(--accent)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,92,252,0.05)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-                      >
-                        <Zap size={10} style={{ color: 'var(--accent)' }}/> {fq}
+                          background: 'rgba(124,92,252,0.06)', border: '1px solid var(--border)',
+                          color: 'var(--text2)', padding: '11px 15px', borderRadius: '11px',
+                          fontSize: '13px', cursor: 'pointer', textAlign: 'left',
+                          display: 'flex', alignItems: 'center', gap: '8px', transition: '.2s',
+                        }}>
+                        <Zap size={11}/> {fq}
                       </button>
                     ))}
                   </div>
                 </div>
-
-                {/* Question Input */}
-                <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border2)', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', gap: '8px' }}>
                   <input
                     style={{ flex: 1, background: 'var(--bg3)', border: '1px solid var(--border)', color: 'var(--text)', padding: '13px 16px', borderRadius: '13px', fontSize: '14px', outline: 'none' }}
                     placeholder="Ask anything about the extracted data..."
@@ -896,7 +763,6 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
                       padding: '0 16px', borderRadius: '13px',
                       cursor: followInput.trim() ? 'pointer' : 'not-allowed',
                       opacity: followInput.trim() ? 1 : 0.5,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                     <Send size={15}/>
                   </button>
@@ -905,54 +771,31 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
             )}
 
             {activeTab === 'raw' && (
-              <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '8px 12px', borderRadius: '10px', border: '1px solid var(--border)' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text3)' }}>Raw content size: {(rawContent.length / 1024).toFixed(1)} KB</span>
-                  <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px' }}>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(rawContent);
-                        showToast('Raw feed copied!', 'success');
-                      }} 
-                      style={spBtn}
-                    >
+              <div style={{ padding: '18px', maxHeight: '500px', overflow: 'auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text3)', letterSpacing: '2px' }}>
+                    RAW SCRAPED FEED — {rawContent.length.toLocaleString()} chars
+                  </span>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button onClick={() => { navigator.clipboard.writeText(rawContent); showToast('Raw feed copied!'); }} style={spBtn}>
                       <Copy size={11}/> Copy Raw
                     </button>
-                    <button 
-                      onClick={() => {
-                        const a = Object.assign(document.createElement('a'), {
-                          href: URL.createObjectURL(new Blob([rawContent], { type: 'text/plain' })),
-                          download: `raw_feed_${Date.now()}.txt`,
-                        });
-                        a.click();
-                        URL.revokeObjectURL(a.href);
-                        showToast('Downloaded raw feed!', 'success');
-                      }} 
-                      style={spBtn}
-                    >
-                      <Download size={11}/> Download Raw
+                    <button onClick={() => {
+                      const safeQ = (query || 'spider').replace(/[^a-z0-9]+/gi, '_').slice(0, 40);
+                      const a = Object.assign(document.createElement('a'), {
+                        href: URL.createObjectURL(new Blob([rawContent], { type: 'text/plain' })),
+                        download: `spider_raw_${safeQ}_${Date.now()}.txt`,
+                      });
+                      a.click(); URL.revokeObjectURL(a.href);
+                      showToast('Raw feed downloaded!');
+                    }} style={spBtn}>
+                      <Download size={11}/> Download
                     </button>
-                    {rawContent.length > 15000 && (
-                      <button 
-                        onClick={() => setShowFullRaw(p => !p)} 
-                        style={{
-                          ...spBtn,
-                          background: showFullRaw ? 'rgba(124,92,252,0.15)' : 'var(--bg3)',
-                          borderColor: showFullRaw ? 'var(--accent)' : 'var(--border)',
-                          color: showFullRaw ? 'var(--accent)' : 'var(--text2)',
-                        }}
-                      >
-                        {showFullRaw ? 'Show Less' : 'Show Full Feed'}
-                      </button>
-                    )}
                   </div>
                 </div>
-                <div style={{ maxHeight: '500px', overflow: 'auto', background: 'var(--bg2)', borderRadius: '12px', padding: '14px', border: '1px solid var(--border)' }}>
-                  <pre style={{ color: '#34d399', fontFamily: "'DM Mono',monospace", fontSize: '11px', lineHeight: '1.6', whiteSpace: 'pre-wrap', margin: 0 }}>
-                    {showFullRaw ? rawContent : rawContent.slice(0, 15000)}
-                    {!showFullRaw && rawContent.length > 15000 && '\n\n[... Truncated at 15,000 chars. Click "Show Full Feed" above to view everything ...]'}
-                  </pre>
-                </div>
+                <pre style={{ color: '#34d399', fontFamily: "'DM Mono',monospace", fontSize: '11px', lineHeight: '1.6', whiteSpace: 'pre-wrap', margin: 0 }}>
+                  {rawContent.slice(0, 20000)}{rawContent.length > 20000 ? '\n\n[... truncated — download full feed above ...]' : ''}
+                </pre>
               </div>
             )}
 
@@ -990,18 +833,17 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
         @keyframes spin      { to { transform: rotate(360deg); } }
         @keyframes radarPing { 0%{transform:scale(.3);opacity:.7} 100%{transform:scale(1.5);opacity:0} }
         @keyframes slowSpin  { to { transform: rotate(360deg); } }
-        .sp-md-body h1, .sp-md-body h2, .sp-md-body h3 { color: var(--text); font-weight: 900; margin: 28px 0 14px; letter-spacing: -0.5px; line-height: 1.4; }
-        .sp-md-body h2 { font-size: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 32px; }
-        .sp-md-body h3 { color: var(--accent); font-size: 16px; margin-top: 24px; }
-        .sp-md-body p { margin-bottom: 16px; color: var(--text2); font-size: 15px; line-height: 1.85; }
-        .sp-md-body strong { color: var(--text); font-weight: 900; background: rgba(124, 92, 252, 0.08); padding: 1px 5px; border-radius: 4px; border-bottom: 1px solid rgba(124, 92, 252, 0.25); }
+        .sp-md-body h1, .sp-md-body h2, .sp-md-body h3 { color: var(--text); font-weight: 800; margin: 24px 0 10px; letter-spacing: -.5px; }
+        .sp-md-body h2 { border-bottom: 1px solid var(--border); padding-bottom: 9px; }
+        .sp-md-body h3 { color: var(--accent); font-size: 1em; }
+        .sp-md-body p { margin-bottom: 12px; color: var(--text2); }
+        .sp-md-body strong { color: var(--text); font-weight: 800; }
         .sp-md-body a { color: var(--accent); text-decoration: none; border-bottom: 1px dashed var(--accent); }
-        .sp-md-body ul { padding-left: 0; list-style: none; margin-bottom: 16px; }
-        .sp-md-body li { padding: 8px 14px 8px 16px; border-left: 3px solid var(--accent); margin-bottom: 6px; color: var(--text2); background: var(--bg3); border-radius: 0 8px 8px 0; font-size: 14.5px; line-height: 1.7; }
-        .sp-md-body table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
-        .sp-md-body th { background: var(--bg3); color: var(--accent); padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border: 1px solid var(--border); }
-        .sp-md-body td { padding: 12px 16px; border: 1px solid var(--border2); color: var(--text2); line-height: 1.7; }
-        .sp-md-body tr:hover { background: rgba(124, 92, 252, 0.02); }
+        .sp-md-body ul { padding-left: 0; list-style: none; margin-bottom: 14px; }
+        .sp-md-body li { padding: 7px 12px 7px 13px; border-left: 2px solid var(--accent); margin-bottom: 5px; color: var(--text2); background: var(--bg3); border-radius: 0 7px 7px 0; }
+        .sp-md-body table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+        .sp-md-body th { background: var(--bg3); color: var(--accent); padding: 9px 13px; text-align: left; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); }
+        .sp-md-body td { padding: 9px 13px; border: 1px solid var(--border2); color: var(--text2); }
         .sp-md-body code { background: var(--bg3); color: var(--accent2); padding: 2px 5px; border-radius: 4px; font-size: 12px; font-family: 'DM Mono',monospace; }
         .sp-md-body pre { background: var(--bg2); border: 1px solid var(--border); border-radius: 11px; padding: 14px; overflow-x: auto; margin: 14px 0; }
         .sp-md-body pre code { background: none; color: var(--text); font-size: 12px; }
