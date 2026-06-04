@@ -57,7 +57,7 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
           <NavItem id="chatdata" icon={FileText} label="Chat With Data" badge="Pro" badgeClass="badge-hot" />
           <NavItem id="optimizer" icon={Wand2} label="Prompt Optimizer" badge="Magic" badgeClass="badge-pro" />
           <NavItem id="aiwriter" icon={PenTool} label="AI Writer" />
-          <NavItem id="creator" icon={Share2} label="Social Media AI" />
+          <NavItem id="creator" icon={Share2} label="Creator Studio" />
           <NavItem id="library" icon={Library} label="Prompt Library" badge="60+" badgeClass="badge-pro" />
           <NavItem id="compare" icon={GitCompare} label="Model Compare" />
           <NavItem id="codehelper" icon={Code2} label="Code Helper" />

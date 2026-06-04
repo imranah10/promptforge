@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, ArrowRight, ChevronRight, ChevronLeft, Zap, Database, 
   Image as ImageIcon, Code, ArrowUpRight, CheckCircle2, 
-  Search, Brain, Lightbulb, Globe, Menu, X, Wand2, Layers, MessageSquare, Play, Video as VideoIcon, HelpCircle, Shield, Cpu, RefreshCw, Star, ArrowDown, Copy, Terminal
+  Search, Brain, Lightbulb, Globe, Menu, X, Wand2, Layers, MessageSquare, Play, Video as VideoIcon, HelpCircle, Shield, Cpu, RefreshCw, Star, ArrowDown, Copy, Terminal, Share2
 } from 'lucide-react';
 import Lenis from 'lenis';
 import ExplodingObjects from '../components/landing/ExplodingObjects';
@@ -567,9 +567,8 @@ const Navbar = () => {
       <div className="nav-links desktop-only">
         <a href="#features" className="nav-link">Capabilities</a>
         <a href="#quantum-arena" className="nav-link">Quantum Arena</a>
-        <a href="#tools" className="nav-link">The 13 Tools</a>
+        <a href="#tools" className="nav-link">The 11 Tools</a>
         <a href="#architecture" className="nav-link">Architecture Mesh</a>
-        <a href="#pricing" className="nav-link">Mathematics</a>
         <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); navigate('/dashboard/docs'); }} style={{ color: 'var(--lp-accent-light)', fontWeight: 800 }}>
           Interactive Docs Hub
         </a>
@@ -602,9 +601,8 @@ const Navbar = () => {
             <div className="mobile-links">
               <a href="#features" className="mobile-link" onClick={() => setIsOpen(false)}>Capabilities</a>
               <a href="#quantum-arena" className="mobile-link" onClick={() => setIsOpen(false)}>Quantum Arena</a>
-              <a href="#tools" className="mobile-link" onClick={() => setIsOpen(false)}>The 13 Tools</a>
+              <a href="#tools" className="mobile-link" onClick={() => setIsOpen(false)}>The 11 Tools</a>
               <a href="#architecture" className="mobile-link" onClick={() => setIsOpen(false)}>Architecture Mesh</a>
-              <a href="#pricing" className="mobile-link" onClick={() => setIsOpen(false)}>Mathematics</a>
               <a href="#" className="mobile-link" onClick={(e) => { setIsOpen(false); navigate('/dashboard/docs'); }} style={{ color: 'var(--lp-accent-light)' }}>Interactive Docs Hub</a>
               <button className="lp-btn lp-btn-primary" onClick={() => { setIsOpen(false); navigate('/dashboard'); }} style={{ width: '100%', justifyContent: 'center', marginTop: '24px' }}>
                 Launch Studio
@@ -633,7 +631,7 @@ const Footer = () => {
           <div className="footer-links">
             <a href="#features" className="footer-link">Zero-Trust Bento</a>
             <a href="#quantum-arena" className="footer-link">Quantum Deck Explode</a>
-            <a href="#tools" className="footer-link">The 13 Tools Suite</a>
+            <a href="#tools" className="footer-link">The 11 Tools Suite</a>
             <a href="#" onClick={(e) => { e.preventDefault(); navigate('/dashboard'); }} className="footer-link">Live Workspace</a>
           </div>
         </div>
@@ -1185,17 +1183,17 @@ const ToolsDiscovery = () => {
     },
     {
       name: "Creator Studio",
-      icon: <VideoIcon size={20} />,
+      icon: <Share2 size={20} />,
       privacy: "Instant clipboard export. Local browser storage.",
-      desc: "Social media workspace supporting 8 networks (Instagram, LinkedIn, YouTube, TikTok, Threads, Twitter, Facebook, WhatsApp). Formulates curiosity, pain-point, or contrarian hooks and schedules drafts directly into an interactive 7-Day Calendar Planner.",
-      testPrompt: "Generate Curiosity hook series for a LinkedIn Sass launch, pushing output to the interactive calendar.",
+      desc: "Social media workspace supporting 8 platforms (Instagram, LinkedIn, YouTube, TikTok, Twitter/X, Facebook, WhatsApp, Pinterest). Generate viral hooks, curiosity-driven captions, platform-specific formats, and schedule drafts inside an interactive 7-Day Content Calendar.",
+      testPrompt: "Generate a curiosity-hook caption series for a LinkedIn SaaS launch and push to the 7-day calendar.",
       color: "#e11d48"
     },
     {
       name: "Code Helper",
       icon: <Code size={20} />,
       privacy: "Executed locally inside browser sandbox.",
-      desc: "Senior engineering assistant for 18 languages. Conduct static security audits to locate exact vulnerability lines, obtain drop-in secure code replacements, and compile formatted conventional commits matching standardization parameters.",
+      desc: "Senior engineering assistant supporting 18 languages. Run static security audits to locate exact vulnerability lines, generate drop-in secure code replacements, write unit tests, and compile formatted conventional commit messages.",
       testPrompt: "Paste React hook code, run a Security Audit scan, and output conventional commit messages for a bugfix.",
       color: "#fb7185"
     },
@@ -1203,65 +1201,57 @@ const ToolsDiscovery = () => {
       name: "The Inventor",
       icon: <Lightbulb size={20} />,
       privacy: "Keys encrypted locally. Zero middleman.",
-      desc: "Assemble a multi-agent debate council. Renders live conversational chat bubbles between 4 persona entities (Visionary, Hacker, Analyst, Critic) disputing your tech proposals. Compiles synthesized 30-60-90 day Master plans into the Vault.",
-      testPrompt: "Topic: 'Zero-emission urban shipping fleet using hovercrafts'. Trigger live agent council debate.",
+      desc: "Multi-agent debate council with 4 expert personas (Visionary, Hacker, Analyst, Critic) that debate your idea in real-time chat bubbles. Includes cancel support, session history saved to localStorage, and exports a synthesized 30-60-90 day Master Blueprint as a .md file.",
+      testPrompt: "Topic: 'Zero-emission urban shipping fleet'. Trigger live 4-agent council debate and export Master Blueprint.",
       color: "#a78bfa"
     },
     {
       name: "Data Wizard",
       icon: <Database size={20} />,
       privacy: "Client-side output. Private keys.",
-      desc: "Developer sandbox producing BigQuery/Postgres/Snowflake SQL scripts, Pandas dataframes, complex Excel formulas, DAX PowerBI strings, Regex matrices, and R-code. Contrasts side-by-side versions with integrated efficiency gauges.",
-      testPrompt: "Input schema -> Compile Postgres query to fetch active subscriptions, showing side-by-side optimization options.",
+      desc: "Developer sandbox generating BigQuery, Postgres, and Snowflake SQL scripts, Pandas dataframes, Excel formulas, DAX PowerBI strings, Regex patterns, and R-code. Compare two approaches side-by-side with integrated efficiency gauges.",
+      testPrompt: "Input schema -> compile Postgres query to fetch active subscriptions with side-by-side optimization options.",
       color: "#fbbf24"
     },
     {
       name: "The Spider",
       icon: <Globe size={20} />,
-      privacy: "Client-side Jina routing.",
-      desc: "Deep scraping command center routing through Jina AI parse engines. Features a scanning radar ping display and translates scraper outputs into 6 clean dossier configurations, allowing immediate routing into Chat With Data.",
-      testPrompt: "Scrape: 'https://news.ycombinator.com' -> Export as a clean Markdown dossier and send directly to Chat With Data.",
+      privacy: "Client-side Jina AI routing. No server logs.",
+      desc: "Deep web scraping command center via Jina AI parse engines. Supports URL mode and search mode, cancel mid-crawl, 6 output dossier formats, session history with full restore, verified vs AI-hallucinated source detection, and follow-up Q&A on extracted data.",
+      testPrompt: "Scrape 'https://news.ycombinator.com' → export as Markdown dossier → send to Chat With Data.",
       color: "#10b981"
     },
     {
       name: "SEO Optimizer",
       icon: <Search size={20} />,
       privacy: "Local memory. Direct browser rendering.",
-      desc: "Analyze content drafts inside interactive ScoreRings, bundle keyword targets into semantic Topic Clusters, compile Google-compliant JSON-LD Schema structures, and simulate real-time desktop/mobile SERP layout snippets.",
-      testPrompt: "Simulate SERP snippet for 'PromptForge local SaaS platform' and compile matching JSON-LD Schema markup.",
+      desc: "7-tool SEO suite: Keyword Lab, SERP Simulator (live Google preview), Content Scorer (6-dimension score rings), Topic Clusters, Content Gap AI, Meta Forge (5 title variants with char count), and Schema Generator with individual JSON-LD copy buttons.",
+      testPrompt: "Simulate SERP snippet for 'PromptForge AI studio' and compile matching JSON-LD Article schema markup.",
       color: "#60a5fa"
     },
     {
       name: "Model Compare",
       icon: <RefreshCw size={20} />,
       privacy: "Parallel async promises direct to providers.",
-      desc: "Test LLMs side-by-side using parallel async Promise.allSettled query resolutions. Includes an automated independent AI Judge panel that audits responses, selects a winner, and generates diagnostic verdict cards.",
-      testPrompt: "Prompt: 'Explain quantum entanglement' -> Compare Claude 3.5 vs GPT-4o with Judge verdict active.",
+      desc: "Test multiple LLMs side-by-side using parallel async Promise.allSettled resolutions. An automated AI Judge panel audits all responses, picks a winner, and generates detailed diagnostic verdict cards with reasoning.",
+      testPrompt: "Prompt: 'Explain quantum entanglement' → compare Claude 3.5 vs GPT-4o with AI Judge verdict active.",
       color: "#ec4899"
-    },
-    {
-      name: "Image Studio",
-      icon: <ImageIcon size={20} />,
-      privacy: "Direct API route. Stored locally.",
-      desc: "Visual branding studio tailoring advanced Flux, DALL-E 3, and Midjourney prompts. Select from 6 aspect ratios, 9 styles, and multiple camera rigs, then render images directly using secure local keys.",
-      testPrompt: "Style: 3D Render | Aspect: 16:9 -> Write Midjourney prompt and render test on canvas using local DALL-E key.",
-      color: "#06b6d4"
-    },
-    {
-      name: "Cinematic Director",
-      icon: <Play size={20} />,
-      privacy: "Instant download, private keys.",
-      desc: "Motion video prompts builder supporting Runway, Sora, Kling, Luma, and Pika. Select from 8 camera motions (orbit, pan, tilt), sound effects matrices, lighting coordinates, and copy finalized video prompts.",
-      testPrompt: "Preset: Orbit Shot | Atmosphere: Neo-noir -> Generate advanced prompt specs for Sora video.",
-      color: "#f43f5e"
     },
     {
       name: "Prompt Library",
       icon: <Star size={20} />,
       privacy: "Saved inside browser localStorage.",
-      desc: "Custom template manager preloaded with 60+ tested developer prompts across 6 category tabs. Add favorites locally, construct custom parameters, and route prompts directly into the workspace.",
-      testPrompt: "Search 'Refactor' under Code category, favorite the prompt, and pop it into the workspace.",
+      desc: "Template manager preloaded with 60+ battle-tested prompts across 6 category tabs (Writing, Code, Business, SEO, Data, Creative). Save favourites locally, customise parameters, and route any prompt directly into the active workspace tool.",
+      testPrompt: "Search 'Refactor' under Code category, favourite the prompt, and pop it into Code Helper.",
       color: "#fbbf24"
+    },
+    {
+      name: "History Vault",
+      icon: <Brain size={20} />,
+      privacy: "Stored in browser IndexedDB. Never leaves device.",
+      desc: "Persistent results archive powered by IndexedDB. Every tool output is auto-tagged with tool name and topic, fully searchable, individually restorable, and exportable. Acts as your private AI work history — no cloud, no sync, no data leaks.",
+      testPrompt: "Open Vault → search 'SEO' → restore a previous Content Scorer result directly into SEO Optimizer.",
+      color: "#7c5cfc"
     }
   ];
 
@@ -1270,7 +1260,7 @@ const ToolsDiscovery = () => {
       <div className="section-header">
         <span className="tag-premium">SYSTEM INTEGRITY INDEX</span>
         <h2>
-          Explore The <span style={{ color: 'var(--lp-accent)' }}>13 System Tools</span>
+          Explore The <span style={{ color: 'var(--lp-accent)' }}>11 System Tools</span>
         </h2>
         <p>
           Select any utility to audit its client-side engine features and encryption protocols.
@@ -1543,7 +1533,7 @@ const LandingPage = () => {
       <ShaderLine />
 
       {/* --- VALUE PROPOSITION SAVINGS CALCULATOR --- */}
-      <section id="pricing" className="calc-section">
+      <section id="byok" className="calc-section">
         <SavingsCalculator />
       </section>
 
@@ -1674,11 +1664,11 @@ const LandingPage = () => {
           whileHover={{ scale: 1.01 }}
           transition={{ type: "spring", stiffness: 400, damping: 15 }}
         >
-          <div style={{ fontSize: '11px', color: 'var(--lp-cyan)', fontWeight: 900, letterSpacing: '4px', marginBottom: '20px', fontFamily: 'Space Grotesk' }}>LIFETIME ACCESS ARCHITECTURE</div>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 4.5vw, 2.8rem)', fontWeight: 800, marginBottom: '16px', fontFamily: 'var(--lp-font)', letterSpacing: '-0.03em' }}>$49 Decoupled License</h2>
-          <p style={{ color: 'var(--lp-text-muted)', marginBottom: '40px', fontSize: '1.15rem', maxWidth: '600px', margin: '0 auto 40px' }}>Lifetime access. Stored entirely locally on your device. Route AI queries directly through official credentials safely.</p>
+          <div style={{ fontSize: '11px', color: 'var(--lp-cyan)', fontWeight: 900, letterSpacing: '4px', marginBottom: '20px', fontFamily: 'Space Grotesk' }}>FREE TO USE — BRING YOUR OWN KEYS</div>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4.5vw, 2.8rem)', fontWeight: 800, marginBottom: '16px', fontFamily: 'var(--lp-font)', letterSpacing: '-0.03em' }}>Start Building Today</h2>
+          <p style={{ color: 'var(--lp-text-muted)', marginBottom: '40px', fontSize: '1.15rem', maxWidth: '600px', margin: '0 auto 40px' }}>PromptForge is free to use. Add your own API keys from OpenAI, Anthropic, or Google — pay only raw token costs directly to the provider. No subscription. No platform markup.</p>
           <button className="lp-btn lp-btn-primary" style={{ margin: '0 auto', fontSize: '17px', padding: '18px 46px' }} onClick={() => navigate('/dashboard')}>
-            Unlock Decoupled Workspace <ArrowRight size={20} />
+            Launch Free Workspace <ArrowRight size={20} />
           </button>
         </motion.div>
       </section>
