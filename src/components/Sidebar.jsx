@@ -4,12 +4,43 @@ import {
   Key, Share2, Languages, DollarSign,
   Zap, Search, Library, Wand2, Database, Archive, FileText,
   PanelLeftClose, PanelRightClose, Globe, Lightbulb, BookOpen,
-  Sun, Moon
+  Sun, Moon, ChevronDown
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AppContext } from '../context/AppContext';
+
+const UI_LANGS = [
+  { code:'en', label:'🇺🇸 English' },
+  { code:'hi', label:'🇮🇳 हिंदी' },
+  { code:'es', label:'🇪🇸 Español' },
+  { code:'zh', label:'🇨🇳 中文' },
+  { code:'ar', label:'🇸🇦 العربية' },
+  { code:'pt', label:'🇧🇷 Português' },
+  { code:'fr', label:'🇫🇷 Français' },
+  { code:'de', label:'🇩🇪 Deutsch' },
+  { code:'ja', label:'🇯🇵 日本語' },
+  { code:'ru', label:'🇷🇺 Русский' },
+];
+
+// Pre-built translations for all UI strings
+const UI_T = {
+  en: { studio:'Studio', business:'Business', dashboard:'Dashboard', chatdata:'Chat With Data', optimizer:'Prompt Optimizer', aiwriter:'AI Writer', creator:'Creator Studio', library:'Prompt Library', compare:'Model Compare', codehelper:'Code Helper', datawizard:'Data Wizard', seo:'SEO Optimizer', spider:'The Spider', inventor:'The Inventor', vault:'History Vault', keys:'API Keys', docs:'Docs', sellearn:'Sell & Earn', lightMode:'Light Mode', darkMode:'Dark Mode', systems:'All systems live', langLabel:'Language' },
+  hi: { studio:'स्टूडियो', business:'बिज़नेस', dashboard:'डैशबोर्ड', chatdata:'डेटा से चैट', optimizer:'प्रॉम्प्ट ऑप्टिमाइज़र', aiwriter:'AI राइटर', creator:'क्रिएटर स्टूडियो', library:'प्रॉम्प्ट लाइब्रेरी', compare:'मॉडल कम्पेयर', codehelper:'कोड हेल्पर', datawizard:'डेटा विज़ार्ड', seo:'SEO ऑप्टिमाइज़र', spider:'द स्पाइडर', inventor:'द इन्वेंटर', vault:'हिस्ट्री वॉल्ट', keys:'API कीज़', docs:'डॉक्स', sellearn:'बेचो & कमाओ', lightMode:'लाइट मोड', darkMode:'डार्क मोड', systems:'सभी सिस्टम चालू', langLabel:'भाषा' },
+  es: { studio:'Estudio', business:'Negocio', dashboard:'Panel', chatdata:'Chat con Datos', optimizer:'Optimizador', aiwriter:'Escritor IA', creator:'Estudio Creador', library:'Biblioteca', compare:'Comparar Modelos', codehelper:'Ayuda de Código', datawizard:'Mago de Datos', seo:'SEO', spider:'La Araña', inventor:'El Inventor', vault:'Bóveda', keys:'Claves API', docs:'Docs', sellearn:'Vender & Ganar', lightMode:'Modo Claro', darkMode:'Modo Oscuro', systems:'Todos los sistemas activos', langLabel:'Idioma' },
+  zh: { studio:'工作室', business:'商业', dashboard:'仪表盘', chatdata:'数据对话', optimizer:'提示优化器', aiwriter:'AI写作', creator:'创作工作室', library:'提示库', compare:'模型对比', codehelper:'代码助手', datawizard:'数据巫师', seo:'SEO优化', spider:'蜘蛛', inventor:'发明家', vault:'历史库', keys:'API密钥', docs:'文档', sellearn:'销售赚钱', lightMode:'浅色模式', darkMode:'深色模式', systems:'所有系统正常', langLabel:'语言' },
+  ar: { studio:'الاستوديو', business:'الأعمال', dashboard:'لوحة التحكم', chatdata:'الدردشة مع البيانات', optimizer:'محسّن الأوامر', aiwriter:'الكاتب الذكي', creator:'استوديو المبدع', library:'مكتبة الأوامر', compare:'مقارنة النماذج', codehelper:'مساعد الكود', datawizard:'معالج البيانات', seo:'تحسين محركات البحث', spider:'العنكبوت', inventor:'المخترع', vault:'خزينة التاريخ', keys:'مفاتيح API', docs:'الوثائق', sellearn:'بيع واكسب', lightMode:'الوضع الفاتح', darkMode:'الوضع الداكن', systems:'جميع الأنظمة تعمل', langLabel:'اللغة' },
+  pt: { studio:'Estúdio', business:'Negócio', dashboard:'Painel', chatdata:'Chat com Dados', optimizer:'Otimizador', aiwriter:'Escritor IA', creator:'Estúdio Criador', library:'Biblioteca', compare:'Comparar Modelos', codehelper:'Ajudante de Código', datawizard:'Mago de Dados', seo:'SEO', spider:'A Aranha', inventor:'O Inventor', vault:'Cofre', keys:'Chaves API', docs:'Docs', sellearn:'Vender & Ganhar', lightMode:'Modo Claro', darkMode:'Modo Escuro', systems:'Todos sistemas ativos', langLabel:'Idioma' },
+  fr: { studio:'Studio', business:'Commerce', dashboard:'Tableau de bord', chatdata:'Chat avec Données', optimizer:'Optimiseur', aiwriter:'Rédacteur IA', creator:'Studio Créatif', library:'Bibliothèque', compare:'Comparer Modèles', codehelper:'Aide Code', datawizard:'Magicien Données', seo:'SEO', spider:'L\'Araignée', inventor:'L\'Inventeur', vault:'Coffre', keys:'Clés API', docs:'Docs', sellearn:'Vendre & Gagner', lightMode:'Mode Clair', darkMode:'Mode Sombre', systems:'Tous systèmes actifs', langLabel:'Langue' },
+  de: { studio:'Studio', business:'Business', dashboard:'Dashboard', chatdata:'Chat mit Daten', optimizer:'Optimierer', aiwriter:'KI-Autor', creator:'Kreativstudio', library:'Bibliothek', compare:'Modelle Vergleichen', codehelper:'Code-Hilfe', datawizard:'Daten-Assistent', seo:'SEO', spider:'Die Spinne', inventor:'Der Erfinder', vault:'Tresor', keys:'API-Schlüssel', docs:'Docs', sellearn:'Verkaufen & Verdienen', lightMode:'Heller Modus', darkMode:'Dunkler Modus', systems:'Alle Systeme aktiv', langLabel:'Sprache' },
+  ja: { studio:'スタジオ', business:'ビジネス', dashboard:'ダッシュボード', chatdata:'データチャット', optimizer:'プロンプト最適化', aiwriter:'AIライター', creator:'クリエイタースタジオ', library:'ライブラリ', compare:'モデル比較', codehelper:'コードヘルパー', datawizard:'データウィザード', seo:'SEO最適化', spider:'スパイダー', inventor:'インベンター', vault:'履歴', keys:'APIキー', docs:'ドキュメント', sellearn:'販売・収益', lightMode:'ライトモード', darkMode:'ダークモード', systems:'全システム稼働中', langLabel:'言語' },
+  ru: { studio:'Студия', business:'Бизнес', dashboard:'Панель', chatdata:'Чат с данными', optimizer:'Оптимизатор', aiwriter:'ИИ-автор', creator:'Студия создателя', library:'Библиотека', compare:'Сравнить модели', codehelper:'Помощник кода', datawizard:'Мастер данных', seo:'SEO', spider:'Паук', inventor:'Изобретатель', vault:'Хранилище', keys:'API ключи', docs:'Документы', sellearn:'Продавать & Зарабатывать', lightMode:'Светлый режим', darkMode:'Тёмный режим', systems:'Все системы работают', langLabel:'Язык' },
+};
 
 const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse, theme, onToggleTheme }) => {
   const [tooltip, setTooltip] = React.useState(null);
+  const [showLangPicker, setShowLangPicker] = React.useState(false);
+  const { uiLang, setUiLang } = React.useContext(AppContext);
+  const T = UI_T[uiLang] || UI_T.en;
 
   const handleMouseEnter = (e, label) => {
     if (!isCollapsed) return;
@@ -52,39 +83,98 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
 
       <div className="sidebar-menu-container">
         <div className="nav-section">
-          {!isCollapsed && <div className="nav-label">Studio</div>}
-          <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
-          <NavItem id="chatdata" icon={FileText} label="Chat With Data" badge="Pro" badgeClass="badge-hot" />
-          <NavItem id="optimizer" icon={Wand2} label="Prompt Optimizer" badge="Magic" badgeClass="badge-pro" />
-          <NavItem id="aiwriter" icon={PenTool} label="AI Writer" />
-          <NavItem id="creator" icon={Share2} label="Creator Studio" />
-          <NavItem id="library" icon={Library} label="Prompt Library" badge="60+" badgeClass="badge-pro" />
-          <NavItem id="compare" icon={GitCompare} label="Model Compare" />
-          <NavItem id="codehelper" icon={Code2} label="Code Helper" />
-          <NavItem id="datawizard" icon={Database} label="Data Wizard" badge="New" badgeClass="badge-new" />
-          <NavItem id="seo" icon={Search} label="SEO Optimizer" />
-          <NavItem id="search" icon={Globe} label="The Spider" badge="Deep" badgeClass="badge-hot" />
-          <NavItem id="inventor" icon={Lightbulb} label="The Inventor" badge="Future" badgeClass="badge-new" />
-          <NavItem id="vault" icon={Archive} label="History Vault" />
-          <NavItem id="keys" icon={Key} label="API Keys" />
-          <NavItem id="docs" icon={BookOpen} label="Docs" badge="New" badgeClass="badge-new" />
+          {!isCollapsed && <div className="nav-label">{T.studio}</div>}
+          <NavItem id="dashboard" icon={LayoutDashboard} label={T.dashboard} />
+          <NavItem id="chatdata" icon={FileText} label={T.chatdata} badge="Pro" badgeClass="badge-hot" />
+          <NavItem id="optimizer" icon={Wand2} label={T.optimizer} badge="Magic" badgeClass="badge-pro" />
+          <NavItem id="aiwriter" icon={PenTool} label={T.aiwriter} />
+          <NavItem id="creator" icon={Share2} label={T.creator} />
+          <NavItem id="library" icon={Library} label={T.library} badge="60+" badgeClass="badge-pro" />
+          <NavItem id="compare" icon={GitCompare} label={T.compare} />
+          <NavItem id="codehelper" icon={Code2} label={T.codehelper} />
+          <NavItem id="datawizard" icon={Database} label={T.datawizard} badge="New" badgeClass="badge-new" />
+          <NavItem id="seo" icon={Search} label={T.seo} />
+          <NavItem id="search" icon={Globe} label={T.spider} badge="Deep" badgeClass="badge-hot" />
+          <NavItem id="inventor" icon={Lightbulb} label={T.inventor} badge="Future" badgeClass="badge-new" />
+          <NavItem id="vault" icon={Archive} label={T.vault} />
+          <NavItem id="keys" icon={Key} label={T.keys} />
+          <NavItem id="docs" icon={BookOpen} label={T.docs} badge="New" badgeClass="badge-new" />
         </div>
 
         <div className="nav-section">
-          {!isCollapsed && <div className="nav-label">Business</div>}
-          <NavItem id="sellearn" icon={DollarSign} label="Sell & Earn" />
+          {!isCollapsed && <div className="nav-label">{T.business}</div>}
+          <NavItem id="sellearn" icon={DollarSign} label={T.sellearn} />
         </div>
       </div>
 
       <div className="sidebar-footer">
+
+        {/* Language Picker */}
+        <div style={{ marginBottom: 10, position: 'relative' }}>
+          <button
+            onClick={() => setShowLangPicker(p => !p)}
+            title={T.langLabel}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center',
+              gap: 8, padding: isCollapsed ? '8px 0' : '8px 12px',
+              borderRadius: 8, cursor: 'pointer',
+              background: 'rgba(124,92,252,0.06)',
+              border: '1px solid var(--border)',
+              color: 'var(--text2)', fontSize: 13, fontWeight: 500,
+              justifyContent: isCollapsed ? 'center' : 'space-between',
+              fontFamily: 'inherit', transition: 'all 0.2s',
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Globe size={15} />
+              {!isCollapsed && (UI_LANGS.find(l => l.code === uiLang)?.label || '🇺🇸 English')}
+            </span>
+            {!isCollapsed && <ChevronDown size={13} style={{ transform: showLangPicker ? 'rotate(180deg)' : 'none', transition: '.2s' }} />}
+          </button>
+
+          <AnimatePresence>
+            {showLangPicker && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+                style={{
+                  position: 'absolute', bottom: '110%', left: 0, right: 0,
+                  background: 'var(--bg2)', border: '1px solid var(--border)',
+                  borderRadius: 12, padding: 8, zIndex: 999,
+                  boxShadow: '0 -8px 32px rgba(0,0,0,0.4)',
+                  maxHeight: 300, overflowY: 'auto',
+                }}
+              >
+                <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--text3)', letterSpacing: 2, padding: '4px 8px 8px', textTransform: 'uppercase' }}>
+                  {T.langLabel}
+                </div>
+                {UI_LANGS.map(l => (
+                  <button key={l.code} onClick={() => { setUiLang(l.code); setShowLangPicker(false); }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '8px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                      background: uiLang === l.code ? 'rgba(124,92,252,0.2)' : 'transparent',
+                      color: uiLang === l.code ? 'var(--accent2)' : 'var(--text2)',
+                      fontSize: 13, fontWeight: uiLang === l.code ? 700 : 500,
+                      fontFamily: 'inherit', textAlign: 'left', transition: '.15s',
+                    }}
+                  >
+                    {l.label}
+                    {uiLang === l.code && <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--accent)' }}>✓</span>}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
         <div className="theme-switcher-wrapper" style={{ marginBottom: isCollapsed ? '16px' : '12px' }}>
-          <button onClick={onToggleTheme} className="sidebar-theme-btn" title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+          <button onClick={onToggleTheme} className="sidebar-theme-btn" title={theme === 'dark' ? T.lightMode : T.darkMode}>
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            {!isCollapsed && <span className="theme-btn-label">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
+            {!isCollapsed && <span className="theme-btn-label">{theme === 'dark' ? T.lightMode : T.darkMode}</span>}
           </button>
         </div>
         <div className="status-dot">
-          <div className="dot"></div> {!isCollapsed && "All systems live"}
+          <div className="dot"></div> {!isCollapsed && T.systems}
         </div>
       </div>
       

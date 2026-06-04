@@ -66,6 +66,11 @@ export const AppProvider = ({ children }) => {
   );
 
   const [toastMsg, setToastMsg] = useState(null);
+  const [uiLang, setUiLang] = useState(() => localStorage.getItem('pf_ui_lang') || 'en');
+
+  useEffect(() => {
+    localStorage.setItem('pf_ui_lang', uiLang);
+  }, [uiLang]);
 
   useEffect(() => {
     localStorage.setItem('pf_key', apiKey);
@@ -137,7 +142,8 @@ export const AppProvider = ({ children }) => {
         providerKeys, setProviderKeys,
         customModels, addCustomModel, removeCustomModel,
         vaultHistory, saveToVault, clearVault, deleteVaultItem,
-        toastMsg, showToast
+        toastMsg, showToast,
+        uiLang, setUiLang,
       }}
     >
       {children}
