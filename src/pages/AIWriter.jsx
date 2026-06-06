@@ -1,3 +1,4 @@
+import { usePageTranslate } from '../hooks/usePageTranslate';
 import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { callAI } from '../utils/ai';
@@ -23,6 +24,7 @@ const CONTENT_TYPES = [
   { id: 'Social media post', label: '📱 Social media post', format: 'Hook first sentence. Value/entertainment. 2-3 emojis. Hashtags optional. Call to action. 100-150 words.' },
   { id: 'YouTube script', label: '🎥 YouTube script', format: 'INTRO (hook + promise, 15 sec). MAIN (numbered points, timestamps). OUTRO (recap + CTA). Conversational tone. Read-aloud friendly.' },
   { id: 'TikTok script', label: '📹 TikTok script', format: 'HOOK (first 3 seconds, visual + text). BODY (15-20 sec value). CTA (5 sec). On-screen text cues. Trend-aware language.' },
+  { id: 'Sales page / Landing page', label: '💰 Sales page / Landing page', format: 'Hero headline (benefit). Subhead (who/problem). Social proof. Features → Benefits. Objection handling. Urgency/scarcity. Multiple CTAs.' },
   { id: 'Professional bio', label: '👤 Professional bio', format: 'Third-person. Current role + company. Key achievement/expertise. Human touch (1 personal detail). CTA/contact. 50-100 words.' },
   { id: 'Cover letter', label: '📄 Cover letter', format: 'Opening: Why this company/role excites you. Body: 2-3 relevant achievements with metrics. Closing: Enthusiasm + availability. 250-300 words.' },
   { id: 'Press release', label: '📰 Press release', format: 'Headline (newsworthy angle). Dateline (city, date). Lead (who/what/when/where/why). Quote. Boilerplate. Contact.' },
@@ -662,7 +664,7 @@ const generateLandingPageHtml = (title, body, cta, image, preset) => {
       <span class="text-4xl mb-4 inline-block animate-bounce">⚡</span>
       <h2 class="text-3xl sm:text-5xl font-black mb-6 font-space">${cta || 'Ready to Scale Conversions?'}</h2>
       <p class="text-slate-400 mb-10 max-w-xl mx-auto leading-relaxed">
-        Premium high-converting landing page — ready to deploy and drive real results.
+        Integrate elite animations and modern designs. Launch your $2000 professional single-page layout now!
       </p>
       <a href="#" class="inline-flex px-8 py-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 rounded-xl font-bold text-base transition shadow-xl shadow-purple-500/30 transform hover:scale-105 duration-300">
         Activate Premium Offer
@@ -692,19 +694,19 @@ const generateLandingPageHtml = (title, body, cta, image, preset) => {
     const details = {
       speed: {
         title: '⚡ Interactive Speed',
-        desc: 'Built for blazing fast performance. Optimized loading, minimal bloat, maximum speed for the best user experience.',
+        desc: 'GSAP and Tailwind are optimized for absolute maximum lightweight speed. Zero bundle bloat, yielding 100/100 Lighthouse performance metrics.',
         color: '#a78bfa',
         border: 'rgba(167, 139, 250, 0.3)'
       },
       design: {
         title: '🎨 Custom Shader Effects',
-        desc: 'Premium visual design with modern gradients, glassmorphism effects, and smooth micro-interactions throughout.',
+        desc: 'Implements dynamic custom gradient overlays and sleek glassmorphism lines that flow perfectly based on user scroll triggers.',
         color: '#22d3ee',
         border: 'rgba(34, 211, 238, 0.3)'
       },
       code: {
         title: '💻 Vanilla HTML/CSS',
-        desc: 'Complete feature set ready to use out of the box. Clean code, easy customization, and production deployment.',
+        desc: 'Production-ready code including lightweight GSAP scripts. Copy it, paste it, double click to run. Zero compile or setup overhead required!',
         color: '#f472b6',
         border: 'rgba(244, 114, 182, 0.3)'
       }
@@ -793,180 +795,31 @@ const LandingPageRenderer = ({ content, preset, topic }) => {
   const explodeDetails = {
     speed: {
       title: '⚡ Interactive Speed',
-      desc: 'Built for blazing fast performance. Optimized loading, minimal bloat, maximum speed for the best user experience.',
+      desc: 'GSAP and Tailwind are optimized for absolute maximum lightweight speed. Zero bundle bloat, yielding 100/100 Lighthouse performance metrics.',
       color: '#a78bfa',
       border: 'rgba(167, 139, 250, 0.3)'
     },
     design: {
       title: '🎨 Custom Shader Effects',
-      desc: 'Premium visual design with modern gradients, glassmorphism effects, and smooth micro-interactions throughout.',
+      desc: 'Implements dynamic custom gradient overlays and sleek glassmorphism lines that flow perfectly based on user scroll triggers.',
       color: '#22d3ee',
       border: 'rgba(34, 211, 238, 0.3)'
     },
     code: {
       title: '💻 Vanilla HTML/CSS',
-      desc: 'Complete feature set ready to use out of the box. Clean code, easy customization, and production deployment.',
+      desc: 'Production-ready code including lightweight GSAP scripts. Copy it, paste it, double click to run. Zero compile or setup overhead required!',
       color: '#f472b6',
       border: 'rgba(244, 114, 182, 0.3)'
     }
   };
 
-  const [codeType, setCodeType] = useState('html');
-  const [downloading, setDownloading] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const cleanTitle = cleanTextDisplay(mainTitle.replace(/^#\s*/, ''));
-
-  const generateReactCode = () => {
-    const safeTitle = cleanTitle.replace(/"/g, '\\"');
-    const bodyParas = cleanBody.split('\n\n').filter(b => b.trim()).slice(0, 5);
-    return {
-      packageJson: `{
-  "name": "landing-page",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "framer-motion": "^11.0.0",
-    "react-scripts": "5.0.1"
-  },
-  "scripts": { "start": "react-scripts start", "build": "react-scripts build" }
-}`,
-      indexHtml: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${cleanTitle}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-</head>
-<body style="margin:0;background:#05070f;"><div id="root"></div></body>
-</html>`,
-      indexJs: `import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>);`,
-      appJsx: `import LandingPage from './components/LandingPage';
-export default function App() { return <LandingPage />; }`,
-      landingJsx: `import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-
-const FEATURES = [
-  { icon: '🚀', title: 'Fast Performance', desc: 'Optimized for speed and conversions.', color: '#a78bfa' },
-  { icon: '🎨', title: 'Premium Design', desc: 'Glassmorphism & gradients.', color: '#22d3ee' },
-  { icon: '🔥', title: 'High Conversion', desc: 'UX patterns that convert.', color: '#f472b6' },
-  { icon: '⚡', title: 'Zero Bloat', desc: '100/100 Lighthouse score.', color: '#4ade80' },
-  { icon: '📱', title: 'Responsive', desc: 'Mobile-first design.', color: '#fbbf24' },
-  { icon: '🛡️', title: 'Production Ready', desc: 'Deploy anywhere.', color: '#60a5fa' },
-];
-
-export default function LandingPage() {
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [hov, setHov] = useState(null);
-  useEffect(() => {
-    const h = e => setMouse({ x: e.clientX, y: e.clientY });
-    window.addEventListener('mousemove', h);
-    return () => window.removeEventListener('mousemove', h);
-  }, []);
-
-  return (
-    <div style={{ fontFamily: "'Outfit',sans-serif", background: '#05070f', color: '#f8fafc', minHeight: '100vh', overflowX: 'hidden' }}>
-      <div style={{ position: 'fixed', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle,rgba(167,139,250,0.07) 0%,transparent 70%)', left: mouse.x, top: mouse.y, transform: 'translate(-50%,-50%)', pointerEvents: 'none', zIndex: 0, transition: 'left 0.1s,top 0.1s' }} />
-      
-      <nav style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 10 }}>
-        <div style={{ fontSize: 22, fontWeight: 900, background: 'linear-gradient(135deg,#a78bfa,#38bdf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>${safeTitle.split(' ').slice(0,2).join(' ')}</div>
-        <motion.a href="#cta" whileHover={{ scale: 1.05 }} style={{ padding: '10px 24px', background: 'linear-gradient(135deg,#7c3aed,#38bdf8)', borderRadius: 999, fontWeight: 700, fontSize: 13, color: '#fff', textDecoration: 'none' }}>Get Started</motion.a>
-      </nav>
-
-      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 32px 100px', textAlign: 'center', position: 'relative', zIndex: 10 }}>
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          <h1 style={{ fontSize: 'clamp(2.5rem,6vw,5rem)', fontWeight: 900, lineHeight: 1.1, marginBottom: 24, background: 'linear-gradient(135deg,#fff 0%,#c084fc 50%,#38bdf8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>${safeTitle}</h1>
-          <p style={{ fontSize: 18, color: '#94a3b8', maxWidth: 600, margin: '0 auto 40px', lineHeight: 1.7 }}>Transform standard traffic into loyal customers with premium motion design.</p>
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <motion.a href="#cta" whileHover={{ scale: 1.05 }} style={{ padding: '16px 36px', background: 'linear-gradient(135deg,#7c3aed,#c084fc)', borderRadius: 14, fontWeight: 800, fontSize: 16, color: '#fff', textDecoration: 'none' }}>Get Started Now</motion.a>
-            <motion.a href="#features" whileHover={{ scale: 1.05 }} style={{ padding: '16px 36px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, fontWeight: 700, fontSize: 16, color: '#fff', textDecoration: 'none' }}>View Features</motion.a>
-          </div>
-        </motion.div>
-      </section>
-
-      <div style={{ height: 1, background: 'linear-gradient(90deg,transparent,#a78bfa,#38bdf8,transparent)', margin: '0 0 80px' }} />
-
-      <section id="features" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px 100px', position: 'relative', zIndex: 10 }}>
-        <div style={{ textAlign: 'center', marginBottom: 60 }}>
-          <h2 style={{ fontSize: 'clamp(2rem,4vw,3rem)', fontWeight: 800 }}>Everything You Need</h2>
-          <p style={{ color: '#94a3b8', marginTop: 12, fontSize: 16 }}>Built to convert. Designed to impress.</p>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20 }}>
-          {FEATURES.map((f, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-              onHoverStart={() => setHov(i)} onHoverEnd={() => setHov(null)}
-              style={{ padding: 28, borderRadius: 20, background: hov === i ? f.color + '15' : 'rgba(255,255,255,0.02)', border: '1.5px solid ' + (hov === i ? f.color : 'rgba(255,255,255,0.07)'), transition: 'all 0.3s', transform: hov === i ? 'translateY(-6px)' : 'none' }}>
-              <div style={{ fontSize: 32, marginBottom: 16 }}>{f.icon}</div>
-              <div style={{ fontWeight: 800, fontSize: 16, color: f.color, marginBottom: 8 }}>{f.title}</div>
-              <div style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.6 }}>{f.desc}</div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      <section id="cta" style={{ maxWidth: 900, margin: '0 auto', padding: '0 32px 120px', textAlign: 'center', position: 'relative', zIndex: 10 }}>
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-          style={{ padding: '60px 40px', borderRadius: 28, background: 'linear-gradient(135deg,rgba(124,58,237,0.1),rgba(56,189,248,0.1))', border: '1px solid rgba(167,139,250,0.25)' }}>
-          <h2 style={{ fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 900, marginBottom: 16 }}>Ready to Get Started?</h2>
-          <motion.button whileHover={{ scale: 1.05 }} style={{ padding: '18px 48px', background: 'linear-gradient(135deg,#7c3aed,#38bdf8)', border: 'none', borderRadius: 999, fontWeight: 900, fontSize: 18, color: '#fff', cursor: 'pointer', marginTop: 24 }}>Get Started Now</motion.button>
-        </motion.div>
-      </section>
-      <style>{\`* { box-sizing: border-box; } ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #7c3aed; border-radius: 3px; }\`}</style>
-    </div>
-  );
-}`
-    };
-  };
-
-  const handleDownloadFolder = async () => {
-    setDownloading(true);
-    try {
-      if (codeType === 'html') {
-        const blob = new Blob([fullHtml], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = (cleanTitle.replace(/\s+/g, '-').toLowerCase() || 'landing') + '.html';
-        a.click();
-        URL.revokeObjectURL(url);
-      } else {
-        const react = generateReactCode();
-        const files = [
-          ['package.json', react.packageJson],
-          ['public/index.html', react.indexHtml],
-          ['src/index.js', react.indexJs],
-          ['src/App.jsx', react.appJsx],
-          ['src/components/LandingPage.jsx', react.landingJsx],
-        ];
-        // Download each file sequentially
-        for (let i = 0; i < files.length; i++) {
-          const [name, content] = files[i];
-          await new Promise(res => setTimeout(res, i * 400));
-          const blob = new Blob([content], { type: 'text/plain' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = name.replace('/', '__');
-          a.click();
-          URL.revokeObjectURL(url);
-        }
-      }
-    } catch (e) { console.error(e); }
-    finally { setDownloading(false); }
-  };
-
   const handleCopyCode = async () => {
-    const code = codeType === 'html' ? fullHtml : generateReactCode().landingJsx;
     try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (_) {}
+      await navigator.clipboard.writeText(fullHtml);
+      alert('Copied 2000$ landing page code successfully! Paste it into a local HTML file to witness the GSAP animations!');
+    } catch (_) {
+      alert('Failed to copy code');
+    }
   };
 
   return (
@@ -990,7 +843,7 @@ export default function LandingPage() {
             padding: '6px 14px', borderRadius: '8px', fontSize: '11.5px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', outline: 'none'
           }}
         >
-          💻 Source Code
+          💻 2000$ HTML/GSAP Source Code
         </button>
       </div>
 
@@ -1030,7 +883,7 @@ export default function LandingPage() {
               fontSize: '9px', fontWeight: 900, letterSpacing: '1px', textTransform: 'uppercase',
               color: '#a78bfa', background: 'rgba(167,139,250,0.1)', padding: '3px 10px', borderRadius: '15px'
             }}>
-              ✨ Premium Landing Page
+              ✨ $2000 High-End Motion UX
             </span>
             <h1 style={{
               fontSize: '28px', fontWeight: 900, lineHeight: '1.2', marginTop: '14px', marginBottom: '10px',
@@ -1060,11 +913,11 @@ export default function LandingPage() {
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-              {(featureCards || [
-                { title: '🚀 Fast Performance', text: 'Optimized for speed and conversion.', color: '#a78bfa' },
-                { title: '🎨 Premium Design', text: 'Beautiful, modern visual aesthetics.', color: '#22d3ee' },
-                { title: '🔥 High Converting', text: 'Built to turn visitors into customers.', color: '#f472b6' }
-              ]).map((card, idx) => (
+              {[
+                { title: '🚀 GSAP Motion', text: 'Silky smooth scroll and spring mechanics.', color: '#a78bfa' },
+                { title: '🎨 Shaders & Lines', text: 'Gorgeous animated particle line dividers.', color: '#22d3ee' },
+                { title: '🔥 Conversion UX', text: 'Proven alignment formats to secure actions.', color: '#f472b6' }
+              ].map((card, idx) => (
                 <div 
                   key={idx}
                   onMouseEnter={() => setHoveredCard(idx)}
@@ -1085,7 +938,7 @@ export default function LandingPage() {
           </div>
 
           <div style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '16px', marginBottom: '24px' }}>
-            <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '8px' }}>Product Highlights</h4>
+            <h4 style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '8px' }}>Interactive Click-to-Explode detail box</h4>
             <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
               {['speed', 'design', 'code'].map(key => (
                 <button
@@ -1098,7 +951,7 @@ export default function LandingPage() {
                     fontSize: '11px', fontWeight: 700, cursor: 'pointer', outline: 'none'
                   }}
                 >
-                  {key === 'speed' ? '⚡ Performance' : key === 'design' ? '🎨 Design' : '💻 Features'}
+                  {key === 'speed' ? '⚡ Speed' : key === 'design' ? '🎨 Shader' : '💻 Vanilla'}
                 </button>
               ))}
             </div>
@@ -1134,46 +987,22 @@ export default function LandingPage() {
       ) : (
         <div style={{ position: 'relative' }}>
           <button
-onClick={handleCopyCode}
+            onClick={handleCopyCode}
             style={{
               position: 'absolute', top: '12px', right: '12px', zIndex: 10,
-              background: copied ? '#22c55e' : '#a78bfa', color: '#fff', border: 'none', borderRadius: '8px',
+              background: '#22c55e', color: '#fff', border: 'none', borderRadius: '8px',
               padding: '6px 14px', fontSize: '11px', fontWeight: 800, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '4px'
+              display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 4px 12px rgba(34,197,94,0.3)'
             }}
           >
-            <Copy size={12} /> {copied ? 'Copied!' : 'Copy'}
+            <Copy size={12} /> Copy Code
           </button>
-          <button
-            onClick={handleDownloadFolder}
-            disabled={downloading}
-            style={{
-              position: 'absolute', top: '12px', right: '100px', zIndex: 10,
-              background: downloading ? '#475569' : '#22c55e', color: '#fff', border: 'none', borderRadius: '8px',
-              padding: '6px 14px', fontSize: '11px', fontWeight: 800, cursor: downloading ? 'not-allowed' : 'pointer',
-              display: 'flex', alignItems: 'center', gap: '4px'
-            }}
-          >
-            <Download size={12} /> {downloading ? '...' : 'Download'}
-          </button>
-          {/* HTML / React toggle */}
-          <div style={{ position: 'absolute', top: '12px', left: '12px', zIndex: 10, display: 'flex', gap: 4 }}>
-            {['html', 'react'].map(t => (
-              <button key={t} onClick={() => setCodeType(t)} style={{
-                padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 800, cursor: 'pointer',
-                border: 'none', background: codeType === t ? '#7c3aed' : 'rgba(255,255,255,0.08)',
-                color: codeType === t ? '#fff' : 'rgba(255,255,255,0.5)'
-              }}>
-                {t === 'html' ? '🌐 HTML+CSS+JS' : '⚛️ React'}
-              </button>
-            ))}
-          </div>
           <pre style={{
             background: '#05070c', border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '16px', padding: '60px 16px 16px', overflowX: 'auto', maxHeight: '500px',
+            borderRadius: '16px', padding: '16px', overflowX: 'auto', maxHeight: '500px',
             fontSize: '11.5px', color: '#34d399', fontFamily: 'monospace', textAlign: 'left', margin: 0
           }}>
-            <code>{codeType === 'html' ? fullHtml : generateReactCode().landingJsx}</code>
+            <code>{fullHtml}</code>
           </pre>
         </div>
       )}
@@ -2184,6 +2013,7 @@ const renderFormattedContent = (content, contentType, selectedSeoIdx, setSelecte
 };
 
 const AIWriter = () => {
+  const pageRef = usePageTranslate('aiwriter');
   const { activeModel, apiKey, providerKeys, customModels, showToast, saveToVault } = useContext(AppContext);
 
   const [appTheme, setAppTheme] = useState(() => document.documentElement.getAttribute('data-theme') || 'dark');
@@ -2216,6 +2046,10 @@ const AIWriter = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
   const [wordCount, setWordCount] = useState(0);
+  const [sessionHistory, setSessionHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('pf_aiwriter_history') || '[]'); } catch { return []; }
+  });
+  const [showHistory, setShowHistory] = useState(false);
 
   const [humanizing, setHumanizing] = useState(false);
   const [humanized, setHumanized] = useState('');
@@ -2228,6 +2062,7 @@ const AIWriter = () => {
   const [toneReport, setToneReport] = useState(null);
 
   const [activeTab, setActiveTab] = useState('main');
+  const [sandboxOpen, setSandboxOpen] = useState(false);
   const [selectedSeoIdx, setSelectedSeoIdx] = useState(0);
   const [generatedType, setGeneratedType] = useState('Blog post / Article');
   
@@ -2240,13 +2075,12 @@ const AIWriter = () => {
   const hideLength = ![
     'Blog post / Article',
     'YouTube script',
+    'Sales page / Landing page',
     'Press release',
     'Newsletter',
     'Code documentation',
     'Video script'
   ].includes(type);
-  // Landing page always full — no slider needed
-  const isLandingPage = type === 'Sales page / Landing page';
 
   const shouldShowLength = !hideLength || (customLengthEnabled && type !== 'SEO meta tags');
 
@@ -2371,51 +2205,6 @@ Option 2:
       userPrompt += `\nWrite the ${type} now. Remember: EXACTLY ${targetWords} words. Enforce a premium, high-converting ${type} structure using natural markdown headers (##), benefit-focused bullet lists, and strong CTAs. DO NOT include any salutations (like 'Dear...'), thank you closings, or signature blocks (like 'Sincerely, [Name]') at the bottom. Start directly with the main heading and end with your main content/CTA.`;
     }
 
-    // LANDING PAGE: Override system prompt + userPrompt completely
-    if (isLandingPage) {
-      const lpSeed = Math.random().toString(36).slice(2,8).toUpperCase();
-      const lpSystem = `You are a world-class landing page copywriter and UX strategist. Session: ${lpSeed}.
-Create a COMPLETE, PREMIUM, HIGH-CONVERTING sales/landing page for the given product/service.
-
-STRUCTURE (must include ALL sections):
-1. HERO — Power headline (3-7 words, bold claim) + subheadline (1-2 lines) + primary CTA button text
-2. SOCIAL PROOF — 3 credibility signals (numbers, logos, testimonials)
-3. PROBLEM — The pain the audience faces (2-3 paragraphs)
-4. SOLUTION — How this product solves it (features → benefits)
-5. FEATURES — 6 key features with icons, titles, and 1-line descriptions
-6. HOW IT WORKS — 3-step simple process
-7. TESTIMONIALS — 3 realistic customer quotes with name/role
-8. PRICING — 3 tiers (Starter/Pro/Elite) with prices and features
-9. FAQ — 5 most common objections answered
-10. FINAL CTA — Urgency + scarcity + button
-
-RULES:
-- Every section must be specific to the actual product/topic described
-- NO generic filler. NO "Lorem ipsum". NO hardcoded "GSAP Motion" or "Shaders" unless requested
-- Use actual product-specific benefits, features, and language
-- Make it feel PREMIUM — like a $10,000 agency built it
-- Output clean structured text — sections labeled clearly
-- NO asterisks, NO markdown symbols
-- Language: ${lang}
-- Tone: ${tone}`;
-      
-      const lpPrompt = `Product/Service: "${topic}"
-${audience ? `Target Audience: ${audience}` : ''}
-${keywords ? `Key terms: ${keywords}` : ''}
-Session: ${lpSeed}
-
-Write the complete landing page now. Make every section specific to THIS product. No generic content.`;
-      
-      const lpRes = await callAI(lpSystem, lpPrompt, null, activeModel, apiKey, providerKeys, customModels);
-      const lpClean = lpRes.replace(/\*\*/g,'').replace(/\*/g,'').replace(/#{1,6}\s/g,'').replace(/`{1,3}/g,'').trim();
-      setResult(lpClean);
-      setWordCount(countWords(lpClean));
-      saveToVault?.('AI Writer', 'Landing Page: ' + topic, lpClean);
-      showToast('Landing page generated!');
-      setLoading(false);
-      return;
-    }
-
     try {
       let res = await callAI(system, userPrompt, null, activeModel, apiKey, providerKeys, customModels);
       let words = countWords(res);
@@ -2438,6 +2227,13 @@ Write the complete landing page now. Make every section specific to THIS product
       setGeneratedType(type);
       setWordCount(words);
       saveToVault?.('AI Writer', `${type}: ${topic}`, formatted);
+      // Save to session history
+      const histItem = { id: Date.now(), type, topic: topic.slice(0,60), result: formatted, time: new Date().toLocaleString() };
+      setSessionHistory(prev => {
+        const updated = [histItem, ...prev].slice(0, 15);
+        try { localStorage.setItem('pf_aiwriter_history', JSON.stringify(updated)); } catch(_) {}
+        return updated;
+      });
       
       if (Math.abs(words - targetWords) <= targetWords * 0.2) {
         showToast(`Perfect! Generated ${words} words`);
@@ -3056,7 +2852,7 @@ Scores are 0-100.`;
   };
 
   return (
-    <div className="page active">
+    <div className="page active" ref={pageRef}>
       <style dangerouslySetInnerHTML={{ __html: `
         /* Avoid Light Mode global overrides inside dark-theme-card */
         :root[data-theme="light"] .dark-theme-card {
@@ -3115,15 +2911,42 @@ Scores are 0-100.`;
           color: rgba(255, 255, 255, 0.5) !important;
         }
       ` }} />
-      <div className="section-header">
-        <h2 className="section-title">
-          <Zap size={20} style={{ color: '#a78bfa', marginRight: 8, verticalAlign: 'middle' }} />
-          AI Writer
-        </h2>
-        <div className="section-sub">
-          Generate · Humanize · A/B Test · Analyze tone — all in one place.
+      <div className="section-header" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+        <div>
+          <h2 className="section-title">
+            <Zap size={20} style={{ color: '#a78bfa', marginRight: 8, verticalAlign: 'middle' }} />
+            AI Writer
+          </h2>
+          <div className="section-sub">
+            Generate · Humanize · A/B Test · Analyze tone — all in one place.
+          </div>
         </div>
+        {sessionHistory.length > 0 && (
+          <button onClick={() => setShowHistory(h => !h)} style={{ display:'flex', alignItems:'center', gap:6, background:'var(--bg3)', border:'1px solid var(--border)', borderRadius:8, padding:'8px 12px', cursor:'pointer', color:'var(--text2)', fontSize:12, fontWeight:700, position:'relative', flexShrink:0 }}>
+            History
+            <span style={{ position:'absolute', top:-6, right:-6, background:'#a78bfa', color:'#fff', borderRadius:'50%', width:16, height:16, fontSize:9, fontWeight:800, display:'flex', alignItems:'center', justifyContent:'center' }}>{sessionHistory.length}</span>
+          </button>
+        )}
       </div>
+
+      {/* History Panel */}
+      {showHistory && (
+        <div style={{ background:'var(--bg3)', border:'1px solid var(--border)', borderRadius:14, padding:16, marginBottom:20 }}>
+          <div style={{ fontSize:11, fontWeight:800, color:'var(--text3)', letterSpacing:2, marginBottom:12, textTransform:'uppercase' }}>Recent Generations (last 15)</div>
+          {sessionHistory.map(h => (
+            <div key={h.id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 12px', background:'var(--bg)', border:'1px solid var(--border)', borderRadius:10, marginBottom:8 }}>
+              <div>
+                <div style={{ fontSize:12, fontWeight:600, color:'var(--text)' }}>{h.type} — {h.topic}</div>
+                <div style={{ fontSize:11, color:'var(--text3)', marginTop:2 }}>{h.time}</div>
+              </div>
+              <div style={{ display:'flex', gap:6 }}>
+                <button onClick={() => { setResult(h.result); setShowHistory(false); showToast('Restored!'); }} style={{ fontSize:11, color:'#a78bfa', background:'rgba(167,139,250,0.1)', border:'1px solid rgba(167,139,250,0.3)', borderRadius:6, padding:'4px 10px', cursor:'pointer', fontWeight:700 }}>Restore</button>
+                <button onClick={() => { setSessionHistory(prev => { const u = prev.filter(i => i.id !== h.id); localStorage.setItem('pf_aiwriter_history', JSON.stringify(u)); return u; }); }} style={{ fontSize:11, color:'#f87171', background:'rgba(248,113,113,0.1)', border:'1px solid rgba(248,113,113,0.2)', borderRadius:6, padding:'4px 8px', cursor:'pointer' }}>✕</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
@@ -3247,7 +3070,7 @@ Scores are 0-100.`;
             </div>
           )}
 
-          {shouldShowLength && !isLandingPage && (
+          {shouldShowLength && (
             <div className="form-group" style={{ marginBottom: '14px' }}>
               <label className="form-label">
                 Length: <span style={{ color: '#a78bfa', fontWeight: 700 }}>{getLengthText(length)}</span>
@@ -3425,6 +3248,77 @@ Scores are 0-100.`;
         </motion.div>
       )}
 
+      {/* Interactive Rich Paste Sandbox — OFF by default */}
+      {(result || humanized || variants.length > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ marginTop: '16px', width: '100%', boxSizing: 'border-box' }}
+        >
+          {/* Toggle button */}
+          <button
+            onClick={() => setSandboxOpen(p => !p)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700,
+              cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
+              background: sandboxOpen ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.04)',
+              border: `1.5px solid ${sandboxOpen ? '#a78bfa' : 'rgba(255,255,255,0.12)'}`,
+              color: sandboxOpen ? '#a78bfa' : 'rgba(255,255,255,0.5)',
+              marginBottom: sandboxOpen ? 12 : 0,
+            }}
+          >
+            <span>📋</span>
+            Clipboard Rich Paste Sandbox
+            <span style={{
+              fontSize: 9, fontWeight: 900, color: '#fff',
+              background: sandboxOpen ? '#a78bfa' : 'rgba(255,255,255,0.2)',
+              padding: '2px 7px', borderRadius: 20, textTransform: 'uppercase', marginLeft: 4,
+            }}>
+              {sandboxOpen ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
+          {/* Sandbox content — only when open */}
+          <AnimatePresence>
+            {sandboxOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div style={{
+                  padding: '20px',
+                  border: '2px dashed rgba(167,139,250,0.4)',
+                  background: 'rgba(167,139,250,0.03)',
+                  borderRadius: 14,
+                  width: '100%', boxSizing: 'border-box',
+                }}>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 14, lineHeight: 1.6 }}>
+                    Copy your content above, then press <strong style={{ color: '#a78bfa' }}>Ctrl+V</strong> below to verify it pastes with styling in Google Docs, Notion, MS Word, and WordPress.
+                  </p>
+                  <div
+                    contentEditable="true"
+                    style={{
+                      width: '100%', boxSizing: 'border-box',
+                      minHeight: 180, maxHeight: 500, overflowY: 'auto',
+                      background: 'rgba(0,0,0,0.25)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 10, padding: 18,
+                      color: 'rgba(255,255,255,0.9)',
+                      fontSize: 13, outline: 'none',
+                      fontFamily: 'inherit', lineHeight: 1.7,
+                    }}
+                    onFocus={e => { e.target.style.borderColor = '#a78bfa'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      )}
     </div>
   );
 };

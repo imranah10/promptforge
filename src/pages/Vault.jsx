@@ -1,18 +1,22 @@
+import { usePageTranslate } from '../hooks/usePageTranslate';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Archive, Trash2, Copy, Download, Search, Zap, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Archive, Trash2, Copy, Download, Search, Zap, Clock, ChevronDown, ChevronUp, CheckSquare, Square } from 'lucide-react';
 import { downloadText } from '../utils/helpers';
 
 const Vault = () => {
+  const pageRef = usePageTranslate('vault');
   const { vaultHistory, clearVault, deleteVaultItem, showToast } = useContext(AppContext);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedId, setExpandedId] = useState(null);
+  const [selected, setSelected] = useState(new Set());
+  const [bulkMode, setBulkMode] = useState(false);
 
-  const filteredHistory = vaultHistory.filter(item => 
-    item.prompt.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredHistory = vaultHistory.filter(item =>
+    item.prompt.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.result.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.toolName.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -29,8 +33,35 @@ const Vault = () => {
     showToast('✓ Download started');
   };
 
+  const handleExportAll = () => {
+    if (filteredHistory.length === 0) return;
+    const content = filteredHistory.map(item =>
+      `========================================\nDate: ${item.date}\nTool: ${item.toolName}\nModel: ${item.model}\n\n--- PROMPT ---\n${item.prompt}\n\n--- RESULT ---\n${item.result}\n`
+    ).join('\n');
+    downloadText(content, `PromptForge_Vault_Export_${Date.now()}.txt`);
+    showToast(`✓ Exported ${filteredHistory.length} items`);
+  };
+
+  const toggleSelect = (id) => {
+    setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  };
+
+  const selectAll = () => {
+    if (selected.size === filteredHistory.length) setSelected(new Set());
+    else setSelected(new Set(filteredHistory.map(i => i.id)));
+  };
+
+  const deleteSelected = () => {
+    if (selected.size === 0) return;
+    if (window.confirm(`Delete ${selected.size} selected items?`)) {
+      selected.forEach(id => deleteVaultItem(id));
+      setSelected(new Set()); setBulkMode(false);
+      showToast(`✓ Deleted ${selected.size} items`);
+    }
+  };
+
   return (
-    <div className="page active">
+    <div className="page active" ref={pageRef}>
       <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h2 className="section-title">🗄️ Generation Vault</h2>
@@ -38,11 +69,24 @@ const Vault = () => {
         </div>
         
         {vaultHistory.length > 0 && (
-          <button className="btn btn-outline" style={{ borderColor: 'var(--pink)', color: 'var(--pink)' }} onClick={() => {
-            if(window.confirm('Are you sure you want to clear your entire vault history?')) clearVault();
-          }}>
-            <Trash2 size={16} /> Clear Vault
-          </button>
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+            <button className="btn btn-outline" onClick={handleExportAll} style={{ borderColor:'var(--accent)', color:'var(--accent)' }}>
+              <Download size={15} /> Export All
+            </button>
+            <button className="btn btn-outline" onClick={() => { setBulkMode(b => !b); setSelected(new Set()); }} style={{ borderColor: bulkMode ? 'var(--pink)' : 'var(--border)', color: bulkMode ? 'var(--pink)' : 'var(--text2)' }}>
+              <CheckSquare size={15} /> {bulkMode ? 'Cancel Bulk' : 'Bulk Select'}
+            </button>
+            {bulkMode && selected.size > 0 && (
+              <button className="btn btn-outline" onClick={deleteSelected} style={{ borderColor:'var(--pink)', color:'var(--pink)' }}>
+                <Trash2 size={15} /> Delete {selected.size} Selected
+              </button>
+            )}
+            <button className="btn btn-outline" style={{ borderColor: 'var(--pink)', color: 'var(--pink)' }} onClick={() => {
+              if(window.confirm('Clear entire vault?')) clearVault();
+            }}>
+              <Trash2 size={16} /> Clear All
+            </button>
+          </div>
         )}
       </div>
 
@@ -79,7 +123,12 @@ const Vault = () => {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: i * 0.05 }}
                 >
-                  <div className="vault-item-header" onClick={() => setExpandedId(isExpanded ? null : item.id)}>
+                  <div className="vault-item-header" onClick={() => !bulkMode && setExpandedId(isExpanded ? null : item.id)}>
+                    {bulkMode && (
+                      <div onClick={e => { e.stopPropagation(); toggleSelect(item.id); }} style={{ padding:'0 12px 0 0', cursor:'pointer', color: selected.has(item.id) ? 'var(--accent)' : 'var(--text3)' }}>
+                        {selected.has(item.id) ? <CheckSquare size={16}/> : <Square size={16}/>}
+                      </div>
+                    )}
                     <div className="vault-item-meta">
                       <span className="vault-tool-badge">{item.toolName}</span>
                       <span className="vault-model"><Zap size={12} /> {item.model}</span>

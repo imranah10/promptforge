@@ -1,8 +1,9 @@
+import { usePageTranslate } from '../hooks/usePageTranslate';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { AppContext } from '../context/AppContext.jsx';
-import { Search, Star, Download, Copy, Play } from 'lucide-react';
+import { Search, Star, Download, Copy, Play, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const CATEGORIES = ['All', 'Writing', 'Marketing', 'Coding', 'Business', 'Education', 'Creative'];
@@ -90,6 +91,7 @@ const COMMUNITY_PROMPTS = [
 ];
 
 const PromptLibrary = ({ onNavigate }) => {
+  const pageRef = usePageTranslate('library');
   const { showToast } = useContext(AppContext);
   const [search, setSearch] = useState('');
   const [activeCat, setActiveCat] = useState('All');
@@ -97,38 +99,113 @@ const PromptLibrary = ({ onNavigate }) => {
     try { return JSON.parse(localStorage.getItem('pf-fav-prompts') || '[]'); } catch { return []; }
   });
   const [showFavOnly, setShowFavOnly] = useState(false);
+  const [customPrompts, setCustomPrompts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('pf-custom-prompts') || '[]'); } catch { return []; }
+  });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newDesc, setNewDesc] = useState('');
+  const [newText, setNewText] = useState('');
+  const [newCat, setNewCat] = useState('Writing');
 
   useEffect(() => {
     localStorage.setItem('pf-fav-prompts', JSON.stringify(favorites));
   }, [favorites]);
 
+  useEffect(() => {
+    localStorage.setItem('pf-custom-prompts', JSON.stringify(customPrompts));
+  }, [customPrompts]);
+
   const toggleFav = (id) => {
     setFavorites(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const addCustomPrompt = () => {
+    if (!newTitle.trim() || !newText.trim()) { showToast('Title and prompt text are required', 'warn'); return; }
+    const np = { id: `custom_${Date.now()}`, cat: newCat, title: newTitle.trim(), desc: newDesc.trim() || newTitle.trim(), text: newText.trim(), isCustom: true };
+    setCustomPrompts(prev => [np, ...prev]);
+    setNewTitle(''); setNewDesc(''); setNewText(''); setShowAddForm(false);
+    showToast('Custom prompt added!');
+  };
+
+  const deleteCustomPrompt = (id) => {
+    setCustomPrompts(prev => prev.filter(p => p.id !== id));
+    showToast('Deleted');
   };
 
   const usePrompt = (text) => {
     navigator.clipboard.writeText(text);
     showToast('Prompt copied to clipboard!');
-    // Redirect to AI Writer
     onNavigate('aiwriter');
   };
 
+  // Fuzzy search — matches even if words are not adjacent
+  const fuzzyMatch = (str, query) => {
+    const s = str.toLowerCase();
+    const q = query.toLowerCase().trim();
+    if (s.includes(q)) return true;
+    // Word-by-word match
+    const words = q.split(/\s+/);
+    return words.every(w => s.includes(w));
+  };
+
+  const ALL_PROMPTS = [...customPrompts, ...PROMPTS];
+
   const filtered = useMemo(() => {
-    let list = showFavOnly ? PROMPTS.filter(p => favorites.includes(p.id)) : PROMPTS;
+    let list = showFavOnly ? ALL_PROMPTS.filter(p => favorites.includes(p.id)) : ALL_PROMPTS;
     if (activeCat !== 'All') list = list.filter(p => p.cat === activeCat);
     if (search.trim()) {
-      const s = search.toLowerCase();
-      list = list.filter(p => p.title.toLowerCase().includes(s) || p.desc.toLowerCase().includes(s) || p.text.toLowerCase().includes(s) || p.cat.toLowerCase().includes(s));
+      list = list.filter(p =>
+        fuzzyMatch(p.title, search) ||
+        fuzzyMatch(p.desc, search) ||
+        fuzzyMatch(p.text, search) ||
+        fuzzyMatch(p.cat, search)
+      );
     }
     return list;
-  }, [activeCat, search, favorites, showFavOnly]);
+  }, [activeCat, search, favorites, showFavOnly, customPrompts]);
 
   return (
-    <div className="page active">
-      <div className="section-header">
-        <h2 className="section-title">📚 Prompt Library</h2>
-        <div className="section-sub">60+ battle-tested prompts. One click to copy and use in AI Writer or AI Chat.</div>
+    <div className="page active" ref={pageRef}>
+      <div className="section-header" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+        <div>
+          <h2 className="section-title">📚 Prompt Library</h2>
+          <div className="section-sub">60+ battle-tested prompts + your own. One click to copy and use.</div>
+        </div>
+        <button onClick={() => setShowAddForm(f => !f)} style={{ display:'flex', alignItems:'center', gap:6, background:'rgba(124,92,252,0.1)', border:'1px solid rgba(124,92,252,0.3)', borderRadius:8, padding:'8px 14px', cursor:'pointer', color:'var(--accent2)', fontSize:12, fontWeight:700, flexShrink:0 }}>
+          + Add Custom
+        </button>
       </div>
+
+      {showAddForm && (
+        <div style={{ background:'var(--bg3)', border:'1px solid rgba(124,92,252,0.3)', borderRadius:14, padding:20, marginBottom:20 }}>
+          <div style={{ fontSize:13, fontWeight:700, color:'var(--text)', marginBottom:14 }}>Add Custom Prompt</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:10 }}>
+            <div>
+              <div style={{ fontSize:11, color:'var(--text3)', marginBottom:5, fontWeight:600 }}>TITLE *</div>
+              <input className="form-input" value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="e.g. LinkedIn Hook Writer" />
+            </div>
+            <div>
+              <div style={{ fontSize:11, color:'var(--text3)', marginBottom:5, fontWeight:600 }}>CATEGORY</div>
+              <select className="form-select" value={newCat} onChange={e => setNewCat(e.target.value)}>
+                {CATEGORIES.filter(c => c !== 'All').map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{ marginBottom:10 }}>
+            <div style={{ fontSize:11, color:'var(--text3)', marginBottom:5, fontWeight:600 }}>SHORT DESCRIPTION</div>
+            <input className="form-input" value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="One line describing what this prompt does" />
+          </div>
+          <div style={{ marginBottom:14 }}>
+            <div style={{ fontSize:11, color:'var(--text3)', marginBottom:5, fontWeight:600 }}>PROMPT TEXT * (use [BRACKETS] for variables)</div>
+            <textarea className="form-textarea" rows={4} value={newText} onChange={e => setNewText(e.target.value)} placeholder="Write your prompt here. Use [TOPIC], [PRODUCT], [NAME] etc. for customizable parts." />
+          </div>
+          <div style={{ display:'flex', gap:8 }}>
+            <button onClick={addCustomPrompt} style={{ background:'var(--accent)', border:'none', color:'#fff', borderRadius:8, padding:'9px 20px', cursor:'pointer', fontSize:13, fontWeight:700 }}>Save Prompt</button>
+            <button onClick={() => setShowAddForm(false)} style={{ background:'var(--bg2)', border:'1px solid var(--border)', color:'var(--text2)', borderRadius:8, padding:'9px 16px', cursor:'pointer', fontSize:13 }}>Cancel</button>
+          </div>
+        </div>
+      )}
 
       {/* Search & filters */}
       <div className="tool-card" style={{ marginBottom: '20px', padding: '16px' }}>
@@ -194,6 +271,11 @@ const PromptLibrary = ({ onNavigate }) => {
               >
                 <Star size={16} fill={favorites.includes(p.id) ? "var(--gold)" : "none"} color={favorites.includes(p.id) ? "var(--gold)" : "var(--text3)"} />
               </button>
+              {p.isCustom && (
+                <button className="btn btn-sm btn-ghost" onClick={() => deleteCustomPrompt(p.id)} title="Delete custom prompt" style={{ color:'var(--pink)' }}>
+                  <Trash2 size={14} />
+                </button>
+              )}
             </div>
           </motion.div>
         ))}

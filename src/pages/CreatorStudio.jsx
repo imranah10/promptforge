@@ -1,3 +1,4 @@
+import { usePageTranslate } from '../hooks/usePageTranslate';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import React, { useState, useContext } from 'react';
@@ -99,6 +100,7 @@ const HOOK_TYPES = [
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 const CreatorStudio = () => {
+  const pageRef = usePageTranslate('creator');
   const { activeModel, apiKey, providerKeys, customModels, showToast, saveToVault } = useContext(AppContext);
 
   // Active tool tab
@@ -117,6 +119,10 @@ const CreatorStudio = () => {
   const [duration, setDuration] = useState('Under 60 seconds');
   const [loading,  setLoading]  = useState(false);
   const [result,   setResult]   = useState('');
+  const [genHistory, setGenHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('pf_creator_history') || '[]'); } catch { return []; }
+  });
+  const [showGenHistory, setShowGenHistory] = useState(false);
 
   // Hook generator
   const [hookLoading, setHookLoading] = useState(false);
@@ -173,6 +179,8 @@ const CreatorStudio = () => {
       const res = await callAI(system, prompt, null, activeModel, apiKey, providerKeys, customModels);
       setResult(res);
       saveToVault?.('Creator Studio', `${platform} | ${goal} | ${topic}`, res);
+      const hi = { id: Date.now(), platform, topic: topic.slice(0,50), result: res, time: new Date().toLocaleString() };
+      setGenHistory(prev => { const u = [hi,...prev].slice(0,15); try { localStorage.setItem('pf_creator_history', JSON.stringify(u)); } catch(_){} return u; });
     } catch (e) { setResult('❌ Error: ' + e.message); }
     finally { setLoading(false); }
   };
@@ -414,11 +422,37 @@ Make the "superior version" ready to post — formatted perfectly for ${platform
 
   // ── RENDER ────────────────────────────────────────────────────────────────
   return (
-    <div className="page active">
-      <div className="section-header">
-        <h2 className="section-title">🎨 Creator Studio</h2>
-        <div className="section-sub">Generate · Viral Hooks · 7-Day Calendar · Beat Competitors — all platforms, all in one place.</div>
+    <div className="page active" ref={pageRef}>
+      <div className="section-header" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+        <div>
+          <h2 className="section-title">🎨 Creator Studio</h2>
+          <div className="section-sub">Generate · Viral Hooks · 7-Day Calendar · Beat Competitors — all platforms, all in one place.</div>
+        </div>
+        {genHistory.length > 0 && (
+          <button onClick={() => setShowGenHistory(h => !h)} style={{ display:'flex', alignItems:'center', gap:6, background:'var(--bg3)', border:'1px solid var(--border)', borderRadius:8, padding:'8px 12px', cursor:'pointer', color:'var(--text2)', fontSize:12, fontWeight:700, position:'relative', flexShrink:0 }}>
+            History
+            <span style={{ position:'absolute', top:-6, right:-6, background:'#f87171', color:'#fff', borderRadius:'50%', width:16, height:16, fontSize:9, fontWeight:800, display:'flex', alignItems:'center', justifyContent:'center' }}>{genHistory.length}</span>
+          </button>
+        )}
       </div>
+
+      {showGenHistory && (
+        <div style={{ background:'var(--bg3)', border:'1px solid var(--border)', borderRadius:14, padding:16, marginBottom:20 }}>
+          <div style={{ fontSize:11, fontWeight:800, color:'var(--text3)', letterSpacing:2, marginBottom:12, textTransform:'uppercase' }}>Recent Generations</div>
+          {genHistory.map(h => (
+            <div key={h.id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 12px', background:'var(--bg)', border:'1px solid var(--border)', borderRadius:10, marginBottom:8 }}>
+              <div>
+                <div style={{ fontSize:12, fontWeight:600, color:'var(--text)' }}>{h.platform} — {h.topic}</div>
+                <div style={{ fontSize:11, color:'var(--text3)', marginTop:2 }}>{h.time}</div>
+              </div>
+              <div style={{ display:'flex', gap:6 }}>
+                <button onClick={() => { setResult(h.result); setShowGenHistory(false); showToast('Restored!'); }} style={{ fontSize:11, color:'#f87171', background:'rgba(248,113,113,0.1)', border:'1px solid rgba(248,113,113,0.2)', borderRadius:6, padding:'4px 10px', cursor:'pointer', fontWeight:700 }}>Restore</button>
+                <button onClick={() => { setGenHistory(prev => { const u = prev.filter(i => i.id !== h.id); localStorage.setItem('pf_creator_history', JSON.stringify(u)); return u; }); }} style={{ fontSize:11, color:'var(--text3)', background:'var(--bg2)', border:'1px solid var(--border)', borderRadius:6, padding:'4px 8px', cursor:'pointer' }}>✕</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Platform Selector */}
       <div style={{ marginBottom: 20 }}>

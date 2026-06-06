@@ -24,37 +24,73 @@ function isProbablyChatModel(id) {
   return false;
 }
 
-export const AppProvider = ({ children }) => {
-  const initialProviderKeys = JSON.parse(localStorage.getItem('pf_provider_keys') || '{}');
-  const initialGlobalKey = localStorage.getItem('pf_key') || '';
+// ── AES-GCM ENCRYPTION HELPERS ─────────────────────────────────────────────
+// Device-bound key derived from browser fingerprint — keys never stored as plain text
+const getEncKey = async () => {
+  const fp = [navigator.userAgent, navigator.language, screen.colorDepth, screen.width, screen.height, Intl.DateTimeFormat().resolvedOptions().timeZone].join('|');
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(fp), 'PBKDF2', false, ['deriveKey']);
+  const salt = enc.encode('pf_salt_v1');
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt, iterations:100000, hash:'SHA-256' },
+    keyMaterial, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
+  );
+};
 
-  // Restore previously selected model if it's still valid; else fall back safely
-  const savedModelId   = localStorage.getItem('pf_active_model')      || '';
-  const savedModelName = localStorage.getItem('pf_active_model_name') || '';
+const encryptData = async (plainText) => {
+  if (!plainText) return '';
+  try {
+    const key = await getEncKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const enc = new TextEncoder();
+    const encrypted = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, enc.encode(plainText));
+    const combined = new Uint8Array(iv.length + encrypted.byteLength);
+    combined.set(iv, 0); combined.set(new Uint8Array(encrypted), iv.length);
+    return btoa(String.fromCharCode(...combined));
+  } catch { return plainText; }
+};
 
-  let initialModelId   = SAFE_DEFAULT_ID;
-  let initialModelName = SAFE_DEFAULT_NAME;
+const decryptData = async (cipherText) => {
+  if (!cipherText) return '';
+  try {
+    const key = await getEncKey();
+    const combined = Uint8Array.from(atob(cipherText), c => c.charCodeAt(0));
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+    const dec = new TextDecoder();
+    const decrypted = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, data);
+    return dec.decode(decrypted);
+  } catch { return cipherText; } // fallback if already plain (migration)
+};
 
-  if (savedModelId && isProbablyChatModel(savedModelId)) {
-    initialModelId   = savedModelId;
-    initialModelName = savedModelName || savedModelId;
-  } else if (!initialGlobalKey) {
-    const savedProviders = Object.keys(initialProviderKeys).filter(k => initialProviderKeys[k]);
-    if (savedProviders.length > 0) {
-      const firstProvider = savedProviders[0];
-      const model = ALL_MODELS.find(m => m.provider === firstProvider);
-      if (model) {
-        initialModelId = model.id;
-        initialModelName = model.name;
-      }
-    }
+const encryptKeys = async (keysObj) => {
+  const result = {};
+  for (const [k, v] of Object.entries(keysObj)) {
+    result[k] = v ? await encryptData(v) : '';
   }
+  return result;
+};
 
-  const [activeModel, setActiveModel] = useState(initialModelId);
-  const [activeModelName, setActiveModelName] = useState(initialModelName);
-  const [apiKey, setApiKey] = useState(initialGlobalKey);
-  const [providerKeys, setProviderKeys] = useState(initialProviderKeys);
-  
+const decryptKeys = async (keysObj) => {
+  const result = {};
+  for (const [k, v] of Object.entries(keysObj)) {
+    result[k] = v ? await decryptData(v) : '';
+  }
+  return result;
+};
+
+export const AppProvider = ({ children }) => {
+  // Load & decrypt keys on init
+  const [keysReady, setKeysReady] = useState(false);
+  const initialGlobalKey = ''; // will be loaded async
+  const [activeModel, setActiveModel] = useState(() => {
+    const savedModelId = localStorage.getItem('pf_active_model') || '';
+    return savedModelId && isProbablyChatModel(savedModelId) ? savedModelId : SAFE_DEFAULT_ID;
+  });
+  const [activeModelName, setActiveModelName] = useState(() => localStorage.getItem('pf_active_model_name') || SAFE_DEFAULT_NAME);
+  const [apiKey, setApiKey] = useState('');
+  const [providerKeys, setProviderKeys] = useState({});
+
   // Custom models state
   const [customModels, setCustomModels] = useState(
     JSON.parse(localStorage.getItem('pf_custom_models') || '[]')
@@ -65,20 +101,65 @@ export const AppProvider = ({ children }) => {
     JSON.parse(localStorage.getItem('pf_vault_history') || '[]')
   );
 
+  // Decrypt keys on mount
+  useEffect(() => {
+    const loadKeys = async () => {
+      try {
+        const encGlobal = localStorage.getItem('pf_key') || '';
+        const encProvider = JSON.parse(localStorage.getItem('pf_provider_keys') || '{}');
+        const [dGlobal, dProvider] = await Promise.all([
+          decryptData(encGlobal),
+          decryptKeys(encProvider),
+        ]);
+        if (dGlobal) setApiKey(dGlobal);
+        if (Object.keys(dProvider).length) setProviderKeys(dProvider);
+      } catch(e) { console.warn('Key decrypt failed:', e); }
+      finally { setKeysReady(true); }
+    };
+    loadKeys();
+
+    // Session timeout — clear keys from memory after 2 hours inactivity
+    let inactivityTimer;
+    const resetTimer = () => {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        setApiKey('');
+        setProviderKeys({});
+        console.info('PromptForge: Keys cleared from memory after inactivity.');
+      }, 2 * 60 * 60 * 1000); // 2 hours
+    };
+    const events = ['mousemove','keydown','click','touchstart','scroll'];
+    events.forEach(e => window.addEventListener(e, resetTimer, { passive:true }));
+    resetTimer();
+    return () => {
+      clearTimeout(inactivityTimer);
+      events.forEach(e => window.removeEventListener(e, resetTimer));
+    };
+  }, []);
+
   const [toastMsg, setToastMsg] = useState(null);
   const [uiLang, setUiLang] = useState(() => localStorage.getItem('pf_ui_lang') || 'en');
+  const [translateEnabled, setTranslateEnabled] = useState(() => localStorage.getItem('pf_translate_enabled') === 'true');
 
   useEffect(() => {
     localStorage.setItem('pf_ui_lang', uiLang);
   }, [uiLang]);
 
   useEffect(() => {
-    localStorage.setItem('pf_key', apiKey);
-  }, [apiKey]);
+    localStorage.setItem('pf_translate_enabled', translateEnabled);
+  }, [translateEnabled]);
 
+  // Save apiKey encrypted
   useEffect(() => {
-    localStorage.setItem('pf_provider_keys', JSON.stringify(providerKeys));
-  }, [providerKeys]);
+    if (!keysReady) return;
+    encryptData(apiKey).then(enc => localStorage.setItem('pf_key', enc));
+  }, [apiKey, keysReady]);
+
+  // Save providerKeys encrypted
+  useEffect(() => {
+    if (!keysReady) return;
+    encryptKeys(providerKeys).then(enc => localStorage.setItem('pf_provider_keys', JSON.stringify(enc)));
+  }, [providerKeys, keysReady]);
 
   useEffect(() => {
     localStorage.setItem('pf_custom_models', JSON.stringify(customModels));
@@ -144,6 +225,7 @@ export const AppProvider = ({ children }) => {
         vaultHistory, saveToVault, clearVault, deleteVaultItem,
         toastMsg, showToast,
         uiLang, setUiLang,
+        translateEnabled, setTranslateEnabled,
       }}
     >
       {children}
