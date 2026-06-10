@@ -1393,15 +1393,18 @@ const LandingPage = () => {
               <MagneticButton className="lp-btn lp-btn-primary" onClick={() => navigate('/dashboard')} style={{ padding: '20px 42px', fontSize: '16.5px' }}>
                 Unlock Workspace <ArrowRight size={18} />
               </MagneticButton>
-              <div style={{ color: 'var(--lp-cyan)', fontSize: '10px', fontWeight: 800, marginTop: '14px', letterSpacing: '2px', fontFamily: 'Space Grotesk' }}>
-                ⚡ BETA VERSION ACTIVE / ZERO MIDDLEMAN MARKUP
-              </div>
+             
             </div>
-            <MagneticButton className="lp-btn lp-btn-outline" onClick={() => navigate('/dashboard/docs')} style={{ padding: '20px 42px', fontSize: '16.5px' }}>
+            <MagneticButton className="lp-btn lp-btn-outline " onClick={() => navigate('/dashboard/docs')} style={{ fontSize: '16.5px' }}>
               Read System Docs <HelpCircle size={18} />
             </MagneticButton>
+        
+
           </div>
         </motion.div>
+         <div className='text-center' style={{ color: 'var(--lp-cyan)', fontSize: '10px', fontWeight: 800, marginTop: '14px', letterSpacing: '2px', fontFamily: 'Space Grotesk' }}>
+                ⚡ BETA VERSION ACTIVE / ZERO MIDDLEMAN MARKUP
+              </div>
 
         {/* Zoom-in device scroll preview viewport */}
         <div className="dashboard-preview-container">
