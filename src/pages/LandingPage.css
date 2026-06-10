@@ -409,15 +409,15 @@ body {
 }
 
 .lp-btn-outline {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.06);
   color: white;
-  border: 1px solid var(--lp-glass-border);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(20px);
 }
 
 .lp-btn-outline:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-4px);
 }
 

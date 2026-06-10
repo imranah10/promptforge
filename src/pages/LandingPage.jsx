@@ -213,7 +213,7 @@ const QuantumArena = () => {
   const [cards, setCards] = useState([
     {
       id: 0,
-      title: "Holographic Vector Database Interface",
+      title: "Chat With Data — PDF & File Intelligence",
       desc: "Upload up to 50 pages of local PDF reports, scrape websites with Tesseract.js OCR, and explore structural visual links inside a custom SVG Knowledge mesh.",
       badge: "Chat With Data",
       color: "#06b6d4",
@@ -629,8 +629,8 @@ const Footer = () => {
         <div className="footer-col">
           <h4>Capabilities</h4>
           <div className="footer-links">
-            <a href="#features" className="footer-link">Zero-Trust Bento</a>
-            <a href="#quantum-arena" className="footer-link">Quantum Deck Explode</a>
+            <a href="#features" className="footer-link">Capabilities</a>
+            <a href="#quantum-arena" className="footer-link">Tool Showcase</a>
             <a href="#tools" className="footer-link">The 11 Tools Suite</a>
             <a href="#" onClick={(e) => { e.preventDefault(); navigate('/dashboard'); }} className="footer-link">Live Workspace</a>
           </div>
@@ -647,7 +647,7 @@ const Footer = () => {
         <div className="footer-col">
           <h4>Vault & Safety</h4>
           <div className="footer-links">
-            <a href="#" className="footer-link">BYOK Encryption Policy</a>
+            <a href="#byok" className="footer-link">BYOK Architecture</a>
             <a href="#" className="footer-link">Zero Server logs</a>
             <a href="#" className="footer-link">Structured Data Exports</a>
             <a href="#" className="footer-link">Contact Support</a>
@@ -713,8 +713,8 @@ const CardShuffle = () => {
   const [cards, setCards] = useState([
     { id: 1, title: "Claude 3.5 Sonnet", desc: "Supreme coding reasoning and highly detailed structural outputs.", color: "#7c5cfc", icon: <Cpu size={24} /> },
     { id: 2, title: "GPT-4o Omniscient", desc: "Ultra-fast contextual parses and high-volume analytical equations.", color: "#06b6d4", icon: <Zap size={24} /> },
-    { id: 3, title: "Gemini 1.5 Pro", desc: "In-browser vectors holding up to 2,000,000 token inputs safely.", color: "#10b981", icon: <Database size={24} /> },
-    { id: 4, title: "DeepSeek-V3 Speed", desc: "Sleek low-cost math optimizations and private static audits.", color: "#f43f5e", icon: <Sparkles size={24} /> }
+    { id: 3, title: "Gemini 1.5 Pro", desc: "Long-context model with up to 1M token window — ideal for large documents and complex analysis.", color: "#10b981", icon: <Database size={24} /> },
+    { id: 4, title: "DeepSeek-V3", desc: "Fast, cost-efficient model for code, math, and structured reasoning tasks.", color: "#f43f5e", icon: <Sparkles size={24} /> }
   ]);
 
   const shuffle = () => {
@@ -830,7 +830,7 @@ const ThreeDSlider = () => {
     { title: "Indexed PDF Vector Mesh", desc: "Upload up to 50 pages of local PDF data models, scrape image logs with Tesseract.js OCR, and explore parsed conceptual paths inside a beautiful SVG Knowledge Mesh.", icon: <Database />, color: "#06b6d4", img: "/local_vector_nexus.png" },
     { title: "Senior AI Software Auditor", desc: "Audit source files in 18 common languages, locate exact line numbers of severe bugs/vulnerabilities, and replace code sections with verified drop-in boilerplate segments.", icon: <Code />, color: "#10b981", img: "/promptforge_nexus_core.png" },
     { title: "Multi-Agent Debater Council", desc: "Convene 4 specialized expert personas (Visionary, Hacker, Analyst, Critic) inside live bubbles. Synthesis complete blueprints into an AES-encrypted history vault.", icon: <Lightbulb />, color: "#7c5cfc", img: "/neural_agent_synapse.png" },
-    { title: "Holographic Key Vault Console", desc: "BYOK serverless routing. Add API keys directly into local browser sandbox settings, ensuring perfect safety while executing parallel comparative judge debates.", icon: <Shield />, color: "#f43f5e", img: "/private_key_vault_core.png" }
+    { title: "API Key Vault — Secure BYOK Routing", desc: "BYOK serverless routing. Add API keys directly into local browser sandbox settings, ensuring perfect safety while executing parallel comparative judge debates.", icon: <Shield />, color: "#f43f5e", img: "/private_key_vault_core.png" }
   ];
 
   const handlePrev = () => {
@@ -926,7 +926,7 @@ const SavingsCalculator = () => {
     <div className="math-showcase-card">
       <div className="math-showcase-shine" />
       <span className="tag-premium" style={{ color: 'var(--lp-cyan)', borderColor: 'var(--lp-cyan-glow)' }}>
-        THE MATHEMATICS OF BYOK
+        HOW BYOK SAVES YOU MONEY
       </span>
       <h2 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '24px 0', fontFamily: 'var(--lp-font)', textAlign: 'center', lineHeight: 1.1 }}>
         Stop Overpaying <br />For AI <span style={{ background: 'linear-gradient(135deg, #a78bfa 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Access.</span>
@@ -987,7 +987,7 @@ const SavingsCalculator = () => {
               <div className="item-marker cyan-marker">✓</div>
               <div className="item-text">
                 <strong>Local-First Client Sandbox</strong>
-                <p>Keys are encrypted locally in your browser IndexedDB (AES-GCM). Data never touches external servers.</p>
+                <p>Keys are encrypted with AES-GCM 256-bit in your browser localStorage, bound to your device. Data never touches external servers.</p>
               </div>
             </div>
             <div className="compare-item-detailed">

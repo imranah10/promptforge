@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useContext, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronDown, Copy, Check, Globe, Loader2, RefreshCw, X, Menu } from 'lucide-react';
@@ -91,7 +90,7 @@ Google Gemini — key format: AIza... — Free tier available — Best for: long
 OpenRouter — key format: sk-or-... — Many free models — Best for: beginners, 100+ models
 Mistral — No free tier — Best for: European models, fast and cheap
 
-Your keys are stored only in your browser localStorage with AES-GCM encryption. Never sent to any server.
+Your keys are stored only in your browser localStorage with AES-GCM 256-bit encryption, device-fingerprint bound. Never sent to any server. Auto-cleared after 2 hours inactivity.
 
 === Prompt Optimizer ===
 What it does: Turns weak or vague prompts into expert-level prompts. Uses the CREATE framework: Character (who the AI should be), Request (what you want), Examples, Adjustments, Type (format), Extras.
@@ -339,7 +338,7 @@ How to add a key:
 3. Paste your API key in the field
 4. Click Save
 
-Security: Keys are stored only in your browser localStorage with AES-GCM encryption. PromptForge server never receives your keys. Requests go directly from your browser to the AI provider.
+Security: Keys are stored only in your browser localStorage with AES-GCM 256-bit encryption, bound to your device fingerprint — copying them to another device won't work. PromptForge server never receives your keys. Requests go directly from your browser to the AI provider. After 2 hours of inactivity, keys are automatically cleared from memory. The app is also protected by Content Security Policy (CSP) headers on the server — only approved AI providers can be contacted.
 
 Warning: If you clear your browser's site data, keys will be deleted. Keep a backup of your keys.
 
