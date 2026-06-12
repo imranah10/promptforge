@@ -45,7 +45,7 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
     <nav className={`sidebar ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`} id="sidebar">
       <div className="sidebar-logo">
         <a className="logo-mark" href="#" onClick={(e) => { e.preventDefault(); onNavigate('dashboard'); }}>
-          <div className="logo-icon"><Zap size={20} color="#fff" /></div>
+          <img src="/logo-icon.png" alt="PF" style={{ width: '42px', height: '42px', objectFit: 'contain', display: 'block' }} />
         </a>
         <button className="collapse-toggle" onClick={onToggleCollapse} title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}>
           {isCollapsed ? <PanelRightClose size={18} /> : <PanelLeftClose size={18} />}

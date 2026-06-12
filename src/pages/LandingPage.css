@@ -154,6 +154,7 @@ body {
   background: rgba(3, 3, 8, 0.75);
   border-bottom: 1px solid var(--lp-glass-border);
   box-sizing: border-box;
+  transform: translate3d(0, 0, 9999px);
 }
 
 .nav-logo-wrap {
@@ -161,6 +162,33 @@ body {
   align-items: center;
   gap: 12px;
   cursor: pointer;
+}
+
+.brand-logo-full {
+  height: 68px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.brand-logo-icon {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+  display: none;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .brand-logo-full.desktop-logo {
+    display: none;
+  }
+  .brand-logo-icon.mobile-logo {
+    display: block;
+  }
 }
 
 .logo-icon {
@@ -649,17 +677,11 @@ body {
     0 0 60px rgba(6, 182, 212, 0.2);
 }
 
-/* 3D Card spread coordinates */
-.quantum-interactive-zone:hover .qcard-0 { transform: translate3d(-320px, -35px, 80px) rotate(-18deg) scale(1.05); }
-.quantum-interactive-zone:hover .qcard-1 { transform: translate3d(-110px, -10px, 30px) rotate(-6deg) scale(1.05); }
-.quantum-interactive-zone:hover .qcard-2 { transform: translate3d(110px, -10px, 30px) rotate(6deg) scale(1.05); }
-.quantum-interactive-zone:hover .qcard-3 { transform: translate3d(320px, -35px, 80px) rotate(18deg) scale(1.05); }
-
 /* Inactive Stack piles */
-.qcard-0 { transform: translate3d(-80px, 0, 0) rotate(-7deg); z-index: 10; border-left: 5px solid var(--lp-accent); }
-.qcard-1 { transform: translate3d(-25px, 0, 15px) rotate(-2deg); z-index: 11; border-left: 5px solid var(--lp-cyan); }
-.qcard-2 { transform: translate3d(25px, 0, 30px) rotate(3deg); z-index: 12; border-left: 5px solid var(--lp-accent-light); }
-.qcard-3 { transform: translate3d(80px, 0, 45px) rotate(8deg); z-index: 13; border-left: 5px solid var(--lp-rose); }
+.qcard-0 { z-index: 10; border-left: 5px solid var(--lp-accent); }
+.qcard-1 { z-index: 11; border-left: 5px solid var(--lp-cyan); }
+.qcard-2 { z-index: 12; border-left: 5px solid var(--lp-accent-light); }
+.qcard-3 { z-index: 13; border-left: 5px solid var(--lp-rose); }
 
 /* Crisp High-saturation image overlays inside cards */
 .quantum-card-bg {

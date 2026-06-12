@@ -70,7 +70,7 @@ const WhiteLabelModal = ({ isOpen, onClose }) => {
                   <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', fontFamily: 'Outfit, sans-serif', margin: 0 }}>
                     Commercial Codebase License
                   </h3>
-                  <p style={{ fontSize: '12px', color: 'var(--text3)', margin: '4px 0 0' }}>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '4px 0 0' }}>
                     Purchase the full source code to host and customize yourself.
                   </p>
                 </div>
@@ -86,12 +86,12 @@ const WhiteLabelModal = ({ isOpen, onClose }) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--text3)',
+                  color: '#94a3b8',
                   cursor: 'pointer',
                   transition: '0.2s',
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; }}
               >
                 <X size={16} />
               </button>
@@ -99,28 +99,28 @@ const WhiteLabelModal = ({ isOpen, onClose }) => {
 
             {/* Content Body */}
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <p style={{ color: 'var(--text2)', fontSize: '13.5px', lineHeight: '1.6', marginBottom: '24px' }}>
+              <p style={{ color: '#cbd5e1', fontSize: '13.5px', lineHeight: '1.6', marginBottom: '24px' }}>
                 Want to buy the complete, production-ready <strong>PromptForge</strong> codebase? We offer commercial source code licenses for developers, startups, and agencies who want to host and customize it themselves:
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <div style={{ color: 'var(--lp-cyan)', marginTop: '2px', flexShrink: 0 }}><Sparkles size={16} /></div>
-                  <div style={{ fontSize: '13px', color: 'var(--text)', lineHeight: '1.5' }}>
+                  <div style={{ fontSize: '13px', color: '#e2e8f0', lineHeight: '1.5' }}>
                     <strong>Full Source Code Access:</strong> Obtain the complete, clean React + Vite codebase. Easily deploy and host it on Vercel, Netlify, or your own private servers.
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <div style={{ color: 'var(--green)', marginTop: '2px', flexShrink: 0 }}><Settings size={16} /></div>
-                  <div style={{ fontSize: '13px', color: 'var(--text)', lineHeight: '1.5' }}>
+                  <div style={{ fontSize: '13px', color: '#e2e8f0', lineHeight: '1.5' }}>
                     <strong>100% Customizable:</strong> You get complete freedom to change branding, logos, default models, default system prompts, or integrate your own backend APIs.
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <div style={{ color: 'var(--accent2)', marginTop: '2px', flexShrink: 0 }}><ShieldAlert size={16} /></div>
-                  <div style={{ fontSize: '13px', color: 'var(--text)', lineHeight: '1.5' }}>
+                  <div style={{ fontSize: '13px', color: '#e2e8f0', lineHeight: '1.5' }}>
                     <strong>Self-Hosted & Private:</strong> Keep 100% control of your deployment and data privacy. Includes basic installation support to get your local build running.
                   </div>
                 </div>
@@ -159,7 +159,7 @@ const WhiteLabelModal = ({ isOpen, onClose }) => {
                   style={{
                     background: 'transparent',
                     border: '1px solid rgba(255, 255, 255, 0.08)',
-                    color: 'var(--text2)',
+                    color: '#cbd5e1',
                     borderRadius: '12px',
                     padding: '12px 20px',
                     cursor: 'pointer',
@@ -174,7 +174,7 @@ const WhiteLabelModal = ({ isOpen, onClose }) => {
                 </button>
 
                 {/* Email Copy fallback UI */}
-                <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '11px', color: 'var(--text3)', display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
+                <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '11px', color: '#94a3b8', display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
                   <span>Or email directly: <strong style={{ color: '#fff' }}>imranaha310@gmail.com</strong></span>
                   <button 
                     onClick={handleCopyEmail}

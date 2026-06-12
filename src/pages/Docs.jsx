@@ -683,7 +683,7 @@ STRICT RULES:
         {/* Logo */}
         <div style={{ padding: '20px 18px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, background: 'var(--accent)', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>⚡</div>
+            <img src="/logo-icon.png" alt="PF" style={{ width: '36px', height: '36px', objectFit: 'contain', flexShrink: 0, display: 'block' }} />
             <div>
               <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', letterSpacing: '-0.5px' }}>PromptForge</div>
               <div style={{ fontSize: 9, color: 'var(--accent)', fontWeight: 700, letterSpacing: 2 }}>DOCS v3.0</div>

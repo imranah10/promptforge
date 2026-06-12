@@ -210,6 +210,21 @@ const QuantumArena = () => {
   const { showToast } = useContext(AppContext);
   const [explodedCard, setExplodedCard] = useState(null);
   const [activeNode, setActiveNode] = useState(0);
+  const [deckHovered, setDeckHovered] = useState(false);
+
+  const stackedPosition = [
+    { x: -80, y: 0, z: 0, rotate: -7 },
+    { x: -25, y: 0, z: 15, rotate: -2 },
+    { x: 25, y: 0, z: 30, rotate: 3 },
+    { x: 80, y: 0, z: 45, rotate: 8 }
+  ];
+
+  const spreadPosition = [
+    { x: -320, y: -35, z: 80, rotate: -18 },
+    { x: -110, y: -10, z: 30, rotate: -6 },
+    { x: 110, y: -10, z: 30, rotate: 6 },
+    { x: 320, y: -35, z: 80, rotate: 18 }
+  ];
   
   const [cards, setCards] = useState([
     {
@@ -292,30 +307,48 @@ const QuantumArena = () => {
   return (
     <div className="quantum-arena-wrap">
       <div className="section-header">
-        <span className="tag-premium">INVENTED QUANTUM ARENA ARCHITECTURE</span>
+        <span className="tag-premium">QUANTUM WORKSPACE PIPELINES</span>
         <h2>
-          Interactive <span style={{ color: 'var(--lp-accent)' }}>Exploding Blueprints</span>
+          Local AI <span style={{ color: 'var(--lp-accent)' }}>Development Workbench</span>
         </h2>
         <p>
-          Hover the deck below to <strong style={{ color: 'var(--lp-cyan)', fontWeight: 700 }}>spread</strong> cards in 3D space. Click <strong style={{ color: 'var(--lp-cyan)', fontWeight: 700 }}>shuffle</strong> to trigger active spring mechanics. <strong style={{ color: 'var(--lp-accent)', fontWeight: 700 }}>Click any card</strong> to explode it into an interactive SVG Neural Node Mesh.
+          Explore PromptForge's local sandboxed agent workbenches designed for developer efficiency. Each pipeline runs securely in your browser client, executing file parsing, multi-agent debates, and code vulnerability audits with zero server latency.
         </p>
       </div>
 
       {/* Interactive Zone wrapping stack and button */}
-      <div className="quantum-interactive-zone">
+      <div 
+        className="quantum-interactive-zone"
+        onMouseEnter={() => setDeckHovered(true)}
+        onMouseLeave={() => setDeckHovered(false)}
+      >
         <div className="quantum-stack-wrap">
-          {cards.map((card, idx) => (
-            <motion.div
-              key={card.id}
-              layout
-              className={`quantum-card qcard-${idx}`}
-              onClick={() => {
-                setExplodedCard(card);
-                setActiveNode(0);
-              }}
-              whileHover={{ scale: 1.05, y: -20, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 350, damping: 18 }}
-            >
+          {cards.map((card, idx) => {
+            const target = deckHovered ? spreadPosition[idx] : stackedPosition[idx];
+            return (
+              <motion.div
+                key={card.id}
+                layout
+                className={`quantum-card qcard-${idx}`}
+                onClick={() => {
+                  setExplodedCard(card);
+                  setActiveNode(0);
+                }}
+                animate={{
+                  x: target.x,
+                  y: target.y,
+                  z: target.z,
+                  rotate: target.rotate,
+                  scale: 1
+                }}
+                whileHover={{ 
+                  scale: 1.08, 
+                  z: target.z + 40, 
+                  rotate: 0,
+                  transition: { duration: 0.2 }
+                }}
+                transition={{ type: "spring", stiffness: 240, damping: 20 }}
+              >
               {/* Background image panel with full saturated visibility */}
               <div 
                 className="quantum-card-bg"
@@ -389,7 +422,7 @@ const QuantumArena = () => {
                 </div>
               </div>
             </motion.div>
-          ))}
+          );})}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '-35px', marginBottom: '15px', zIndex: 50, position: 'relative' }}>
@@ -547,12 +580,11 @@ const QuantumArena = () => {
 
 const Logo = () => (
   <div className="nav-logo-wrap" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-    <div className="logo-icon">
-      <Zap size={18} color="#fff" />
-    </div>
-    <span className="nav-logo-text">
-      Prompt<span className="nav-logo-forge">Forge</span>
-    </span>
+    {/* Full stacked logo (PF Monogram + PromptForge text) shown on desktop */}
+    <img src="/logo.png" alt="PromptForge" className="brand-logo-full desktop-logo" />
+    
+    {/* Monogram Icon shown only on mobile */}
+    <img src="/logo-icon.png" alt="PF" className="brand-logo-icon mobile-logo" />
   </div>
 );
 
@@ -851,12 +883,12 @@ const ThreeDSlider = () => {
   return (
     <div className="orbital-showcase-wrap">
       <div className="section-header">
-        <span className="tag-premium">UPGRADED SYSTEM INTERFACES</span>
+        <span className="tag-premium">BYOK SERVERLESS EXECUTION</span>
         <h2>
-          3D Visual <span style={{ color: 'var(--lp-accent)' }}>Interactive Slider</span>
+          Secure <span style={{ color: 'var(--lp-accent)' }}>Multi-Model Intelligence</span>
         </h2>
         <p>
-          Drag or click items below to inspect PromptForge's most complex local structures with full saturation.
+          Harness the power of frontier language models directly. Store your API keys safely under local browser encryption, routing queries straight to Gemini, Claude, OpenAI, and DeepSeek with zero middleman markup.
         </p>
       </div>
 
@@ -878,6 +910,17 @@ const ThreeDSlider = () => {
               <motion.div
                 key={i}
                 className={`orbital-card ${isActive ? 'active' : ''}`}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(event, info) => {
+                  const swipeThreshold = 50;
+                  if (info.offset.x < -swipeThreshold) {
+                    handleNext();
+                  } else if (info.offset.x > swipeThreshold) {
+                    handlePrev();
+                  }
+                }}
                 animate={{
                   scale: isActive ? 1.05 : 0.72,
                   opacity: Math.abs(offset) > 1 ? 0 : 1 - Math.abs(offset) * 0.45,
@@ -886,8 +929,8 @@ const ThreeDSlider = () => {
                   rotateY: offset * -25,
                 }}
                 transition={{ type: "spring", stiffness: 240, damping: 22 }}
-                onClick={() => setActive(i)}
-                style={{ cursor: 'pointer' }}
+                onTap={() => setActive(i)}
+                style={{ cursor: 'pointer', touchAction: 'pan-y' }}
               >
                 <div className="orbital-card-inner">
                   <div className="orbital-card-bg" style={{ backgroundImage: `url(${tool.img})` }} />
