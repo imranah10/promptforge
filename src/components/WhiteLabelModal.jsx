@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Briefcase, Mail, ShieldAlert, Sparkles, Settings, ArrowRight } from 'lucide-react';
 
 const WhiteLabelModal = ({ isOpen, onClose }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText('imranaha310@gmail.com');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -164,6 +172,27 @@ const WhiteLabelModal = ({ isOpen, onClose }) => {
                 >
                   Close
                 </button>
+
+                {/* Email Copy fallback UI */}
+                <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '11px', color: 'var(--text3)', display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
+                  <span>Or email directly: <strong style={{ color: '#fff' }}>imranaha310@gmail.com</strong></span>
+                  <button 
+                    onClick={handleCopyEmail}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: copied ? 'var(--green)' : 'var(--lp-cyan)',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      padding: '2px 8px',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    {copied ? '✓ Copied to clipboard!' : 'Copy Email Address'}
+                  </button>
+                </div>
+
               </div>
             </div>
           </motion.div>
