@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+import WhiteLabelModal from './components/WhiteLabelModal';
 import Topbar from './components/Topbar';
 import ModelSelector from './components/ModelSelector';
 import Dashboard from './pages/Dashboard';
@@ -21,11 +22,12 @@ import TheSpider from './pages/TheSpider';
 import TheInventor from './pages/TheInventor';
 import Docs from './pages/Docs';
 import Toast from './components/Toast';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, AppContext } from './context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingPage from './pages/LandingPage';
 
 function DashboardLayout({ theme, onToggleTheme }) {
+  const { whiteLabelOpen, setWhiteLabelOpen } = useContext(AppContext);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
   const navigate = useNavigate();
@@ -114,6 +116,7 @@ function DashboardLayout({ theme, onToggleTheme }) {
           </AnimatePresence>
         </div>
       </div>
+      <WhiteLabelModal isOpen={whiteLabelOpen} onClose={() => setWhiteLabelOpen(false)} />
     </div>
   );
 }

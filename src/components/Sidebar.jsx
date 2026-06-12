@@ -1,15 +1,17 @@
 import React from 'react';
 import { 
   LayoutDashboard, PenTool, GitCompare, Code2, MessageSquare, 
-  Key, Share2, Languages, DollarSign,
+  Key, Share2, Languages, DollarSign, Briefcase,
   Zap, Search, Library, Wand2, Database, Archive, FileText,
   PanelLeftClose, PanelRightClose, Globe, Lightbulb, BookOpen,
   Sun, Moon
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { AppContext } from '../context/AppContext';
 
 const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse, theme, onToggleTheme }) => {
   const [tooltip, setTooltip] = React.useState(null);
+  const { setWhiteLabelOpen } = React.useContext(AppContext);
 
   const handleMouseEnter = (e, label) => {
     if (!isCollapsed) return;
@@ -73,6 +75,17 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
         <div className="nav-section">
           {!isCollapsed && <div className="nav-label">Business</div>}
           <NavItem id="sellearn" icon={DollarSign} label="Sell & Earn" />
+          <div 
+            className="nav-item" 
+            onClick={() => setWhiteLabelOpen(true)}
+            onMouseEnter={(e) => handleMouseEnter(e, "White-Label")}
+            onMouseLeave={handleMouseLeave}
+            style={{ color: 'var(--lp-accent-light)', borderColor: 'rgba(124, 92, 252, 0.15)' }}
+          >
+            <Briefcase size={18} className="icon" style={{ color: 'var(--accent2)' }} /> 
+            {!isCollapsed && <span className="item-label" style={{ fontWeight: 600 }}>White-Label</span>}
+            {!isCollapsed && <span className="nav-badge badge-pro">Enterprise</span>}
+          </div>
         </div>
       </div>
 

@@ -140,6 +140,7 @@ export const AppProvider = ({ children }) => {
   const [toastMsg, setToastMsg] = useState(null);
   const [uiLang, setUiLang] = useState(() => localStorage.getItem('pf_ui_lang') || 'en');
   const [translateEnabled, setTranslateEnabled] = useState(() => localStorage.getItem('pf_translate_enabled') === 'true');
+  const [whiteLabelOpen, setWhiteLabelOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('pf_ui_lang', uiLang);
@@ -226,6 +227,7 @@ export const AppProvider = ({ children }) => {
         toastMsg, showToast,
         uiLang, setUiLang,
         translateEnabled, setTranslateEnabled,
+        whiteLabelOpen, setWhiteLabelOpen,
       }}
     >
       {children}

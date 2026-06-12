@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, ArrowRight, ChevronRight, ChevronLeft, Zap, Database, 
   Image as ImageIcon, Code, ArrowUpRight, CheckCircle2, 
-  Search, Brain, Lightbulb, Globe, Menu, X, Wand2, Layers, MessageSquare, Play, Video as VideoIcon, HelpCircle, Shield, Cpu, RefreshCw, Star, ArrowDown, Copy, Terminal, Share2
+  Search, Brain, Lightbulb, Globe, Menu, X, Wand2, Layers, MessageSquare, Play, Video as VideoIcon, HelpCircle, Shield, Cpu, RefreshCw, Star, ArrowDown, Copy, Terminal, Share2, Briefcase, Mail
 } from 'lucide-react';
 import Lenis from 'lenis';
 import ExplodingObjects from '../components/landing/ExplodingObjects';
+import WhiteLabelModal from '../components/WhiteLabelModal';
 import { AppContext } from '../context/AppContext';
 import './LandingPage.css';
 
@@ -557,6 +558,7 @@ const Logo = () => (
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { setWhiteLabelOpen } = useContext(AppContext);
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -571,6 +573,9 @@ const Navbar = () => {
         <a href="#architecture" className="nav-link">Architecture Mesh</a>
         <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); navigate('/dashboard/docs'); }} style={{ color: 'var(--lp-accent-light)', fontWeight: 800 }}>
           Interactive Docs Hub
+        </a>
+        <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); setWhiteLabelOpen(true); }} style={{ color: 'var(--lp-cyan)', fontWeight: 700 }}>
+          Enterprise White-Label
         </a>
         <MagneticButton className="lp-btn lp-btn-primary" onClick={() => navigate('/dashboard')} style={{ padding: '11px 26px', fontSize: '13.5px' }}>
           Launch Studio
@@ -604,6 +609,7 @@ const Navbar = () => {
               <a href="#tools" className="mobile-link" onClick={() => setIsOpen(false)}>The 11 Tools</a>
               <a href="#architecture" className="mobile-link" onClick={() => setIsOpen(false)}>Architecture Mesh</a>
               <a href="#" className="mobile-link" onClick={(e) => { setIsOpen(false); navigate('/dashboard/docs'); }} style={{ color: 'var(--lp-accent-light)' }}>Interactive Docs Hub</a>
+              <a href="#" className="mobile-link" onClick={(e) => { setIsOpen(false); setWhiteLabelOpen(true); }} style={{ color: 'var(--lp-cyan)', fontWeight: 700 }}>Enterprise White-Label</a>
               <button className="lp-btn lp-btn-primary" onClick={() => { setIsOpen(false); navigate('/dashboard'); }} style={{ width: '100%', justifyContent: 'center', marginTop: '24px' }}>
                 Launch Studio
               </button>
@@ -617,6 +623,7 @@ const Navbar = () => {
 
 const Footer = () => {
   const navigate = useNavigate();
+  const { setWhiteLabelOpen } = useContext(AppContext);
   return (
     <footer className="lp-footer">
       <div className="footer-grid">
@@ -650,7 +657,7 @@ const Footer = () => {
             <a href="#byok" className="footer-link">BYOK Architecture</a>
             <a href="#" className="footer-link">Zero Server logs</a>
             <a href="#" className="footer-link">Structured Data Exports</a>
-            <a href="#" className="footer-link">Contact Support</a>
+            <a href="#" className="footer-link" onClick={(e) => { e.preventDefault(); setWhiteLabelOpen(true); }}>Contact Developer (White-Label)</a>
           </div>
         </div>
       </div>
@@ -1338,6 +1345,7 @@ const ToolsDiscovery = () => {
 // --- MAIN PAGE ---
 
 const LandingPage = () => {
+  const { setWhiteLabelOpen, whiteLabelOpen } = useContext(AppContext);
   const navigate = useNavigate();
   const heroRef = useRef(null);
   
@@ -1395,11 +1403,12 @@ const LandingPage = () => {
               </MagneticButton>
              
             </div>
-            <MagneticButton className="lp-btn lp-btn-outline " onClick={() => navigate('/dashboard/docs')} style={{ fontSize: '16.5px' }}>
+            <MagneticButton className="lp-btn lp-btn-outline" onClick={() => navigate('/dashboard/docs')} style={{ fontSize: '16.5px' }}>
               Read System Docs <HelpCircle size={18} />
             </MagneticButton>
-        
-
+            <MagneticButton className="lp-btn lp-btn-outline" onClick={() => setWhiteLabelOpen(true)} style={{ fontSize: '16.5px', border: '1px solid rgba(124, 92, 252, 0.4)', color: 'var(--lp-accent-light)' }}>
+              Contact Me (White-Label) <Briefcase size={18} style={{ marginLeft: 6 }} />
+            </MagneticButton>
           </div>
         </motion.div>
          <div className='text-center' style={{ color: 'var(--lp-cyan)', fontSize: '10px', fontWeight: 800, marginTop: '14px', letterSpacing: '2px', fontFamily: 'Space Grotesk' }}>
@@ -1677,6 +1686,7 @@ const LandingPage = () => {
       </section>
 
       <Footer />
+      <WhiteLabelModal isOpen={whiteLabelOpen} onClose={() => setWhiteLabelOpen(false)} />
     </div>
   );
 };

@@ -1,12 +1,11 @@
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { motion } from 'framer-motion';
 import { PROVIDERS } from '../utils/models';
+import { Shield, Lock, Briefcase, ArrowRight } from 'lucide-react';
 
 const ApiKeys = () => {
-  const { providerKeys, setProviderKeys, showToast } = useContext(AppContext);
+  const { providerKeys, setProviderKeys, showToast, setWhiteLabelOpen } = useContext(AppContext);
 
   const handleSave = (id, value) => {
     if (!value.trim()) return;
@@ -28,6 +27,22 @@ const ApiKeys = () => {
       <div className="section-header">
         <h2 className="section-title">🔑 API Keys Manager</h2>
         <div className="section-sub">Your keys are stored only in your browser — never sent to our servers. Direct to AI provider.</div>
+      </div>
+
+      <div className="glass-card" style={{ padding: '24px', marginBottom: '24px', background: 'rgba(16, 185, 129, 0.04)', borderLeft: '4px solid var(--green)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', right: '16px', top: '16px', opacity: 0.05, pointerEvents: 'none', color: 'var(--green)' }}>
+          <Shield size={100} />
+        </div>
+        <h4 style={{ color: 'var(--green)', fontSize: '15px', fontWeight: 700, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Lock size={16} /> 100% Privacy & Direct Connection Verification
+        </h4>
+        <p style={{ fontSize: '13px', color: 'var(--text2)', lineHeight: '1.6', margin: 0 }}>
+          <strong>AES-GCM Local Encryption:</strong> Your keys are encrypted directly in your browser using a device-bound key. They never leave your device. <br/>
+          <strong>No Proxy Servers:</strong> All API requests are sent directly from your browser to the official provider endpoints (OpenAI, Anthropic, Google, Groq). <br/>
+          <span style={{ display: 'inline-block', marginTop: '8px', color: 'var(--text3)', fontSize: '12px' }}>
+            💡 <strong>Verify it yourself:</strong> Open browser Developer Tools (F12 or inspect element) → go to the <code>Network</code> tab → trigger any prompt. You will see requests routing directly to <code>api.openai.com</code> or <code>generativelanguage.googleapis.com</code>, never touching a PromptForge server.
+          </span>
+        </p>
       </div>
       
       <div className="glass-card" style={{ padding: '16px 20px', marginBottom: '24px', background: 'rgba(56, 189, 248, 0.05)', borderLeft: '4px solid var(--accent3)' }}>
@@ -79,6 +94,22 @@ const ApiKeys = () => {
           <br/><br/>
           Click the <span style={{ background: 'var(--card2)', border: '1px dashed var(--border)', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>+ Custom</span> button next to the model selection chips at the top of the screen. You'll be able to enter your custom API Endpoint URL, Model ID, and API Key there!
         </p>
+      </div>
+
+      <div className="white-label-card glass-card" style={{ marginTop: '20px', padding: '24px', background: 'linear-gradient(135deg, rgba(124, 92, 252, 0.05) 0%, rgba(56, 189, 248, 0.02) 100%)', border: '1px solid rgba(124, 92, 252, 0.2)' }}>
+        <h3 style={{ fontFamily: 'var(--font-head)', fontSize: '18px', color: 'var(--text)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Briefcase size={18} style={{ color: 'var(--accent2)' }} /> Deploy PromptForge for Your Team (White-Label)
+        </h3>
+        <p style={{ color: 'var(--text2)', fontSize: '14px', lineHeight: '1.6', marginBottom: '16px' }}>
+          Need a private AI portal for your company or agency? Deploy PromptForge under your own domain with custom branding, default corporate API keys (with employee usage ceilings), and customized prompt templates.
+        </p>
+        <button 
+          className="btn btn-primary" 
+          onClick={() => setWhiteLabelOpen(true)}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '13px' }}
+        >
+          Explore White-Label Solutions <ArrowRight size={14} />
+        </button>
       </div>
 
       <style jsx>{`
