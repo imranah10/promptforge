@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef } from 'react';
 import { AppContext } from '../context/AppContext';
-import { callAI } from '../utils/ai';
+import { callAI, getEffectiveKey } from '../utils/ai';
 
 // In-memory cache for translations to avoid redundant AI calls
 // Format: { [lang]: { [originalText]: translatedText } }
@@ -61,7 +61,8 @@ export function usePageTranslate(pageKey) {
     };
 
     const translatePage = async () => {
-      if (!translateEnabled || uiLang === 'en' || !apiKey) {
+      const effectiveKey = getEffectiveKey(activeModel, apiKey, providerKeys, customModels);
+      if (!translateEnabled || uiLang === 'en' || !effectiveKey) {
         restoreEnglish();
         return;
       }
