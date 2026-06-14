@@ -40,6 +40,22 @@ const T = {
       { n: '4', t: 'Done! Open any tool and start generating' },
     ],
     setup_note: '💡 Tip: Groq gives free API keys at console.groq.com — use Llama 3.3 70B for free!',
+    label_supported_providers: 'Supported Providers',
+    label_key: 'Key',
+    label_models: 'Models',
+    label_input_fields: 'Input Fields — What to fill in',
+    label_step_by_step: 'Step by Step — How to use it',
+    label_real_examples: 'Real Examples — Copy and Try',
+    label_what_you_type: 'What you type:',
+    label_what_you_get: 'What you get:',
+    label_copy_example: 'Copy Example',
+    label_copied: 'Copied!',
+    label_pro_tips: '💡 Pro Tips',
+    label_search_placeholder: 'Search tools...',
+    label_documentation: 'Documentation',
+    label_retranslate: 'Retranslate',
+    label_tabs_sections: 'Tabs / Sections',
+    label_ai_experts: '5 AI Experts',
     tools: [
       {
         id: 'aiwriter',
@@ -738,17 +754,17 @@ Prompt: "Write a Python function to check if a string is a valid email address"`
   // Other languages handled by AI translation
 };
 
-const CopyButton = ({ text }) => {
+const CopyButton = ({ text, labelCopy, labelCopied }) => {
   const [copied, setCopied] = useState(false);
   const copy = () => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   return (
     <button onClick={copy} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', background: copied ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.06)', border: `1px solid ${copied ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.12)'}`, color: copied ? '#4ade80' : 'rgba(255,255,255,0.6)', transition: 'all 0.2s' }}>
-      {copied ? <><Check size={11} /> Copied!</> : <><Copy size={11} /> Copy Example</>}
+      {copied ? <><Check size={11} /> {labelCopied || 'Copied!'}</> : <><Copy size={11} /> {labelCopy || 'Copy Example'}</>}
     </button>
   );
 };
 
-const ToolCard = ({ tool }) => {
+const ToolCard = ({ tool, content }) => {
   const [open, setOpen] = useState(false);
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -773,7 +789,7 @@ const ToolCard = ({ tool }) => {
               {/* Tabs */}
               {tool.tabs && (
                 <div style={{ marginBottom: 18 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>Tabs / Sections</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>{content?.label_tabs_sections || 'Tabs / Sections'}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
                     {tool.tabs.map((tab, i) => (
                       <div key={i} style={{ padding: '10px 14px', background: `${tool.color}0a`, border: `1px solid ${tool.color}25`, borderRadius: 10 }}>
@@ -788,7 +804,7 @@ const ToolCard = ({ tool }) => {
               {/* Agents (for Inventor) */}
               {tool.agents && (
                 <div style={{ marginBottom: 18 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>5 AI Experts</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>{content?.label_ai_experts || '5 AI Experts'}</div>
                   {tool.agents.map((a, i) => (
                     <div key={i} style={{ padding: '8px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: 10 }}>
                       <div style={{ fontWeight: 700, fontSize: 13, color: tool.color, minWidth: 180 }}>{a.name}</div>
@@ -801,13 +817,13 @@ const ToolCard = ({ tool }) => {
               {/* Supported providers (for API Keys) */}
               {tool.supported && (
                 <div style={{ marginBottom: 18 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>Supported Providers</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>{content?.label_supported_providers || 'Supported Providers'}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
                     {tool.supported.map((p, i) => (
                       <div key={i} style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10 }}>
                         <div style={{ fontWeight: 700, fontSize: 13, color: '#fff' }}>{p.name}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>Key: <code style={{ color: tool.color }}>{p.key}</code></div>
-                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>Models: {p.models}</div>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>{content?.label_key || 'Key'}: <code style={{ color: tool.color }}>{p.key}</code></div>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{content?.label_models || 'Models'}: {p.models}</div>
                         <div style={{ fontSize: 11, color: tool.color, marginTop: 4 }}>{p.url}</div>
                       </div>
                     ))}
@@ -818,7 +834,7 @@ const ToolCard = ({ tool }) => {
               {/* Input Fields */}
               {tool.fields && (
                 <div style={{ marginBottom: 18 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>Input Fields — What to fill in</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>{content?.label_input_fields || 'Input Fields — What to fill in'}</div>
                   {tool.fields.map((f, i) => (
                     <div key={i} style={{ display: 'flex', gap: 10, padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', flexWrap: 'wrap' }}>
                       <div style={{ fontWeight: 700, fontSize: 13, color: tool.color, minWidth: 180, flexShrink: 0 }}>{f.name}</div>
@@ -830,7 +846,7 @@ const ToolCard = ({ tool }) => {
 
               {/* Steps */}
               <div style={{ marginBottom: 18 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>Step by Step — How to use it</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>{content?.label_step_by_step || 'Step by Step — How to use it'}</div>
                 {(tool.steps || []).map((step, i) => (
                   <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 10, alignItems: 'flex-start' }}>
                     <div style={{ width: 26, height: 26, borderRadius: 8, background: `${tool.color}18`, border: `1px solid ${tool.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: tool.color, flexShrink: 0 }}>{i + 1}</div>
@@ -841,17 +857,17 @@ const ToolCard = ({ tool }) => {
 
               {/* Examples */}
               <div style={{ marginBottom: 18 }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>Real Examples — Copy and Try</div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>{content?.label_real_examples || 'Real Examples — Copy and Try'}</div>
                 {(tool.examples || []).map((ex, i) => (
                   <div key={i} style={{ marginBottom: 14, padding: 16, background: 'rgba(0,0,0,0.25)', border: `1px solid ${tool.color}20`, borderRadius: 12 }}>
                     <div style={{ fontWeight: 700, fontSize: 13, color: tool.color, marginBottom: 10 }}>📌 {ex.label}</div>
                     <div style={{ marginBottom: 10 }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: 6 }}>What you type:</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: 6 }}>{content?.label_what_you_type || 'What you type:'}</div>
                       <pre style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', background: 'rgba(255,255,255,0.04)', padding: '10px 14px', borderRadius: 8, whiteSpace: 'pre-wrap', fontFamily: 'monospace', margin: 0, lineHeight: 1.65 }}>{ex.input}</pre>
-                      <div style={{ marginTop: 8 }}><CopyButton text={ex.input} /></div>
+                      <div style={{ marginTop: 8 }}><CopyButton text={ex.input} labelCopy={content?.label_copy_example} labelCopied={content?.label_copied} /></div>
                     </div>
                     <div>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: 6 }}>What you get:</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', marginBottom: 6 }}>{content?.label_what_you_get || 'What you get:'}</div>
                       <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>{ex.output}</div>
                     </div>
                   </div>
@@ -861,7 +877,7 @@ const ToolCard = ({ tool }) => {
               {/* Tips */}
               {tool.tips && (
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>💡 Pro Tips</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 10 }}>{content?.label_pro_tips || '💡 Pro Tips'}</div>
                   {tool.tips.map((tip, i) => (
                     <div key={i} style={{ display: 'flex', gap: 10, padding: '9px 14px', marginBottom: 8, background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.18)', borderRadius: 9 }}>
                       <span style={{ flexShrink: 0 }}>💡</span>
@@ -903,14 +919,24 @@ const parseTranslatedText = (translatedText, originalContent) => {
 
       const upperLine = line.toUpperCase();
 
-      if (line === 'TITLE') {
-        currentSection = 'TITLE';
-        continue;
-      }
-      if (line === 'SUBTITLE') {
-        currentSection = 'SUBTITLE';
-        continue;
-      }
+      if (line === 'TITLE') { currentSection = 'TITLE'; continue; }
+      if (line === 'SUBTITLE') { currentSection = 'SUBTITLE'; continue; }
+      if (line === 'LABEL_SUPPORTED_PROVIDERS') { currentSection = 'LABEL_SUPPORTED_PROVIDERS'; continue; }
+      if (line === 'LABEL_KEY') { currentSection = 'LABEL_KEY'; continue; }
+      if (line === 'LABEL_MODELS') { currentSection = 'LABEL_MODELS'; continue; }
+      if (line === 'LABEL_INPUT_FIELDS') { currentSection = 'LABEL_INPUT_FIELDS'; continue; }
+      if (line === 'LABEL_STEP_BY_STEP') { currentSection = 'LABEL_STEP_BY_STEP'; continue; }
+      if (line === 'LABEL_REAL_EXAMPLES') { currentSection = 'LABEL_REAL_EXAMPLES'; continue; }
+      if (line === 'LABEL_WHAT_YOU_TYPE') { currentSection = 'LABEL_WHAT_YOU_TYPE'; continue; }
+      if (line === 'LABEL_WHAT_YOU_GET') { currentSection = 'LABEL_WHAT_YOU_GET'; continue; }
+      if (line === 'LABEL_COPY_EXAMPLE') { currentSection = 'LABEL_COPY_EXAMPLE'; continue; }
+      if (line === 'LABEL_COPIED') { currentSection = 'LABEL_COPIED'; continue; }
+      if (line === 'LABEL_PRO_TIPS') { currentSection = 'LABEL_PRO_TIPS'; continue; }
+      if (line === 'LABEL_SEARCH_PLACEHOLDER') { currentSection = 'LABEL_SEARCH_PLACEHOLDER'; continue; }
+      if (line === 'LABEL_DOCUMENTATION') { currentSection = 'LABEL_DOCUMENTATION'; continue; }
+      if (line === 'LABEL_RETRANSLATE') { currentSection = 'LABEL_RETRANSLATE'; continue; }
+      if (line === 'LABEL_TABS_SECTIONS') { currentSection = 'LABEL_TABS_SECTIONS'; continue; }
+      if (line === 'LABEL_AI_EXPERTS') { currentSection = 'LABEL_AI_EXPERTS'; continue; }
       if (line === 'SETUP') {
         currentSection = 'SETUP';
         setupStepIndex = 0;
@@ -932,16 +958,24 @@ const parseTranslatedText = (translatedText, originalContent) => {
         continue;
       }
 
-      if (currentSection === 'TITLE') {
-        result.title = line;
-        currentSection = '';
-        continue;
-      }
-      if (currentSection === 'SUBTITLE') {
-        result.subtitle = line;
-        currentSection = '';
-        continue;
-      }
+      if (currentSection === 'TITLE') { result.title = line; currentSection = ''; continue; }
+      if (currentSection === 'SUBTITLE') { result.subtitle = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_SUPPORTED_PROVIDERS') { result.label_supported_providers = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_KEY') { result.label_key = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_MODELS') { result.label_models = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_INPUT_FIELDS') { result.label_input_fields = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_STEP_BY_STEP') { result.label_step_by_step = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_REAL_EXAMPLES') { result.label_real_examples = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_WHAT_YOU_TYPE') { result.label_what_you_type = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_WHAT_YOU_GET') { result.label_what_you_get = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_COPY_EXAMPLE') { result.label_copy_example = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_COPIED') { result.label_copied = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_PRO_TIPS') { result.label_pro_tips = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_SEARCH_PLACEHOLDER') { result.label_search_placeholder = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_DOCUMENTATION') { result.label_documentation = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_RETRANSLATE') { result.label_retranslate = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_TABS_SECTIONS') { result.label_tabs_sections = line; currentSection = ''; continue; }
+      if (currentSection === 'LABEL_AI_EXPERTS') { result.label_ai_experts = line; currentSection = ''; continue; }
 
       if (currentSection === 'SETUP') {
         if (upperLine.startsWith('TIP:')) {
@@ -1109,10 +1143,26 @@ const Docs = () => {
       return text;
     };
 
-    // Part 1: Header + Title/Subtitle + Setup + first 4 tools
+    // Part 1: Header + Title/Subtitle + Setup + Labels + first 4 tools
     let p1 = `=== PROMPTFORGE DOCUMENTATION ===\n\n`;
     p1 += `TITLE\n${T.en.title}\n`;
     p1 += `SUBTITLE\n${T.en.subtitle}\n\n`;
+    p1 += `LABEL_SUPPORTED_PROVIDERS\n${T.en.label_supported_providers}\n`;
+    p1 += `LABEL_KEY\n${T.en.label_key}\n`;
+    p1 += `LABEL_MODELS\n${T.en.label_models}\n`;
+    p1 += `LABEL_INPUT_FIELDS\n${T.en.label_input_fields}\n`;
+    p1 += `LABEL_STEP_BY_STEP\n${T.en.label_step_by_step}\n`;
+    p1 += `LABEL_REAL_EXAMPLES\n${T.en.label_real_examples}\n`;
+    p1 += `LABEL_WHAT_YOU_TYPE\n${T.en.label_what_you_type}\n`;
+    p1 += `LABEL_WHAT_YOU_GET\n${T.en.label_what_you_get}\n`;
+    p1 += `LABEL_COPY_EXAMPLE\n${T.en.label_copy_example}\n`;
+    p1 += `LABEL_COPIED\n${T.en.label_copied}\n`;
+    p1 += `LABEL_PRO_TIPS\n${T.en.label_pro_tips}\n`;
+    p1 += `LABEL_SEARCH_PLACEHOLDER\n${T.en.label_search_placeholder}\n`;
+    p1 += `LABEL_DOCUMENTATION\n${T.en.label_documentation}\n`;
+    p1 += `LABEL_RETRANSLATE\n${T.en.label_retranslate}\n`;
+    p1 += `LABEL_TABS_SECTIONS\n${T.en.label_tabs_sections}\n`;
+    p1 += `LABEL_AI_EXPERTS\n${T.en.label_ai_experts}\n\n`;
     p1 += `SETUP\n${T.en.setup_title}\n`;
     T.en.setup_steps.forEach(s => { p1 += `${s.n}. ${s.t}\n`; });
     p1 += `\nTIP: ${T.en.setup_note}\n\n`;
@@ -1137,8 +1187,8 @@ const Docs = () => {
     const system = `You are a professional technical documentation translator.
 Translate the following PromptForge documentation into ${langName}.
 RULES:
-1. Translate every word naturally — sound completely native
-2. Keep in English: PromptForge, API, URL, CSV, PDF, JSON, HTML, CSS, JavaScript, Python, SQL, OpenAI, Anthropic, Groq, Gemini, Claude, GPT, Llama, OpenRouter, BYOK, TikTok, LinkedIn, Instagram, YouTube, WhatsApp, Twitter, Facebook
+1. Translate every word naturally (including product names like PromptForge, AI Writer, Social Media AI, etc.) — sound completely native.
+2. Keep ONLY technical acronyms in English: API, URL, CSV, PDF, JSON, HTML, CSS, JavaScript, Python, SQL, OpenAI, Anthropic, Groq, Gemini, Claude, GPT, Llama, OpenRouter, BYOK
 3. Keep code examples exactly as-is
 4. Keep === markers and bullet format exactly
 5. Output ONLY the translated text — no explanations`;
@@ -1181,7 +1231,7 @@ RULES:
       <div style={{ textAlign: 'center', padding: '0 0 32px' }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 16px', borderRadius: 99, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.25)', fontSize: 11, fontWeight: 800, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>
-            📖 Documentation
+            📖 {content.label_documentation || 'Documentation'}
           </div>
           <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: '0 0 10px', background: 'linear-gradient(135deg, #fff, #a78bfa, #38bdf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             {content.title}
@@ -1251,7 +1301,7 @@ RULES:
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
               <span style={{ fontSize: 12, color: '#4ade80' }}>✓ Translated to {currentLangName}</span>
               <button onClick={() => { setTransCache(p => ({ ...p, [currentLangName]: null })); translate(currentLangName); }} style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <RefreshCw size={11} /> Retranslate
+                <RefreshCw size={11} /> {content.label_retranslate || 'Retranslate'}
               </button>
             </div>
           )}
@@ -1280,7 +1330,7 @@ RULES:
         <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
         <input
           value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Search tools..."
+          placeholder={content.label_search_placeholder || 'Search tools...'}
           style={{ width: '100%', boxSizing: 'border-box', paddingLeft: 40, padding: '10px 14px 10px 40px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
         />
       </div>
@@ -1289,7 +1339,7 @@ RULES:
       <div>
         {filtered.map((tool, i) => (
           <motion.div key={tool.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-            <ToolCard tool={tool} />
+            <ToolCard tool={tool} content={content} />
           </motion.div>
         ))}
       </div>

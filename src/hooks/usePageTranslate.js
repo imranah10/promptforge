@@ -113,7 +113,7 @@ export function usePageTranslate(pageKey) {
 STRICT RULES:
 1. Return a valid JSON array of strings, where each element is the translation of the corresponding index in the input array.
 2. Maintain all capitalization, punctuation, and style of the original.
-3. Keep product names like "PromptForge", "AI Writer", "Social Media AI", "History Vault", "Data Wizard" in English.
+3. Keep only technical acronyms like API, URL, JSON, CSV in English. Translate product names naturally.
 4. Output ONLY the JSON array. Do not include any explanations, markdown code blocks, or extra text. Example output: ["translation1", "translation2"]`;
 
           const userPrompt = JSON.stringify(batch);
