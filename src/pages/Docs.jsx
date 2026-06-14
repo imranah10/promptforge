@@ -1148,7 +1148,7 @@ const Docs = () => {
       return xml;
     };
 
-    // Part 1: Header + Title/Subtitle + Setup + Labels + first 4 tools
+    // Part 1: Header + Title/Subtitle + Setup + Labels + first 2 tools
     let p1 = `<docs>\n`;
     p1 += `  <title>${T.en.title}</title>\n`;
     p1 += `  <subtitle>${T.en.subtitle}</subtitle>\n`;
@@ -1176,21 +1176,31 @@ const Docs = () => {
     p1 += `  </setup_steps>\n`;
     p1 += `  <setup_note>${T.en.setup_note}</setup_note>\n\n`;
     p1 += `  <tools>\n`;
-    T.en.tools.slice(0, 4).forEach(t => { p1 += serializeTool(t) + '\n'; });
+    T.en.tools.slice(0, 2).forEach(t => { p1 += serializeTool(t) + '\n'; });
     p1 += `  </tools>\n`;
     p1 += `</docs>`;
 
-    // Part 2: next 5 tools
+    // Part 2: next 3 tools
     let p2 = `<tools>\n`;
-    T.en.tools.slice(4, 9).forEach(t => { p2 += serializeTool(t) + '\n'; });
+    T.en.tools.slice(2, 5).forEach(t => { p2 += serializeTool(t) + '\n'; });
     p2 += `</tools>`;
 
-    // Part 3: last tools
+    // Part 3: next 3 tools
     let p3 = `<tools>\n`;
-    T.en.tools.slice(9).forEach(t => { p3 += serializeTool(t) + '\n'; });
+    T.en.tools.slice(5, 8).forEach(t => { p3 += serializeTool(t) + '\n'; });
     p3 += `</tools>`;
 
-    return [p1.trim(), p2.trim(), p3.trim()];
+    // Part 4: next 3 tools
+    let p4 = `<tools>\n`;
+    T.en.tools.slice(8, 11).forEach(t => { p4 += serializeTool(t) + '\n'; });
+    p4 += `</tools>`;
+
+    // Part 5: last tools
+    let p5 = `<tools>\n`;
+    T.en.tools.slice(11).forEach(t => { p5 += serializeTool(t) + '\n'; });
+    p5 += `</tools>`;
+
+    return [p1.trim(), p2.trim(), p3.trim(), p4.trim(), p5.trim()];
   };
 
   // AI Translation

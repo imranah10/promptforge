@@ -147,7 +147,7 @@ function parseResponse(data, provider) {
 }
 
 async function callXAI(model, messages, key) {
-  const data = await safeFetch('https://api.x.ai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages }) }, 'xAI');
+  const data = await safeFetch('https://api.x.ai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages, max_tokens: 4096 }) }, 'xAI');
   return parseResponse(data, 'xAI');
 }
 
@@ -159,7 +159,7 @@ async function callCohere(model, messages, key) {
 }
 
 async function callPerplexity(model, messages, key) {
-  const data = await safeFetch('https://api.perplexity.ai/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages }) }, 'Perplexity');
+  const data = await safeFetch('https://api.perplexity.ai/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages, max_tokens: 4096 }) }, 'Perplexity');
   return parseResponse(data, 'Perplexity');
 }
 
@@ -173,7 +173,7 @@ async function callOpenRouter(modelId, messages, key) {
       'HTTP-Referer': 'https://promptforge.ai', 
       'X-Title': 'PromptForge'
     }, 
-    body: JSON.stringify({ model: modelId, messages }) 
+    body: JSON.stringify({ model: modelId, messages, max_tokens: 4096 }) 
   }, 'OpenRouter');
   return parseResponse(data, 'OpenRouter');
 }
@@ -186,29 +186,29 @@ async function callAnthropic(model, messages, key) {
 }
 
 async function callOpenAI(model, messages, key) {
-  const data = await safeFetch('https://api.openai.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages }) }, 'OpenAI');
+  const data = await safeFetch('https://api.openai.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages, max_tokens: 4096 }) }, 'OpenAI');
   return parseResponse(data, 'OpenAI');
 }
 
 async function callGemini(model, messages, key) {
   const contents = messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
-  const data = await safeFetch(`https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents }) }, 'Google Gemini');
+  const data = await safeFetch(`https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents, generationConfig: { maxOutputTokens: 4096 } }) }, 'Google Gemini');
   return parseResponse(data, 'Google Gemini');
 }
 
 async function callMistral(model, messages, key) {
-  const data = await safeFetch('https://api.mistral.ai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages }) }, 'Mistral');
+  const data = await safeFetch('https://api.mistral.ai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages, max_tokens: 4096 }) }, 'Mistral');
   return parseResponse(data, 'Mistral');
 }
 
 async function callGroq(model, messages, key) {
   if (!key) throw new Error('Groq key is missing.');
-  const data = await safeFetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages }) }, 'Groq');
+  const data = await safeFetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages, max_tokens: 4096 }) }, 'Groq');
   return parseResponse(data, 'Groq');
 }
 
 async function callDeepSeek(model, messages, key) {
-  const data = await safeFetch('https://api.deepseek.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages }) }, 'DeepSeek');
+  const data = await safeFetch('https://api.deepseek.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model, messages, max_tokens: 4096 }) }, 'DeepSeek');
   return parseResponse(data, 'DeepSeek');
 }
 
