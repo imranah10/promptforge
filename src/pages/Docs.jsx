@@ -918,6 +918,8 @@ const parseTranslatedXMLRegex = (xmlParts, originalContent) => {
       return list;
     };
 
+    let toolIndex = -1;
+
     xmlParts.forEach((xmlString) => {
       if (!xmlString) return;
 
