@@ -896,6 +896,7 @@ const ToolCard = ({ tool, content }) => {
 
 // Helper function to parse translated plain text documentation back into T.en structure
 // Helper function to parse translated XML documentation back into T.en structure
+// Helper function to parse translated XML documentation back into T.en structure
 const parseTranslatedXMLRegex = (xmlParts, originalContent) => {
   if (!xmlParts || xmlParts.length === 0) return originalContent;
 
@@ -965,13 +966,9 @@ const parseTranslatedXMLRegex = (xmlParts, originalContent) => {
       }
 
       // 2. Parse tools
-      const toolRegex = /<tool\s+id="([^"]+)">([\s\S]*?)<\/tool>/gi;
-      let toolMatch;
-      while ((toolMatch = toolRegex.exec(xml)) !== null) {
-        const toolId = toolMatch[1];
-        const toolContent = toolMatch[2];
-        const targetTool = result.tools.find(t => t.id === toolId);
-        if (!targetTool) continue;
+      result.tools.forEach((targetTool) => {
+        const toolContent = extractTagContent(xml, `tool_${targetTool.id}`);
+        if (!toolContent) return; // Not present in this XML part
 
         const name = extractTagContent(toolContent, 'name');
         if (name) targetTool.name = name;
@@ -1024,6 +1021,20 @@ const parseTranslatedXMLRegex = (xmlParts, originalContent) => {
           });
         }
 
+        // Supported Providers
+        const supportedContainer = extractTagContent(toolContent, 'supported_providers');
+        if (supportedContainer) {
+          const providers = extractTagsList(supportedContainer, 'provider');
+          providers.forEach((providerXml, idx) => {
+            if (targetTool.supported && targetTool.supported[idx]) {
+              const pName = extractTagContent(providerXml, 'name');
+              const pModels = extractTagContent(providerXml, 'models');
+              if (pName) targetTool.supported[idx].name = pName;
+              if (pModels) targetTool.supported[idx].models = pModels;
+            }
+          });
+        }
+
         // Steps
         const stepsContainer = extractTagContent(toolContent, 'steps');
         if (stepsContainer) {
@@ -1061,7 +1072,7 @@ const parseTranslatedXMLRegex = (xmlParts, originalContent) => {
             }
           });
         }
-      }
+      });
     });
 
     return result;
@@ -1096,7 +1107,7 @@ const Docs = () => {
   // Build XML version of English docs for AI translation in parts
   const buildEnglishXMLParts = () => {
     const serializeTool = (tool) => {
-      let xml = `<tool id="${tool.id}">\n`;
+      let xml = `<tool_${tool.id}>\n`;
       xml += `  <name>${tool.name}</name>\n`;
       xml += `  <tagline>${tool.tagline}</tagline>\n`;
       xml += `  <what>${tool.what}</what>\n`;
@@ -1121,6 +1132,13 @@ const Docs = () => {
         });
         xml += `  </agents>\n`;
       }
+      if (tool.supported) {
+        xml += `  <supported_providers>\n`;
+        tool.supported.forEach(p => {
+          xml += `    <provider>\n      <name>${p.name}</name>\n      <models>${p.models}</models>\n    </provider>\n`;
+        });
+        xml += `  </supported_providers>\n`;
+      }
       if (tool.steps) {
         xml += `  <steps>\n`;
         tool.steps.forEach(s => {
@@ -1142,7 +1160,7 @@ const Docs = () => {
         });
         xml += `  </tips>\n`;
       }
-      xml += `</tool>`;
+      xml += `</tool_${tool.id}>`;
       return xml;
     };
 

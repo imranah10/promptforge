@@ -219,11 +219,17 @@ export default function ChatWithData() {
       for (let pageNum = 1; pageNum <= Math.min(totalPages, 100); pageNum++) {
         const page = await pdf.getPage(pageNum);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items
-          .map(item => item.str)
-          .join(' ')
-          .replace(/\s+/g, ' ')
-          .trim();
+        // Preserve structure: use newline between items that end a line
+        let pageText = '';
+        let lastY = null;
+        for (const item of textContent.items) {
+          if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+            pageText += '\n'; // New line when Y position changes significantly
+          }
+          pageText += item.str + ' ';
+          lastY = item.transform[5];
+        }
+        pageText = pageText.replace(/ {3,}/g, '  ').trim();
         if (pageText.length > 10) hasText = true;
         fullText += `\n--- Page ${pageNum} ---\n${pageText}`;
       }
@@ -416,7 +422,15 @@ export default function ChatWithData() {
 
     const historyText = newMessages.slice(-10).map(m => `${m.role === 'user' ? 'USER' : 'ASSISTANT'}: ${m.text.slice(0, 500)}`).join('\n\n');
 
-    const systemPrompt = `You are NEURAL DATA SOVEREIGN — the world's most advanced document intelligence AI.
+    const systemPrompt = `You are a precise document analyst. You have been given the EXACT TEXT extracted from the user's uploaded files.
+
+ABSOLUTE RULES:
+1. READ the file content carefully before answering
+2. Answer ONLY from what is written in the files — never guess or hallucinate
+3. If a resume: extract the REAL name, REAL contact info, REAL experience from the actual text
+4. Quote exact words/sentences from the file to support your answers
+5. If you cannot find specific info in the file text, say "Not found in document"
+6. NEVER make up names, dates, companies, or details not present in the file
 
 YOUR CORE MISSION:
 You have been given the COMPLETE, FULL TEXT content of the user's uploaded files. 
@@ -454,16 +468,21 @@ If no numerical data: \`\`\`json {"type": "none"} \`\`\`
 chartType: "area" | "bar" | "line" | "pie" | "scatter"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-FULL FILE CONTENTS (analyze everything below):
+EXACT FILE CONTENTS — READ THIS CAREFULLY:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${fileContext.slice(0, 700000)}`;
+${fileContext.slice(0, 700000)}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END OF FILE CONTENTS — Answer based ONLY on what you read above`;
 
     const userContent = `CONVERSATION HISTORY:
 ${historyText}
 
-CURRENT QUESTION: ${userMsg}
+QUESTION: ${userMsg}
 
-IMPORTANT: Answer based ONLY on the file content provided above. Quote specific details from the files.`;
+CRITICAL: Your answer must be based ONLY on the file content shown above in the system prompt.
+- If this is a resume/CV: read the person's actual name, contact, work history from the file text
+- Quote exact sentences from the file to support your answer
+- Do NOT use any knowledge outside the uploaded file`;
 
     try {
       const res = await callAI(systemPrompt, userContent, null, activeModel, apiKey, providerKeys, customModels);
