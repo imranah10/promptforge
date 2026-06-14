@@ -895,211 +895,178 @@ const ToolCard = ({ tool, content }) => {
 };
 
 // Helper function to parse translated plain text documentation back into T.en structure
-const parseTranslatedText = (translatedText, originalContent) => {
-  if (!translatedText) return originalContent;
+// Helper function to parse translated XML documentation back into T.en structure
+const parseTranslatedXMLRegex = (xmlParts, originalContent) => {
+  if (!xmlParts || xmlParts.length === 0) return originalContent;
 
   try {
-    const lines = translatedText.split('\n');
     const result = JSON.parse(JSON.stringify(originalContent)); // Deep clone
-    
-    let currentSection = ''; // 'TITLE', 'SUBTITLE', 'SETUP', 'TOOL'
-    let currentTool = null;
-    let toolIndex = -1;
-    let currentMode = ''; // 'TABS', 'FIELDS', 'STEPS', 'EXAMPLES', 'TIPS', 'INFO'
-    let exampleIndex = -1;
-    let currentExample = null;
-    let exampleSubMode = ''; // 'INPUT', 'OUTPUT'
-    let setupStepIndex = 0;
-    let stepIndex = 0;
-    let tipIndex = 0;
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
+    const extractTagContent = (xml, tagName) => {
+      const regex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\/${tagName}>`, 'i');
+      const match = xml.match(regex);
+      return match ? match[1].trim() : '';
+    };
 
-      const upperLine = line.toUpperCase();
+    const extractTagsList = (xml, tagName) => {
+      const regex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\/${tagName}>`, 'gi');
+      const list = [];
+      let match;
+      while ((match = regex.exec(xml)) !== null) {
+        list.push(match[1].trim());
+      }
+      return list;
+    };
 
-      if (line === 'TITLE') { currentSection = 'TITLE'; continue; }
-      if (line === 'SUBTITLE') { currentSection = 'SUBTITLE'; continue; }
-      if (line === 'LABEL_SUPPORTED_PROVIDERS') { currentSection = 'LABEL_SUPPORTED_PROVIDERS'; continue; }
-      if (line === 'LABEL_KEY') { currentSection = 'LABEL_KEY'; continue; }
-      if (line === 'LABEL_MODELS') { currentSection = 'LABEL_MODELS'; continue; }
-      if (line === 'LABEL_INPUT_FIELDS') { currentSection = 'LABEL_INPUT_FIELDS'; continue; }
-      if (line === 'LABEL_STEP_BY_STEP') { currentSection = 'LABEL_STEP_BY_STEP'; continue; }
-      if (line === 'LABEL_REAL_EXAMPLES') { currentSection = 'LABEL_REAL_EXAMPLES'; continue; }
-      if (line === 'LABEL_WHAT_YOU_TYPE') { currentSection = 'LABEL_WHAT_YOU_TYPE'; continue; }
-      if (line === 'LABEL_WHAT_YOU_GET') { currentSection = 'LABEL_WHAT_YOU_GET'; continue; }
-      if (line === 'LABEL_COPY_EXAMPLE') { currentSection = 'LABEL_COPY_EXAMPLE'; continue; }
-      if (line === 'LABEL_COPIED') { currentSection = 'LABEL_COPIED'; continue; }
-      if (line === 'LABEL_PRO_TIPS') { currentSection = 'LABEL_PRO_TIPS'; continue; }
-      if (line === 'LABEL_SEARCH_PLACEHOLDER') { currentSection = 'LABEL_SEARCH_PLACEHOLDER'; continue; }
-      if (line === 'LABEL_DOCUMENTATION') { currentSection = 'LABEL_DOCUMENTATION'; continue; }
-      if (line === 'LABEL_RETRANSLATE') { currentSection = 'LABEL_RETRANSLATE'; continue; }
-      if (line === 'LABEL_TABS_SECTIONS') { currentSection = 'LABEL_TABS_SECTIONS'; continue; }
-      if (line === 'LABEL_AI_EXPERTS') { currentSection = 'LABEL_AI_EXPERTS'; continue; }
-      if (line === 'SETUP') {
-        currentSection = 'SETUP';
-        setupStepIndex = 0;
-        continue;
+    xmlParts.forEach((xmlString) => {
+      if (!xmlString) return;
+
+      // Clean up markdown code blocks
+      const xml = xmlString
+        .replace(/```xml/gi, '')
+        .replace(/```/gi, '')
+        .trim();
+
+      // 1. Parse top-level metadata labels
+      const title = extractTagContent(xml, 'title');
+      if (title) result.title = title;
+
+      const subtitle = extractTagContent(xml, 'subtitle');
+      if (subtitle) result.subtitle = subtitle;
+
+      const labels = [
+        'label_supported_providers', 'label_key', 'label_models',
+        'label_input_fields', 'label_step_by_step', 'label_real_examples',
+        'label_what_you_type', 'label_what_you_get', 'label_copy_example',
+        'label_copied', 'label_pro_tips', 'label_search_placeholder',
+        'label_documentation', 'label_retranslate', 'label_tabs_sections',
+        'label_ai_experts'
+      ];
+      labels.forEach(l => {
+        const val = extractTagContent(xml, l);
+        if (val) result[l] = val;
+      });
+
+      const setupTitle = extractTagContent(xml, 'setup_title');
+      if (setupTitle) result.setup_title = setupTitle;
+
+      const setupNote = extractTagContent(xml, 'setup_note');
+      if (setupNote) result.setup_note = setupNote;
+
+      // Parse setup steps
+      const setupStepsContainer = extractTagContent(xml, 'setup_steps');
+      if (setupStepsContainer) {
+        const steps = extractTagsList(setupStepsContainer, 'step');
+        steps.forEach((stepText, idx) => {
+          if (result.setup_steps[idx]) {
+            result.setup_steps[idx].t = stepText;
+          }
+        });
       }
 
-      if (line.startsWith('=== ') && line.endsWith(' ===')) {
-        currentSection = 'TOOL';
-        toolIndex++;
-        currentTool = result.tools[toolIndex] || null;
-        if (currentTool) {
-          currentTool.what = ''; // Clear so we can append translated lines
+      // 2. Parse tools
+      const toolRegex = /<tool\s+id="([^"]+)">([\s\S]*?)<\/tool>/gi;
+      let toolMatch;
+      while ((toolMatch = toolRegex.exec(xml)) !== null) {
+        const toolId = toolMatch[1];
+        const toolContent = toolMatch[2];
+        const targetTool = result.tools.find(t => t.id === toolId);
+        if (!targetTool) continue;
+
+        const name = extractTagContent(toolContent, 'name');
+        if (name) targetTool.name = name;
+
+        const tagline = extractTagContent(toolContent, 'tagline');
+        if (tagline) targetTool.tagline = tagline;
+
+        const what = extractTagContent(toolContent, 'what');
+        if (what) targetTool.what = what;
+
+        // Tabs
+        const tabsContainer = extractTagContent(toolContent, 'tabs');
+        if (tabsContainer) {
+          const tabs = extractTagsList(tabsContainer, 'tab');
+          tabs.forEach((tabXml, idx) => {
+            if (targetTool.tabs && targetTool.tabs[idx]) {
+              const tName = extractTagContent(tabXml, 'name');
+              const tDesc = extractTagContent(tabXml, 'desc');
+              if (tName) targetTool.tabs[idx].name = tName;
+              if (tDesc) targetTool.tabs[idx].desc = tDesc;
+            }
+          });
         }
-        currentMode = 'INFO';
-        stepIndex = 0;
-        tipIndex = 0;
-        exampleIndex = -1;
-        currentExample = null;
-        continue;
-      }
 
-      if (currentSection === 'TITLE') { result.title = line; currentSection = ''; continue; }
-      if (currentSection === 'SUBTITLE') { result.subtitle = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_SUPPORTED_PROVIDERS') { result.label_supported_providers = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_KEY') { result.label_key = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_MODELS') { result.label_models = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_INPUT_FIELDS') { result.label_input_fields = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_STEP_BY_STEP') { result.label_step_by_step = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_REAL_EXAMPLES') { result.label_real_examples = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_WHAT_YOU_TYPE') { result.label_what_you_type = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_WHAT_YOU_GET') { result.label_what_you_get = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_COPY_EXAMPLE') { result.label_copy_example = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_COPIED') { result.label_copied = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_PRO_TIPS') { result.label_pro_tips = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_SEARCH_PLACEHOLDER') { result.label_search_placeholder = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_DOCUMENTATION') { result.label_documentation = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_RETRANSLATE') { result.label_retranslate = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_TABS_SECTIONS') { result.label_tabs_sections = line; currentSection = ''; continue; }
-      if (currentSection === 'LABEL_AI_EXPERTS') { result.label_ai_experts = line; currentSection = ''; continue; }
-
-      if (currentSection === 'SETUP') {
-        if (upperLine.startsWith('TIP:')) {
-          result.setup_note = line.replace(/^TIP:\s*/i, '').trim();
-        } else if (/^\d+\./.test(line)) {
-          const text = line.replace(/^\d+\.\s*/, '').trim();
-          if (result.setup_steps[setupStepIndex]) {
-            result.setup_steps[setupStepIndex].t = text;
-            setupStepIndex++;
-          }
-        } else {
-          result.setup_title = line;
+        // Fields
+        const fieldsContainer = extractTagContent(toolContent, 'fields');
+        if (fieldsContainer) {
+          const fields = extractTagsList(fieldsContainer, 'field');
+          fields.forEach((fieldXml, idx) => {
+            if (targetTool.fields && targetTool.fields[idx]) {
+              const fName = extractTagContent(fieldXml, 'name');
+              const fDesc = extractTagContent(fieldXml, 'desc');
+              if (fName) targetTool.fields[idx].name = fName;
+              if (fDesc) targetTool.fields[idx].desc = fDesc;
+            }
+          });
         }
-      } else if (currentSection === 'TOOL' && currentTool) {
-        if (upperLine === 'TABS:') { currentMode = 'TABS'; continue; }
-        if (upperLine === 'FIELDS:') { currentMode = 'FIELDS'; continue; }
-        if (upperLine === 'STEPS:') { currentMode = 'STEPS'; continue; }
-        if (upperLine === 'EXAMPLES:') { currentMode = 'EXAMPLES'; continue; }
-        if (upperLine === 'TIPS:') { currentMode = 'TIPS'; continue; }
 
-        if (currentMode === 'INFO') {
-          if (!currentTool._taglineSet) {
-            currentTool.tagline = line;
-            currentTool._taglineSet = true;
-          } else {
-            currentTool.what = currentTool.what ? currentTool.what + '\n' + line : line;
-          }
-        } else if (currentMode === 'TABS') {
-          if (line.startsWith('- ')) {
-            const colonIdx = line.indexOf(':') !== -1 ? line.indexOf(':') : line.indexOf('：');
-            let name = '';
-            let desc = '';
-            if (colonIdx !== -1) {
-              name = line.substring(2, colonIdx).trim();
-              desc = line.substring(colonIdx + 1).trim();
-            } else {
-              desc = line.substring(2).trim();
+        // Agents
+        const agentsContainer = extractTagContent(toolContent, 'agents');
+        if (agentsContainer) {
+          const agents = extractTagsList(agentsContainer, 'agent');
+          agents.forEach((agentXml, idx) => {
+            if (targetTool.agents && targetTool.agents[idx]) {
+              const aName = extractTagContent(agentXml, 'name');
+              const aDesc = extractTagContent(agentXml, 'desc');
+              if (aName) targetTool.agents[idx].name = aName;
+              if (aDesc) targetTool.agents[idx].desc = aDesc;
             }
+          });
+        }
 
-            if (!currentTool._tabIndex) currentTool._tabIndex = 0;
-            const targetTab = currentTool.tabs?.[currentTool._tabIndex];
-            if (targetTab) {
-              if (name) targetTab.name = name;
-              targetTab.desc = desc;
-              currentTool._tabIndex++;
+        // Steps
+        const stepsContainer = extractTagContent(toolContent, 'steps');
+        if (stepsContainer) {
+          const steps = extractTagsList(stepsContainer, 'step');
+          steps.forEach((stepText, idx) => {
+            if (targetTool.steps && targetTool.steps[idx] !== undefined) {
+              targetTool.steps[idx] = stepText;
             }
-          }
-        } else if (currentMode === 'FIELDS') {
-          if (line.startsWith('- ')) {
-            const colonIdx = line.indexOf(':') !== -1 ? line.indexOf(':') : line.indexOf('：');
-            let name = '';
-            let desc = '';
-            if (colonIdx !== -1) {
-              name = line.substring(2, colonIdx).trim();
-              desc = line.substring(colonIdx + 1).trim();
-            } else {
-              desc = line.substring(2).trim();
-            }
+          });
+        }
 
-            if (!currentTool._fieldIndex) currentTool._fieldIndex = 0;
-            const targetField = currentTool.fields?.[currentTool._fieldIndex];
-            if (targetField) {
-              if (name) targetField.name = name;
-              targetField.desc = desc;
-              currentTool._fieldIndex++;
+        // Examples
+        const examplesContainer = extractTagContent(toolContent, 'examples');
+        if (examplesContainer) {
+          const examples = extractTagsList(examplesContainer, 'example');
+          examples.forEach((exXml, idx) => {
+            if (targetTool.examples && targetTool.examples[idx]) {
+              const label = extractTagContent(exXml, 'label');
+              const input = extractTagContent(exXml, 'input');
+              const output = extractTagContent(exXml, 'output');
+              if (label) targetTool.examples[idx].label = label;
+              if (input) targetTool.examples[idx].input = input;
+              if (output) targetTool.examples[idx].output = output;
             }
-          }
-        } else if (currentMode === 'STEPS') {
-          if (/^\d+\./.test(line)) {
-            const text = line.replace(/^\d+\.\s*/, '').trim();
-            if (currentTool.steps && currentTool.steps[stepIndex] !== undefined) {
-              currentTool.steps[stepIndex] = text;
-              stepIndex++;
+          });
+        }
+
+        // Tips
+        const tipsContainer = extractTagContent(toolContent, 'tips');
+        if (tipsContainer) {
+          const tips = extractTagsList(tipsContainer, 'tip');
+          tips.forEach((tipText, idx) => {
+            if (targetTool.tips && targetTool.tips[idx] !== undefined) {
+              targetTool.tips[idx] = tipText;
             }
-          }
-        } else if (currentMode === 'EXAMPLES') {
-          if (line.startsWith('* ')) {
-            exampleIndex++;
-            currentExample = currentTool.examples?.[exampleIndex] || null;
-            if (currentExample) {
-              currentExample.label = line.substring(2).trim();
-            }
-            exampleSubMode = '';
-          } else if (upperLine.startsWith('INPUT:')) {
-            exampleSubMode = 'INPUT';
-            if (currentExample) {
-              currentExample.input = line.substring(6).trim();
-            }
-          } else if (upperLine.startsWith('OUTPUT:')) {
-            exampleSubMode = 'OUTPUT';
-            if (currentExample) {
-              currentExample.output = line.substring(7).trim();
-            }
-          } else {
-            if (currentExample) {
-              if (exampleSubMode === 'INPUT') {
-                currentExample.input = (currentExample.input ? currentExample.input + '\n' : '') + line;
-              } else if (exampleSubMode === 'OUTPUT') {
-                currentExample.output = (currentExample.output ? currentExample.output + '\n' : '') + line;
-              }
-            }
-          }
-        } else if (currentMode === 'TIPS') {
-          if (line.startsWith('- ')) {
-            const text = line.substring(2).trim();
-            if (currentTool.tips && currentTool.tips[tipIndex] !== undefined) {
-              currentTool.tips[tipIndex] = text;
-              tipIndex++;
-            }
-          }
+          });
         }
       }
-    }
-
-    // cleanup temp fields
-    result.tools.forEach(t => {
-      delete t._taglineSet;
-      delete t._tabIndex;
-      delete t._fieldIndex;
     });
 
     return result;
   } catch (err) {
-    console.error('Error parsing translated text:', err);
+    console.error('Error parsing translated XML regex:', err);
     return originalContent;
   }
 };
@@ -1118,7 +1085,7 @@ const Docs = () => {
   const translatedText = lang !== 'en' && transCache[currentLangNameEarly] ? transCache[currentLangNameEarly] : null;
 
   const content = useMemo(() => {
-    return translatedText ? parseTranslatedText(translatedText, T.en) : T.en;
+    return translatedText ? parseTranslatedXMLRegex([translatedText], T.en) : T.en;
   }, [translatedText]);
 
   const tools = content.tools;
@@ -1126,55 +1093,100 @@ const Docs = () => {
     ? tools.filter(t => t.name.toLowerCase().includes(search.toLowerCase()) || t.tagline.toLowerCase().includes(search.toLowerCase()))
     : tools;
 
-  // Build plain text version of English docs for AI translation in parts
-  const buildEnglishTextParts = () => {
+  // Build XML version of English docs for AI translation in parts
+  const buildEnglishXMLParts = () => {
     const serializeTool = (tool) => {
-      let text = `=== ${tool.name.toUpperCase()} ===\n`;
-      text += `${tool.tagline}\n${tool.what}\n`;
-      if (tool.tabs) { text += `TABS:\n`; tool.tabs.forEach(t => { text += `- ${t.name}: ${t.desc}\n`; }); }
-      if (tool.fields) { text += `FIELDS:\n`; tool.fields.forEach(f => { text += `- ${f.name}: ${f.desc}\n`; }); }
-      if (tool.agents) { text += `AGENTS:\n`; tool.agents.forEach(a => { text += `- ${a.name}: ${a.desc}\n`; }); }
-      text += `STEPS:\n`; tool.steps.forEach((s, i) => { text += `${i+1}. ${s}\n`; });
-      text += `EXAMPLES:\n`;
-      tool.examples.forEach(ex => {
-        text += `* ${ex.label}\nINPUT: ${ex.input}\nOUTPUT: ${ex.output}\n`;
-      });
-      if (tool.tips) { text += `TIPS:\n`; tool.tips.forEach(t => { text += `- ${t}\n`; }); }
-      return text;
+      let xml = `<tool id="${tool.id}">\n`;
+      xml += `  <name>${tool.name}</name>\n`;
+      xml += `  <tagline>${tool.tagline}</tagline>\n`;
+      xml += `  <what>${tool.what}</what>\n`;
+      if (tool.tabs) {
+        xml += `  <tabs>\n`;
+        tool.tabs.forEach(t => {
+          xml += `    <tab>\n      <name>${t.name}</name>\n      <desc>${t.desc}</desc>\n    </tab>\n`;
+        });
+        xml += `  </tabs>\n`;
+      }
+      if (tool.fields) {
+        xml += `  <fields>\n`;
+        tool.fields.forEach(f => {
+          xml += `    <field>\n      <name>${f.name}</name>\n      <desc>${f.desc}</desc>\n    </field>\n`;
+        });
+        xml += `  </fields>\n`;
+      }
+      if (tool.agents) {
+        xml += `  <agents>\n`;
+        tool.agents.forEach(a => {
+          xml += `    <agent>\n      <name>${a.name}</name>\n      <desc>${a.desc}</desc>\n    </agent>\n`;
+        });
+        xml += `  </agents>\n`;
+      }
+      if (tool.steps) {
+        xml += `  <steps>\n`;
+        tool.steps.forEach(s => {
+          xml += `    <step>${s}</step>\n`;
+        });
+        xml += `  </steps>\n`;
+      }
+      if (tool.examples) {
+        xml += `  <examples>\n`;
+        tool.examples.forEach(ex => {
+          xml += `    <example>\n      <label>${ex.label}</label>\n      <input>${ex.input}</input>\n      <output>${ex.output}</output>\n    </example>\n`;
+        });
+        xml += `  </examples>\n`;
+      }
+      if (tool.tips) {
+        xml += `  <tips>\n`;
+        tool.tips.forEach(t => {
+          xml += `    <tip>${t}</tip>\n`;
+        });
+        xml += `  </tips>\n`;
+      }
+      xml += `</tool>`;
+      return xml;
     };
 
     // Part 1: Header + Title/Subtitle + Setup + Labels + first 4 tools
-    let p1 = `=== PROMPTFORGE DOCUMENTATION ===\n\n`;
-    p1 += `TITLE\n${T.en.title}\n`;
-    p1 += `SUBTITLE\n${T.en.subtitle}\n\n`;
-    p1 += `LABEL_SUPPORTED_PROVIDERS\n${T.en.label_supported_providers}\n`;
-    p1 += `LABEL_KEY\n${T.en.label_key}\n`;
-    p1 += `LABEL_MODELS\n${T.en.label_models}\n`;
-    p1 += `LABEL_INPUT_FIELDS\n${T.en.label_input_fields}\n`;
-    p1 += `LABEL_STEP_BY_STEP\n${T.en.label_step_by_step}\n`;
-    p1 += `LABEL_REAL_EXAMPLES\n${T.en.label_real_examples}\n`;
-    p1 += `LABEL_WHAT_YOU_TYPE\n${T.en.label_what_you_type}\n`;
-    p1 += `LABEL_WHAT_YOU_GET\n${T.en.label_what_you_get}\n`;
-    p1 += `LABEL_COPY_EXAMPLE\n${T.en.label_copy_example}\n`;
-    p1 += `LABEL_COPIED\n${T.en.label_copied}\n`;
-    p1 += `LABEL_PRO_TIPS\n${T.en.label_pro_tips}\n`;
-    p1 += `LABEL_SEARCH_PLACEHOLDER\n${T.en.label_search_placeholder}\n`;
-    p1 += `LABEL_DOCUMENTATION\n${T.en.label_documentation}\n`;
-    p1 += `LABEL_RETRANSLATE\n${T.en.label_retranslate}\n`;
-    p1 += `LABEL_TABS_SECTIONS\n${T.en.label_tabs_sections}\n`;
-    p1 += `LABEL_AI_EXPERTS\n${T.en.label_ai_experts}\n\n`;
-    p1 += `SETUP\n${T.en.setup_title}\n`;
-    T.en.setup_steps.forEach(s => { p1 += `${s.n}. ${s.t}\n`; });
-    p1 += `\nTIP: ${T.en.setup_note}\n\n`;
+    let p1 = `<docs>\n`;
+    p1 += `  <title>${T.en.title}</title>\n`;
+    p1 += `  <subtitle>${T.en.subtitle}</subtitle>\n`;
+    p1 += `  <label_supported_providers>${T.en.label_supported_providers}</label_supported_providers>\n`;
+    p1 += `  <label_key>${T.en.label_key}</label_key>\n`;
+    p1 += `  <label_models>${T.en.label_models}</label_models>\n`;
+    p1 += `  <label_input_fields>${T.en.label_input_fields}</label_input_fields>\n`;
+    p1 += `  <label_step_by_step>${T.en.label_step_by_step}</label_step_by_step>\n`;
+    p1 += `  <label_real_examples>${T.en.label_real_examples}</label_real_examples>\n`;
+    p1 += `  <label_what_you_type>${T.en.label_what_you_type}</label_what_you_type>\n`;
+    p1 += `  <label_what_you_get>${T.en.label_what_you_get}</label_what_you_get>\n`;
+    p1 += `  <label_copy_example>${T.en.label_copy_example}</label_copy_example>\n`;
+    p1 += `  <label_copied>${T.en.label_copied}</label_copied>\n`;
+    p1 += `  <label_pro_tips>${T.en.label_pro_tips}</label_pro_tips>\n`;
+    p1 += `  <label_search_placeholder>${T.en.label_search_placeholder}</label_search_placeholder>\n`;
+    p1 += `  <label_documentation>${T.en.label_documentation}</label_documentation>\n`;
+    p1 += `  <label_retranslate>${T.en.label_retranslate}</label_retranslate>\n`;
+    p1 += `  <label_tabs_sections>${T.en.label_tabs_sections}</label_tabs_sections>\n`;
+    p1 += `  <label_ai_experts>${T.en.label_ai_experts}</label_ai_experts>\n\n`;
+    p1 += `  <setup_title>${T.en.setup_title}</setup_title>\n`;
+    p1 += `  <setup_steps>\n`;
+    T.en.setup_steps.forEach(s => {
+      p1 += `    <step>${s.t}</step>\n`;
+    });
+    p1 += `  </setup_steps>\n`;
+    p1 += `  <setup_note>${T.en.setup_note}</setup_note>\n\n`;
+    p1 += `  <tools>\n`;
     T.en.tools.slice(0, 4).forEach(t => { p1 += serializeTool(t) + '\n'; });
+    p1 += `  </tools>\n`;
+    p1 += `</docs>`;
 
     // Part 2: next 5 tools
-    let p2 = '';
+    let p2 = `<tools>\n`;
     T.en.tools.slice(4, 9).forEach(t => { p2 += serializeTool(t) + '\n'; });
+    p2 += `</tools>`;
 
     // Part 3: last tools
-    let p3 = '';
+    let p3 = `<tools>\n`;
     T.en.tools.slice(9).forEach(t => { p3 += serializeTool(t) + '\n'; });
+    p3 += `</tools>`;
 
     return [p1.trim(), p2.trim(), p3.trim()];
   };
@@ -1185,15 +1197,14 @@ const Docs = () => {
     if (transCache[langName]) return;
     setTranslating(true); setTransError('');
     const system = `You are a professional technical documentation translator.
-Translate the following PromptForge documentation into ${langName}.
-RULES:
-1. Translate every word naturally (including product names like PromptForge, AI Writer, Social Media AI, etc.) — sound completely native.
-2. Keep ONLY technical acronyms in English: API, URL, CSV, PDF, JSON, HTML, CSS, JavaScript, Python, SQL, OpenAI, Anthropic, Groq, Gemini, Claude, GPT, Llama, OpenRouter, BYOK
-3. Keep code examples exactly as-is
-4. Keep === markers and bullet format exactly
-5. Output ONLY the translated text — no explanations`;
+Translate the following XML document into ${langName}.
+STRICT RULES:
+1. Keep all XML tags, attribute names, and values (like id="...") exactly as-is. Do not translate them.
+2. Translate ONLY the text content inside the XML tags naturally. Ensure it sounds completely native. Translate everything including brand names, product titles, and user interface labels.
+3. Keep ONLY technical acronyms in English: API, URL, CSV, PDF, JSON, HTML, CSS, JavaScript, Python, SQL, OpenAI, Anthropic, Groq, Gemini, Claude, GPT, Llama, OpenRouter, BYOK
+4. Output ONLY the translated XML. Do not include any explanations, markdown code block wrappers, or extra conversational text.`;
     try {
-      const parts = buildEnglishTextParts();
+      const parts = buildEnglishXMLParts();
       const results = [];
       for (const part of parts) {
         const r = await callAI(system, 'Translate this part into ' + langName + ':\n' + part, null, activeModel, apiKey, providerKeys, customModels);
