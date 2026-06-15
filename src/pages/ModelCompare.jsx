@@ -294,7 +294,7 @@ export default function ModelCompare() {
         </button>
 
         {open && (
-          <div style={{ position:'absolute', top:'100%', left:0, right:0, marginTop:'6px', background:'var(--card)', border:'1px solid var(--border)', borderRadius:'14px', zIndex:200, boxShadow:'0 20px 60px rgba(0,0,0,0.3)', maxHeight:'380px', overflow:'hidden', display:'flex', flexDirection:'column' }}>
+          <div style={{ position:'absolute', top:'100%', left:0, right:0, marginTop:'6px', background:'var(--bg2)', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', border:'1px solid var(--border)', borderRadius:'14px', zIndex:200, boxShadow:'0 20px 60px rgba(0,0,0,0.3)', maxHeight:'380px', overflow:'hidden', display:'flex', flexDirection:'column' }}>
             {/* Search */}
             <div style={{ padding:'10px 12px', borderBottom:'1px solid var(--border)' }}>
               <input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search models..." style={{ width:'100%', background:'var(--bg3)', border:'1px solid var(--border)', color:'var(--text)', padding:'8px 12px', borderRadius:'9px', fontSize:'13px', outline:'none', boxSizing:'border-box' }}/>
