@@ -1480,7 +1480,7 @@ const LandingPage = () => {
             </MagneticButton>
             <div className="stats-banner-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: '24px', zIndex: 12, position: 'relative' }}>
             <div style={{ color: 'var(--lp-cyan)', fontSize: '10px', fontWeight: 800, letterSpacing: '2px', fontFamily: 'Space Grotesk', textTransform: 'uppercase', marginBottom: '8px' }}>
-              ⚡ BETA VERSION ACTIVE / ZERO MIDDLEMAN MARKUP
+              ⚡ REAL-TIME WORKSPACE ACTIVITY
             </div>
             <div className="live-stats-bar" style={{
               display: 'flex',
@@ -1500,19 +1500,19 @@ const LandingPage = () => {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399', fontWeight: 700 }}>
                 <span className="live-pulse-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399', display: 'inline-block' }}></span>
-                <span>{stats.activeUsers} ONLINE</span>
+                <span>{stats.activeUsers} ACTIVE NOW</span>
               </div>
               <div style={{ width: '1px', height: '10px', background: 'rgba(255, 255, 255, 0.15)' }} />
               <div>
-                <span>{stats.uniqueVisitors.toLocaleString()} USERS</span>
+                <span>{stats.uniqueVisitors.toLocaleString()} UNIQUE VISITORS</span>
               </div>
               <div style={{ width: '1px', height: '10px', background: 'rgba(255, 255, 255, 0.15)' }} />
               <div>
-                <span>{stats.totalViews.toLocaleString()} VISITS</span>
+                <span>{stats.totalViews.toLocaleString()} TOTAL PAGEVIEWS</span>
               </div>
               <div style={{ width: '1px', height: '10px', background: 'rgba(255, 255, 255, 0.15)' }} />
               <div style={{ opacity: 0.8 }}>
-                <span>{stats.monthlyViews.toLocaleString()} THIS MONTH</span>
+                <span>{stats.monthlyViews.toLocaleString()} VIEWS THIS MONTH</span>
               </div>
             </div>
           </div>
