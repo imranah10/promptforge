@@ -125,48 +125,21 @@ function AnalyticsTracker() {
   const location = useLocation();
 
   useEffect(() => {
-    // 1. Google Analytics pageview
+    // 1. Google Analytics standard pageview tracking
     if (window.gtag) {
       window.gtag('config', 'G-Q9FWNSYE9Z', {
         page_path: location.pathname + location.search
       });
+
+      // 2. Track specific tool usage when visiting dashboard sub-routes
+      const pathParts = location.pathname.split('/');
+      if (pathParts[1] === 'dashboard' && pathParts[2]) {
+        window.gtag('event', 'use_tool', {
+          tool_name: pathParts[2],
+          page_path: location.pathname
+        });
+      }
     }
-
-    // 2. Upstash Redis Real-time Analytics
-    let visitorId = localStorage.getItem('pf_visitor_id');
-    if (!visitorId) {
-      visitorId = 'v_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-      localStorage.setItem('pf_visitor_id', visitorId);
-    }
-
-    const sessionKey = 'pf_session_tracked_' + location.pathname.replace(/\//g, '_');
-    const isNewForSession = !sessionStorage.getItem(sessionKey);
-
-    if (isNewForSession) {
-      sessionStorage.setItem(sessionKey, 'true');
-    }
-
-    const ping = (isInit) => {
-      fetch(`/api/active-users?id=${visitorId}&init=${isInit}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && !data.error) {
-            const event = new CustomEvent('pf-stats-update', { detail: data });
-            window.dispatchEvent(event);
-          }
-        })
-        .catch(err => console.error('Error pinging analytics:', err));
-    };
-
-    // Immediate ping
-    ping(isNewForSession);
-
-    // Setup heartbeat interval (every 45 seconds) to refresh active status
-    const interval = setInterval(() => {
-      ping(false);
-    }, 45000);
-
-    return () => clearInterval(interval);
   }, [location.pathname]);
 
   return null;
