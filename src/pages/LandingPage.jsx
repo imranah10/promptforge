@@ -1398,6 +1398,8 @@ const LandingPage = () => {
   const dashboardY = useTransform(scrollYProgress, [0, 0.3], [100, 0]);
   const dashboardScale = useTransform(scrollYProgress, [0, 0.35], [0.88, 1.03]);
 
+  const [stats, setStats] = useState({ activeUsers: 1, totalViews: 0, monthlyViews: 0, uniqueVisitors: 0 });
+
   useEffect(() => {
     const lenis = new Lenis();
     function raf(time) {
@@ -1406,6 +1408,30 @@ const LandingPage = () => {
     }
     requestAnimationFrame(raf);
     return () => lenis.destroy();
+  }, []);
+
+  useEffect(() => {
+    const handleUpdate = (e) => {
+      if (e.detail) {
+        setStats(e.detail);
+      }
+    };
+    window.addEventListener('pf-stats-update', handleUpdate);
+
+    // Initial fetch of current stats
+    const visitorId = localStorage.getItem('pf_visitor_id');
+    if (visitorId) {
+      fetch(`/api/active-users?id=${visitorId}&init=false`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && !data.error) {
+            setStats(data);
+          }
+        })
+        .catch(() => {});
+    }
+
+    return () => window.removeEventListener('pf-stats-update', handleUpdate);
   }, []);
 
   return (
@@ -1452,11 +1478,46 @@ const LandingPage = () => {
             <MagneticButton className="lp-btn lp-btn-outline" onClick={() => setWhiteLabelOpen(true)} style={{ fontSize: '16.5px', border: '1px solid rgba(124, 92, 252, 0.4)', color: 'var(--lp-accent-light)' }}>
               Contact Me (White-Label) <Briefcase size={18} style={{ marginLeft: 6 }} />
             </MagneticButton>
+            <div className="stats-banner-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: '24px', zIndex: 12, position: 'relative' }}>
+            <div style={{ color: 'var(--lp-cyan)', fontSize: '10px', fontWeight: 800, letterSpacing: '2px', fontFamily: 'Space Grotesk', textTransform: 'uppercase', marginBottom: '8px' }}>
+              ⚡ BETA VERSION ACTIVE / ZERO MIDDLEMAN MARKUP
+            </div>
+            <div className="live-stats-bar" style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px',
+              padding: '8px 20px',
+              background: 'rgba(124, 92, 252, 0.05)',
+              border: '1px solid rgba(124, 92, 252, 0.15)',
+              borderRadius: '20px',
+              fontSize: '11px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              fontFamily: 'Space Grotesk',
+              letterSpacing: '1px',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#34d399', fontWeight: 700 }}>
+                <span className="live-pulse-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399', display: 'inline-block' }}></span>
+                <span>{stats.activeUsers} ONLINE</span>
+              </div>
+              <div style={{ width: '1px', height: '10px', background: 'rgba(255, 255, 255, 0.15)' }} />
+              <div>
+                <span>{stats.uniqueVisitors.toLocaleString()} USERS</span>
+              </div>
+              <div style={{ width: '1px', height: '10px', background: 'rgba(255, 255, 255, 0.15)' }} />
+              <div>
+                <span>{stats.totalViews.toLocaleString()} VISITS</span>
+              </div>
+              <div style={{ width: '1px', height: '10px', background: 'rgba(255, 255, 255, 0.15)' }} />
+              <div style={{ opacity: 0.8 }}>
+                <span>{stats.monthlyViews.toLocaleString()} THIS MONTH</span>
+              </div>
+            </div>
+          </div>
           </div>
         </motion.div>
-         <div className='text-center' style={{ color: 'var(--lp-cyan)', fontSize: '10px', fontWeight: 800, marginTop: '14px', letterSpacing: '2px', fontFamily: 'Space Grotesk' }}>
-                ⚡ BETA VERSION ACTIVE / ZERO MIDDLEMAN MARKUP
-              </div>
 
         {/* Zoom-in device scroll preview viewport */}
         <div className="dashboard-preview-container">
