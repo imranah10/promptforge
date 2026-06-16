@@ -121,6 +121,18 @@ function DashboardLayout({ theme, onToggleTheme }) {
   );
 }
 
+function AnalyticsTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    if (window.gtag) {
+      window.gtag('config', 'G-Q9FWNSYE9Z', {
+        page_path: location.pathname + location.search
+      });
+    }
+  }, [location]);
+  return null;
+}
+
 function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
 
@@ -137,6 +149,7 @@ function App() {
     <AppProvider>
       <div className="ambient-bg"></div>
       <Router>
+        <AnalyticsTracker />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/pricing" element={<PricingPage />} />
