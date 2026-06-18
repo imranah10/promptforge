@@ -119,7 +119,15 @@ export default function TheSpider() {
   const timerRef      = useRef(null);
   const [elapsed,     setElapsed]      = useState(0);
 
-  const isUrlInput = useMemo(() => /^https?:\/\//i.test(query.trim()), [query]);
+  const isUrlInput = useMemo(() => {
+    const q = query.trim();
+    if (/^https?:\/\//i.test(q)) return true;
+    // Match common domain patterns e.g. domain.com or domain.com/path
+    if (/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?$/i.test(q)) {
+      return true;
+    }
+    return false;
+  }, [query]);
 
   // Persist history
   useEffect(() => { saveHistory(history); }, [history]);
@@ -182,11 +190,15 @@ export default function TheSpider() {
 
     try {
       const isUrl = isUrlInput;
+      let targetQuery = query.trim();
+      if (isUrl && !/^https?:\/\//i.test(targetQuery)) {
+        targetQuery = 'https://' + targetQuery;
+      }
       addStep(isUrl ? 'Extracting target URL content...' : 'Querying global web index...');
 
       const endpoint = isUrl
-        ? `https://r.jina.ai/${query.trim()}`
-        : `https://s.jina.ai/${encodeURIComponent(query.trim())}`;
+        ? `https://r.jina.ai/${targetQuery}`
+        : `https://s.jina.ai/${encodeURIComponent(targetQuery)}`;
 
       let raw;
       try {
@@ -229,14 +241,15 @@ CRITICAL RULES:
 6. Depth: ${depth.toUpperCase()}.
 7. Write the entire response in ${lang}. Keep proper nouns, brand names, and code in English.
 
-At the very end, append this metadata in a JSON block (NO trailing commas, double-quoted strings only):
+At the very end, append this metadata in a JSON block (NO trailing commas, double-quoted strings only).
+IMPORTANT: suggestedFollowUps must be SPECIFIC questions based on the actual content found, not generic placeholders:
 \`\`\`json
 {
   "sourceCount": 3,
   "wordCount": 900,
   "credibility": "High",
   "freshness": "Live data",
-  "suggestedFollowUps": ["follow-up question 1", "follow-up question 2", "follow-up question 3"]
+  "suggestedFollowUps": ["Specific question directly related to the query topic 1", "Specific question directly related to the query topic 2", "Specific question directly related to the query topic 3"]
 }
 \`\`\``;
 
@@ -246,8 +259,17 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
       if (cancelRef.current) return;
       doneAll();
 
+      let cleanRes = res;
       const metaData = extractMetaJSON(res);
-      const cleanRes = res.replace(/```json[\s\S]*?```/g, '').trim();
+      if (metaData && (metaData.suggestedFollowUps || metaData.sourceCount)) {
+        // Find the specific json block and remove it
+        const m = res.match(/```json\s*([\s\S]*?)```/i);
+        if (m) {
+          cleanRes = res.replace(m[0], '').trim();
+        }
+      } else {
+        cleanRes = res.replace(/```json[\s\S]*?```/g, '').trim();
+      }
       setResult(cleanRes);
       if (metaData) {
         setMeta(metaData);
@@ -297,12 +319,12 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
     cancelRef.current = false;
 
     try {
-      const system = `You are SPIDER PRIME answering a follow-up question. Base your answer on the already-scraped web data if available, otherwise use your knowledge. Be specific and detailed. Use plain text, no markdown asterisks. Output language: ${lang}.`;
+      const system = `You are SPIDER PRIME answering a follow-up question. Base your answer on the already-scraped web data if available, otherwise use your knowledge. Be specific and detailed. Use rich Markdown formatting (bold, lists, headers, tables) to answer. Output language: ${lang}.`;
       const user   = `ORIGINAL QUERY: "${query}"\n${rawContent ? `SCRAPED DATA: ${rawContent.substring(0, 30000)}\n` : ''}FOLLOW-UP: "${fq}"`;
-      const res    = await callAI(system, user, null, activeModel, apiKey, providerKeys, customModels);
+      let res = await callAI(system, user, null, activeModel, apiKey, providerKeys, customModels);
       if (cancelRef.current) return;
 
-      const updated = result + `\n\n---\n\n## 🔍 Follow-up: ${fq}\n\n${res}`;
+      const updated = result + '\n\n---\n\n### Follow-up: ' + fq + '\n\n' + res.trim();
       setResult(updated);
       setFollowCount(c => c + 1);
 
@@ -635,8 +657,8 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
             <div style={{ display: 'flex', gap: '2px', padding: '7px 10px', background: 'var(--bg3)', borderBottom: '1px solid var(--border2)', flexWrap: 'wrap' }}>
               {[
                 ['report',   <FileText size={12}/>, 'Report'],
-                sources.length > 0 && ['sources', <Link2 size={12}/>,    `Sources (${sources.length})`],
-                followUps.length > 0 && ['followup', <Brain size={12}/>, `Follow-up (${followUps.length})`],
+                ['sources', <Link2 size={12}/>, sources.length > 0 ? `Sources (${sources.length})` : 'Sources'],
+                ['followup', <Brain size={12}/>, followUps.length > 0 ? `Follow-up (${followUps.length})` : 'Follow-up'],
                 rawContent && ['raw', <Code2 size={12}/>, 'Raw Feed'],
               ].filter(Boolean).map(([id, icon, label]) => (
                 <button key={id} onClick={() => setActiveTab(id)}
@@ -676,6 +698,11 @@ At the very end, append this metadata in a JSON block (NO trailing commas, doubl
                   )}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {sources.length === 0 ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>
+                      No clickable sources found in this report. Try a URL-based search for better source extraction.
+                    </div>
+                  ) : null}
                   {sources.map((s, i) => {
                     let host = '';
                     try { host = new URL(s.url).hostname.replace(/^www\./, ''); } catch (_) { host = s.url; }

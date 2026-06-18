@@ -136,7 +136,17 @@ export default function ChatWithData() {
   // Accept Spider payload
   useEffect(() => {
     if (location.state?.spiderPayload) {
-      setFiles([{ name: 'spider_report.md', content: location.state.spiderPayload, type: 'text/markdown', size: location.state.spiderPayload.length, language: null }]);
+      const content = location.state.spiderPayload;
+      const wordCount = content.split(/\s+/).filter(Boolean).length;
+      setFiles([{
+        name: 'spider_report.md',
+        content,
+        type: 'text/markdown',
+        size: content.length,
+        language: null,
+        wordCount,
+        method: 'spider'
+      }]);
       showToast('Spider report loaded!');
     }
   }, []);
@@ -488,21 +498,28 @@ CRITICAL: Your answer must be based ONLY on the file content shown above in the 
       const res = await callAI(systemPrompt, userContent, null, activeModel, apiKey, providerKeys, customModels);
       if (cancelRef.current) return;
 
-      // Parse visualization JSON
+      // Parse visualization JSON and remove ONLY the dashboard config block
+      let clean = res;
       const jsonMatches = [...res.matchAll(/```(?:json)?\s*([\s\S]*?)\s*```/g)];
       for (const match of jsonMatches) {
         try {
           const art = JSON.parse(match[1]);
-          if (art.type === 'dashboard') {
-            if (art.chart) { setChartData(art.chart); setActiveViz('chart'); }
-            if (art.stats) setStatsData(art.stats);
-          } else if (art.type === 'none') {
-            setChartData(null); setStatsData(null);
+          if (art && (art.type === 'dashboard' || art.type === 'none')) {
+            if (art.type === 'dashboard') {
+              if (art.chart) { setChartData(art.chart); setActiveViz('chart'); }
+              if (art.stats) setStatsData(art.stats);
+            } else if (art.type === 'none') {
+              setChartData(null); setStatsData(null);
+            }
+            // Strip only this matching json block
+            clean = clean.replace(match[0], '');
           }
-        } catch (_) {}
+        } catch (_) {
+          // Normal code block or non-dashboard json, keep it!
+        }
       }
 
-      const clean = res.replace(/```(?:json)?\s*[\s\S]*?\s*```/g, '').trim() || 'Analysis complete. See visualization panel.';
+      clean = clean.trim() || 'Analysis complete. See visualization panel.';
       const updatedMessages = [...newMessages, { role: 'assistant', text: clean }];
       setMessages(updatedMessages);
       saveToVault?.('ChatWithData', userMsg, clean);

@@ -1441,45 +1441,22 @@ const LandingPage = () => {
           </RevealText>
           <div className="hero-cta-group">
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <MagneticButton 
-                className="lp-btn lp-btn-primary" 
-                onClick={() => {
-                  if (window.gtag) {
-                    window.gtag('event', 'click_unlock_workspace', { event_category: 'engagement' });
-                  }
-                  navigate('/dashboard');
-                }} 
-                style={{ padding: '20px 42px', fontSize: '16.5px' }}
-              >
+              <MagneticButton className="lp-btn lp-btn-primary" onClick={() => navigate('/dashboard')} style={{ padding: '20px 42px', fontSize: '16.5px' }}>
                 Unlock Workspace <ArrowRight size={18} />
               </MagneticButton>
+             
             </div>
-            <MagneticButton 
-              className="lp-btn lp-btn-outline" 
-              onClick={() => {
-                if (window.gtag) {
-                  window.gtag('event', 'click_read_docs', { event_category: 'engagement' });
-                }
-                navigate('/dashboard/docs');
-              }} 
-              style={{ fontSize: '16.5px' }}
-            >
+            <MagneticButton className="lp-btn lp-btn-outline" onClick={() => navigate('/dashboard/docs')} style={{ fontSize: '16.5px' }}>
               Read System Docs <HelpCircle size={18} />
             </MagneticButton>
-            <MagneticButton 
-              className="lp-btn lp-btn-outline" 
-              onClick={() => {
-                if (window.gtag) {
-                  window.gtag('event', 'click_contact_whitelabel', { event_category: 'engagement' });
-                }
-                setWhiteLabelOpen(true);
-              }} 
-              style={{ fontSize: '16.5px', border: '1px solid rgba(124, 92, 252, 0.4)', color: 'var(--lp-accent-light)' }}
-            >
+            <MagneticButton className="lp-btn lp-btn-outline" onClick={() => setWhiteLabelOpen(true)} style={{ fontSize: '16.5px', border: '1px solid rgba(124, 92, 252, 0.4)', color: 'var(--lp-accent-light)' }}>
               Contact Me (White-Label) <Briefcase size={18} style={{ marginLeft: 6 }} />
             </MagneticButton>
           </div>
         </motion.div>
+         <div className='text-center' style={{ color: 'var(--lp-cyan)', fontSize: '10px', fontWeight: 800, marginTop: '14px', letterSpacing: '2px', fontFamily: 'Space Grotesk' }}>
+                ⚡ BETA VERSION ACTIVE / ZERO MIDDLEMAN MARKUP
+              </div>
 
         {/* Zoom-in device scroll preview viewport */}
         <div className="dashboard-preview-container">
@@ -1732,6 +1709,51 @@ const LandingPage = () => {
           </p>
         </div>
         <DimensionalParallaxGlide />
+      </section>
+
+      <ShaderLine />
+
+      {/* --- ROADMAP / FUTURE UPDATES SECTION --- */}
+      <section id="roadmap" style={{ padding: '60px 24px', maxWidth: '900px', margin: '0 auto', boxSizing: 'border-box', textAlign: 'center', position: 'relative' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          style={{ position: 'relative' }}
+        >
+          <div style={{ position: 'absolute', top: '-40px', left: '50%', transform: 'translateX(-50%)', width: '280px', height: '280px', background: 'radial-gradient(circle, rgba(124,92,252,0.12), transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
+
+          <span className="tag-premium" style={{ color: 'var(--lp-accent)', borderColor: 'var(--lp-accent-glow)', position: 'relative', zIndex: 1 }}>ALWAYS EVOLVING</span>
+
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 800, marginTop: '18px', letterSpacing: '-0.03em', fontFamily: 'var(--lp-font)', position: 'relative', zIndex: 1 }}>
+            This Is Just The Beginning
+          </h2>
+
+          <p style={{ color: 'var(--lp-text-muted)', fontSize: '15.5px', marginTop: '14px', maxWidth: '620px', margin: '14px auto 0', lineHeight: 1.8, fontFamily: 'var(--lp-font)', position: 'relative', zIndex: 1 }}>
+            New tools are added regularly, and every existing tool keeps getting smarter and more capable over time. When you join PromptForge, you're not just getting what's here today — you're getting everything that comes next, automatically, at no extra cost.
+          </p>
+
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '32px', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+            {['🆕 New tools shipping continuously', '⚡ Existing tools upgraded regularly', '🎁 All future updates included free'].map((text, i) => (
+              <motion.span
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.4 }}
+                style={{
+                  fontSize: '12.5px', fontWeight: 600, color: 'var(--lp-text-muted)',
+                  padding: '9px 18px', borderRadius: '999px',
+                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                  fontFamily: 'var(--lp-font)',
+                }}
+              >
+                {text}
+              </motion.span>
+            ))}
+          </div>
+        </motion.div>
       </section>
 
       <ShaderLine />

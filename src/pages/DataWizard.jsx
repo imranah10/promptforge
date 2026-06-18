@@ -4,6 +4,42 @@ import { callAI } from '../utils/ai';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+
+// ── Lightweight syntax highlighter (no extra deps) ────────────────────────────
+const highlightCode = (code, lang) => {
+  const escape = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let html = escape(code);
+  const rules = {
+    sql:    [[/\b(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|ON|GROUP BY|ORDER BY|HAVING|INSERT|UPDATE|DELETE|CREATE|TABLE|AS|AND|OR|NOT|NULL|INTO|VALUES|WITH|UNION|LIMIT|DISTINCT|CASE|WHEN|THEN|ELSE|END)\b/gi, '#c084fc'], [/--.*$/gm, '#64748b'], [/'[^']*'/g, '#34d399'], [/\b\d+\b/g, '#fb923c']],
+    python: [[/\b(def|class|import|from|return|if|elif|else|for|while|try|except|finally|with|as|pass|break|continue|lambda|yield|None|True|False|self)\b/g, '#c084fc'], [/#.*$/gm, '#64748b'], [/(["'])(?:(?!\1).)*\1/g, '#34d399'], [/\b\d+\b/g, '#fb923c']],
+    excel:  [[/\b([A-Z]+)\(/g, '#c084fc'], [/"[^"]*"/g, '#34d399'], [/\b[A-Z]+\d+\b/g, '#60a5fa']],
+    javascript: [[/\b(const|let|var|function|return|if|else|for|while|class|import|export|from|async|await|new)\b/g, '#c084fc'], [/\/\/.*$/gm, '#64748b'], [/(["'`])(?:(?!\1).)*\1/g, '#34d399']],
+    default:[[/\b(true|false|null)\b/gi, '#fb923c']],
+  };
+  const set = rules[lang?.toLowerCase()] || rules.default;
+  set.forEach(([re, color]) => { html = html.replace(re, m => `<span style="color:${color}">${m}</span>`); });
+  return html;
+};
+
+const CodeBlock = ({ className, children }) => {
+  const lang = (className || '').replace('language-', '');
+  const code = String(children).replace(/\n$/, '');
+  const [copied, setCopied] = useState(false);
+  const copy = () => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(()=>setCopied(false), 1500); };
+  return (
+    <div style={{ position:'relative', margin:'12px 0', borderRadius:10, overflow:'hidden', border:'1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'6px 12px', background:'rgba(255,255,255,0.04)', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+        <span style={{ fontSize:10, fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'0.5px' }}>{lang || 'code'}</span>
+        <button onClick={copy} style={{ display:'flex', alignItems:'center', gap:4, padding:'3px 9px', borderRadius:6, fontSize:10, fontWeight:700, background: copied?'rgba(74,222,128,0.15)':'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color: copied?'#4ade80':'#94a3b8', cursor:'pointer' }}>
+          {copied ? '✓ Copied' : 'Copy'}
+        </button>
+      </div>
+      <pre style={{ margin:0, padding:'14px 16px', overflowX:'auto', background:'#0a0a0f', fontSize:12.5, lineHeight:1.6, fontFamily:"'DM Mono',monospace" }}>
+        <code dangerouslySetInnerHTML={{ __html: highlightCode(code, lang) }} />
+      </pre>
+    </div>
+  );
+};
 import {
   Database, FileText, Code, Binary, BarChart3, Workflow,
   Loader2, Download, Copy, RefreshCw, CheckCircle2,
@@ -336,6 +372,8 @@ export default function DataWizard() {
   const [type,        setType]        = useState('SQL Query');
   const [optMode,     setOptMode]     = useState('balanced');
   const [explainMode, setExplainMode] = useState(false);
+  const [reverseMode, setReverseMode] = useState(false);
+  const [existingCode, setExistingCode] = useState('');
   const [showAdv,     setShowAdv]     = useState(false);
   const [loading,     setLoading]     = useState(false);
   const [pipeSteps,   setPipeSteps]   = useState([]);
@@ -352,7 +390,8 @@ export default function DataWizard() {
     setPipeSteps(prev => prev.map((s, idx) => idx === i ? { ...s, status } : s));
 
   const handleGenerate = async () => {
-    if (!query.trim()) { showToast('Enter a requirement first', 'error'); return; }
+    if (reverseMode && !existingCode.trim()) { showToast('Paste the code/formula to explain', 'error'); return; }
+    if (!reverseMode && !query.trim()) { showToast('Enter a requirement first', 'error'); return; }
     cancelRef.current = false;
     setLoading(true);
     setVariants([]);
@@ -363,12 +402,27 @@ export default function DataWizard() {
       setStep(0, 'running'); await new Promise(r => setTimeout(r, 250)); setStep(0, 'done');
       setStep(1, 'running');
 
-      // ── Each type builds its own specialized system prompt ──
-      const system = currentType.buildSystem(optMode, explainMode);
+      let system, user;
+      if (reverseMode) {
+        // ── EXPLAIN MODE: user pastes existing code, AI explains it ──
+        system = `You are an expert ${currentType.id} reviewer and teacher. The user will paste existing code/formula. Your job:
+1. Explain EXACTLY what it does, line by line or part by part
+2. Identify any bugs, inefficiencies, or risks
+3. Suggest an improved version if relevant
+4. Rate complexity, security, and performance
 
-      const schemaCtx = schema.trim()     ? `\n\nSCHEMA / STRUCTURE:\n${schema}`   : '';
-      const sampleCtx = sampleData.trim() ? `\n\nSAMPLE DATA:\n${sampleData}`      : '';
-      const user      = `REQUIREMENT: ${query}${schemaCtx}${sampleCtx}`;
+Format your response with a \`\`\`${currentType.id.includes('SQL') ? 'sql' : currentType.id.includes('Python') ? 'python' : currentType.id.includes('Excel') ? 'excel' : 'text'} code block showing the original code annotated with comments, followed by a clear explanation section, then === VARIANT 2 === with an improved version if applicable, then a JSON audit block:
+\`\`\`json
+{"complexity":"...","security":"...","scalability":"...","performance":"...","efficiency":85,"warnings":["..."],"optimizations":["..."]}
+\`\`\``;
+        user = `EXPLAIN THIS ${currentType.id}:\n\n${existingCode}${schema.trim() ? '\n\nCONTEXT/SCHEMA:\n' + schema : ''}`;
+      } else {
+        // ── GENERATE MODE: build from requirement ──
+        system = currentType.buildSystem(optMode, explainMode);
+        const schemaCtx = schema.trim()     ? `\n\nSCHEMA / STRUCTURE:\n${schema}`   : '';
+        const sampleCtx = sampleData.trim() ? `\n\nSAMPLE DATA:\n${sampleData}`      : '';
+        user = `REQUIREMENT: ${query}${schemaCtx}${sampleCtx}`;
+      }
 
       const res = await callAI(system, user, null, activeModel, apiKey, providerKeys, customModels);
       if (cancelRef.current) return;
@@ -494,17 +548,52 @@ export default function DataWizard() {
             )}
           </AnimatePresence>
 
-          {/* Requirement input — placeholder changes per type */}
-          <div>
-            <div style={sLabel}>DESCRIBE YOUR REQUIREMENT</div>
-            <textarea rows={5} placeholder={currentType.requirementPlaceholder} value={query} onChange={e=>setQuery(e.target.value)}
-              style={{ ...advInput, minHeight:'120px', fontSize:'14px' }}/>
+          {/* Mode toggle: Generate vs Explain */}
+          <div style={{ display:'flex', gap:'8px', marginBottom:'4px' }}>
+            <button onClick={() => setReverseMode(false)} style={{
+              flex:1, padding:'10px 14px', borderRadius:'10px', fontSize:'12px', fontWeight:700, cursor:'pointer',
+              background: !reverseMode ? 'rgba(124,92,252,0.15)' : 'rgba(255,255,255,0.03)',
+              border: `1.5px solid ${!reverseMode ? 'var(--accent)' : 'rgba(255,255,255,0.08)'}`,
+              color: !reverseMode ? 'var(--accent)' : '#777',
+            }}>
+              ⚡ Generate New
+            </button>
+            <button onClick={() => setReverseMode(true)} style={{
+              flex:1, padding:'10px 14px', borderRadius:'10px', fontSize:'12px', fontWeight:700, cursor:'pointer',
+              background: reverseMode ? 'rgba(96,165,250,0.15)' : 'rgba(255,255,255,0.03)',
+              border: `1.5px solid ${reverseMode ? '#60a5fa' : 'rgba(255,255,255,0.08)'}`,
+              color: reverseMode ? '#60a5fa' : '#777',
+            }}>
+              🔍 Explain Existing
+            </button>
           </div>
 
-          <button onClick={handleGenerate} disabled={loading} style={{ ...genBtn, opacity:loading?0.6:1 }}>
+          {reverseMode ? (
+            /* ── REVERSE MODE: paste existing code, get explanation ── */
+            <div>
+              <div style={sLabel}>PASTE EXISTING {currentType.id.toUpperCase()}</div>
+              <textarea rows={6} placeholder={`Paste your existing ${currentType.id} here — AI will explain what it does, find bugs, and suggest improvements...`}
+                value={existingCode} onChange={e=>setExistingCode(e.target.value)}
+                style={{ ...advInput, minHeight:'150px', fontSize:'13px', fontFamily:"'DM Mono',monospace" }}/>
+              <div style={{ fontSize:'11px', color:'#666', marginTop:'6px', display:'flex', alignItems:'center', gap:'5px' }}>
+                <Sparkles size={11}/> AI will explain line-by-line, find issues, and suggest a better version
+              </div>
+            </div>
+          ) : (
+            /* ── Requirement input — placeholder changes per type ── */
+            <div>
+              <div style={sLabel}>DESCRIBE YOUR REQUIREMENT</div>
+              <textarea rows={5} placeholder={currentType.requirementPlaceholder} value={query} onChange={e=>setQuery(e.target.value)}
+                style={{ ...advInput, minHeight:'120px', fontSize:'14px' }}/>
+            </div>
+          )}
+
+          <button onClick={handleGenerate} disabled={loading} style={{ ...genBtn, opacity:loading?0.6:1, background: reverseMode ? '#60a5fa' : 'var(--accent)' }}>
             {loading
-              ? <><Loader2 size={17} style={{ animation:'spin 1s linear infinite' }}/> Synthesizing...</>
-              : <><Sparkles size={17}/> Generate Production Artifact</>}
+              ? <><Loader2 size={17} style={{ animation:'spin 1s linear infinite' }}/> {reverseMode ? 'Analyzing...' : 'Synthesizing...'}</>
+              : reverseMode
+                ? <><Sparkles size={17}/> Explain This {currentType.id}</>
+                : <><Sparkles size={17}/> Generate Production Artifact</>}
           </button>
 
           {/* History */}
@@ -604,7 +693,12 @@ export default function DataWizard() {
                     </div>
                   ) : (
                     <div className="dw-md-body">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{activeContent}</ReactMarkdown>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+                        code({ node, inline, className, children, ...props }) {
+                          if (inline) return <code style={{ background:'rgba(255,255,255,0.08)', padding:'2px 6px', borderRadius:4, fontSize:'0.9em' }} {...props}>{children}</code>;
+                          return <CodeBlock className={className}>{children}</CodeBlock>;
+                        }
+                      }}>{activeContent}</ReactMarkdown>
                     </div>
                   )}
                 </div>
