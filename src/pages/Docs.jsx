@@ -1,32 +1,7 @@
-import React, { useState, useContext, useCallback, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, Check, Globe, ChevronDown, ChevronUp, Search, Loader2, RefreshCw, X } from 'lucide-react';
-import { AppContext } from '../context/AppContext';
-import { callAI } from '../utils/ai';
+import { Copy, Check, ChevronDown, ChevronUp, Search} from 'lucide-react';
 
-const LANGS = [
-  { code:'en',    label:'🇺🇸 English',            name:'English' },
-  { code:'hi',    label:'🇮🇳 हिंदी',              name:'Hindi' },
-  { code:'es',    label:'🇪🇸 Español',            name:'Spanish' },
-  { code:'zh',    label:'🇨🇳 中文',               name:'Chinese (Simplified)' },
-  { code:'ar',    label:'🇸🇦 العربية',            name:'Arabic' },
-  { code:'pt',    label:'🇧🇷 Português',          name:'Portuguese' },
-  { code:'fr',    label:'🇫🇷 Français',           name:'French' },
-  { code:'de',    label:'🇩🇪 Deutsch',            name:'German' },
-  { code:'ja',    label:'🇯🇵 日本語',             name:'Japanese' },
-  { code:'ru',    label:'🇷🇺 Русский',            name:'Russian' },
-  { code:'ko',    label:'🇰🇷 한국어',             name:'Korean' },
-  { code:'it',    label:'🇮🇹 Italiano',           name:'Italian' },
-  { code:'tr',    label:'🇹🇷 Türkçe',            name:'Turkish' },
-  { code:'nl',    label:'🇳🇱 Nederlands',         name:'Dutch' },
-  { code:'pl',    label:'🇵🇱 Polski',             name:'Polish' },
-  { code:'vi',    label:'🇻🇳 Tiếng Việt',         name:'Vietnamese' },
-  { code:'id',    label:'🇮🇩 Bahasa Indonesia',   name:'Indonesian' },
-  { code:'bn',    label:'🇧🇩 বাংলা',              name:'Bengali' },
-  { code:'ur',    label:'🇵🇰 اردو',              name:'Urdu' },
-  { code:'sw',    label:'🌍 Swahili',             name:'Swahili' },
-  { code:'other', label:'🌐 Other language...',   name:'' },
-];
 
 const T = {
   en: {
@@ -53,7 +28,6 @@ const T = {
     label_pro_tips: '💡 Pro Tips',
     label_search_placeholder: 'Search tools...',
     label_documentation: 'Documentation',
-    label_retranslate: 'Retranslate',
     label_tabs_sections: 'Tabs / Sections',
     label_ai_experts: '5 AI Experts',
     tools: [
@@ -894,440 +868,28 @@ const ToolCard = ({ tool, content }) => {
   );
 };
 
-// Helper function to parse translated plain text documentation back into T.en structure
-// Helper function to parse translated XML documentation back into T.en structure
-const parseTranslatedXMLRegex = (xmlParts, originalContent) => {
-  if (!xmlParts || xmlParts.length === 0) return originalContent;
-
-  try {
-    const result = JSON.parse(JSON.stringify(originalContent)); // Deep clone
-
-    const extractTagContent = (xml, tagName) => {
-      const regex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\/${tagName}>`, 'i');
-      const match = xml.match(regex);
-      return match ? match[1].trim() : '';
-    };
-
-    const extractTagsList = (xml, tagName) => {
-      const regex = new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\/${tagName}>`, 'gi');
-      const list = [];
-      let match;
-      while ((match = regex.exec(xml)) !== null) {
-        list.push(match[1].trim());
-      }
-      return list;
-    };
-
-    let toolIndex = -1;
-
-    xmlParts.forEach((xmlString) => {
-      if (!xmlString) return;
-
-      // Clean up markdown code blocks
-      const xml = xmlString
-        .replace(/```xml/gi, '')
-        .replace(/```/gi, '')
-        .trim();
-
-      // 1. Parse top-level metadata labels
-      const title = extractTagContent(xml, 'title');
-      if (title) result.title = title;
-
-      const subtitle = extractTagContent(xml, 'subtitle');
-      if (subtitle) result.subtitle = subtitle;
-
-      const labels = [
-        'label_supported_providers', 'label_key', 'label_models',
-        'label_input_fields', 'label_step_by_step', 'label_real_examples',
-        'label_what_you_type', 'label_what_you_get', 'label_copy_example',
-        'label_copied', 'label_pro_tips', 'label_search_placeholder',
-        'label_documentation', 'label_retranslate', 'label_tabs_sections',
-        'label_ai_experts'
-      ];
-      labels.forEach(l => {
-        const val = extractTagContent(xml, l);
-        if (val) result[l] = val;
-      });
-
-      const setupTitle = extractTagContent(xml, 'setup_title');
-      if (setupTitle) result.setup_title = setupTitle;
-
-      const setupNote = extractTagContent(xml, 'setup_note');
-      if (setupNote) result.setup_note = setupNote;
-
-      // Parse setup steps
-      const setupStepsContainer = extractTagContent(xml, 'setup_steps');
-      if (setupStepsContainer) {
-        const steps = extractTagsList(setupStepsContainer, 'step');
-        steps.forEach((stepText, idx) => {
-          if (result.setup_steps[idx]) {
-            result.setup_steps[idx].t = stepText;
-          }
-        });
-      }
-
-      // 2. Parse tools
-      const toolRegex = /<tool[^>]*>([\s\S]*?)<\/tool>/gi;
-      let toolMatch;
-      while ((toolMatch = toolRegex.exec(xml)) !== null) {
-        toolIndex++;
-        const toolContent = toolMatch[1];
-        const targetTool = result.tools[toolIndex];
-        if (!targetTool) continue;
-
-        const name = extractTagContent(toolContent, 'name');
-        if (name) targetTool.name = name;
-
-        const tagline = extractTagContent(toolContent, 'tagline');
-        if (tagline) targetTool.tagline = tagline;
-
-        const what = extractTagContent(toolContent, 'what');
-        if (what) targetTool.what = what;
-
-        // Tabs
-        const tabsContainer = extractTagContent(toolContent, 'tabs');
-        if (tabsContainer) {
-          const tabs = extractTagsList(tabsContainer, 'tab');
-          tabs.forEach((tabXml, idx) => {
-            if (targetTool.tabs && targetTool.tabs[idx]) {
-              const tName = extractTagContent(tabXml, 'name');
-              const tDesc = extractTagContent(tabXml, 'desc');
-              if (tName) targetTool.tabs[idx].name = tName;
-              if (tDesc) targetTool.tabs[idx].desc = tDesc;
-            }
-          });
-        }
-
-        // Fields
-        const fieldsContainer = extractTagContent(toolContent, 'fields');
-        if (fieldsContainer) {
-          const fields = extractTagsList(fieldsContainer, 'field');
-          fields.forEach((fieldXml, idx) => {
-            if (targetTool.fields && targetTool.fields[idx]) {
-              const fName = extractTagContent(fieldXml, 'name');
-              const fDesc = extractTagContent(fieldXml, 'desc');
-              if (fName) targetTool.fields[idx].name = fName;
-              if (fDesc) targetTool.fields[idx].desc = fDesc;
-            }
-          });
-        }
-
-        // Agents
-        const agentsContainer = extractTagContent(toolContent, 'agents');
-        if (agentsContainer) {
-          const agents = extractTagsList(agentsContainer, 'agent');
-          agents.forEach((agentXml, idx) => {
-            if (targetTool.agents && targetTool.agents[idx]) {
-              const aName = extractTagContent(agentXml, 'name');
-              const aDesc = extractTagContent(agentXml, 'desc');
-              if (aName) targetTool.agents[idx].name = aName;
-              if (aDesc) targetTool.agents[idx].desc = aDesc;
-            }
-          });
-        }
-
-        // Steps
-        const stepsContainer = extractTagContent(toolContent, 'steps');
-        if (stepsContainer) {
-          const steps = extractTagsList(stepsContainer, 'step');
-          steps.forEach((stepText, idx) => {
-            if (targetTool.steps && targetTool.steps[idx] !== undefined) {
-              targetTool.steps[idx] = stepText;
-            }
-          });
-        }
-
-        // Examples
-        const examplesContainer = extractTagContent(toolContent, 'examples');
-        if (examplesContainer) {
-          const examples = extractTagsList(examplesContainer, 'example');
-          examples.forEach((exXml, idx) => {
-            if (targetTool.examples && targetTool.examples[idx]) {
-              const label = extractTagContent(exXml, 'label');
-              const input = extractTagContent(exXml, 'input');
-              const output = extractTagContent(exXml, 'output');
-              if (label) targetTool.examples[idx].label = label;
-              if (input) targetTool.examples[idx].input = input;
-              if (output) targetTool.examples[idx].output = output;
-            }
-          });
-        }
-
-        // Tips
-        const tipsContainer = extractTagContent(toolContent, 'tips');
-        if (tipsContainer) {
-          const tips = extractTagsList(tipsContainer, 'tip');
-          tips.forEach((tipText, idx) => {
-            if (targetTool.tips && targetTool.tips[idx] !== undefined) {
-              targetTool.tips[idx] = tipText;
-            }
-          });
-        }
-      }
-    });
-
-    return result;
-  } catch (err) {
-    console.error('Error parsing translated XML regex:', err);
-    return originalContent;
-  }
-};
-
 const Docs = () => {
-  const { activeModel, apiKey, providerKeys, customModels } = useContext(AppContext);
-  const [lang, setLang] = useState('en');
   const [search, setSearch] = useState('');
-  const [showLang, setShowLang] = useState(false);
-  const [otherLang, setOtherLang] = useState('');
-  const [translating, setTranslating] = useState(false);
-  const [transCache, setTransCache] = useState({});
-  const [transError, setTransError] = useState('');
-
-  const currentLangNameEarly = lang === 'other' ? otherLang : (LANGS.find(l => l.code === lang)?.name || 'English');
-  const translatedText = lang !== 'en' && transCache[currentLangNameEarly] ? transCache[currentLangNameEarly] : null;
-
-  const content = useMemo(() => {
-    return translatedText ? parseTranslatedXMLRegex([translatedText], T.en) : T.en;
-  }, [translatedText]);
-
-  const tools = content.tools;
+  const content = T.en;
+  const tools = content.tools || [];
   const filtered = search.trim()
-    ? tools.filter(t => t.name.toLowerCase().includes(search.toLowerCase()) || t.tagline.toLowerCase().includes(search.toLowerCase()))
+    ? tools.filter(t =>
+        t.name.toLowerCase().includes(search.toLowerCase()) ||
+        t.tagline.toLowerCase().includes(search.toLowerCase())
+      )
     : tools;
-
-  // Build XML version of English docs for AI translation in parts
-  const buildEnglishXMLParts = () => {
-    const serializeTool = (tool) => {
-      let xml = `<tool id="${tool.id}">\n`;
-      xml += `  <name>${tool.name}</name>\n`;
-      xml += `  <tagline>${tool.tagline}</tagline>\n`;
-      xml += `  <what>${tool.what}</what>\n`;
-      if (tool.tabs) {
-        xml += `  <tabs>\n`;
-        tool.tabs.forEach(t => {
-          xml += `    <tab>\n      <name>${t.name}</name>\n      <desc>${t.desc}</desc>\n    </tab>\n`;
-        });
-        xml += `  </tabs>\n`;
-      }
-      if (tool.fields) {
-        xml += `  <fields>\n`;
-        tool.fields.forEach(f => {
-          xml += `    <field>\n      <name>${f.name}</name>\n      <desc>${f.desc}</desc>\n    </field>\n`;
-        });
-        xml += `  </fields>\n`;
-      }
-      if (tool.agents) {
-        xml += `  <agents>\n`;
-        tool.agents.forEach(a => {
-          xml += `    <agent>\n      <name>${a.name}</name>\n      <desc>${a.desc}</desc>\n    </agent>\n`;
-        });
-        xml += `  </agents>\n`;
-      }
-      if (tool.steps) {
-        xml += `  <steps>\n`;
-        tool.steps.forEach(s => {
-          xml += `    <step>${s}</step>\n`;
-        });
-        xml += `  </steps>\n`;
-      }
-      if (tool.examples) {
-        xml += `  <examples>\n`;
-        tool.examples.forEach(ex => {
-          xml += `    <example>\n      <label>${ex.label}</label>\n      <input>${ex.input}</input>\n      <output>${ex.output}</output>\n    </example>\n`;
-        });
-        xml += `  </examples>\n`;
-      }
-      if (tool.tips) {
-        xml += `  <tips>\n`;
-        tool.tips.forEach(t => {
-          xml += `    <tip>${t}</tip>\n`;
-        });
-        xml += `  </tips>\n`;
-      }
-      xml += `</tool>`;
-      return xml;
-    };
-
-    // Part 1: Header + Title/Subtitle + Setup + Labels + first 2 tools
-    let p1 = `<docs>\n`;
-    p1 += `  <title>${T.en.title}</title>\n`;
-    p1 += `  <subtitle>${T.en.subtitle}</subtitle>\n`;
-    p1 += `  <label_supported_providers>${T.en.label_supported_providers}</label_supported_providers>\n`;
-    p1 += `  <label_key>${T.en.label_key}</label_key>\n`;
-    p1 += `  <label_models>${T.en.label_models}</label_models>\n`;
-    p1 += `  <label_input_fields>${T.en.label_input_fields}</label_input_fields>\n`;
-    p1 += `  <label_step_by_step>${T.en.label_step_by_step}</label_step_by_step>\n`;
-    p1 += `  <label_real_examples>${T.en.label_real_examples}</label_real_examples>\n`;
-    p1 += `  <label_what_you_type>${T.en.label_what_you_type}</label_what_you_type>\n`;
-    p1 += `  <label_what_you_get>${T.en.label_what_you_get}</label_what_you_get>\n`;
-    p1 += `  <label_copy_example>${T.en.label_copy_example}</label_copy_example>\n`;
-    p1 += `  <label_copied>${T.en.label_copied}</label_copied>\n`;
-    p1 += `  <label_pro_tips>${T.en.label_pro_tips}</label_pro_tips>\n`;
-    p1 += `  <label_search_placeholder>${T.en.label_search_placeholder}</label_search_placeholder>\n`;
-    p1 += `  <label_documentation>${T.en.label_documentation}</label_documentation>\n`;
-    p1 += `  <label_retranslate>${T.en.label_retranslate}</label_retranslate>\n`;
-    p1 += `  <label_tabs_sections>${T.en.label_tabs_sections}</label_tabs_sections>\n`;
-    p1 += `  <label_ai_experts>${T.en.label_ai_experts}</label_ai_experts>\n\n`;
-    p1 += `  <setup_title>${T.en.setup_title}</setup_title>\n`;
-    p1 += `  <setup_steps>\n`;
-    T.en.setup_steps.forEach(s => {
-      p1 += `    <step>${s.t}</step>\n`;
-    });
-    p1 += `  </setup_steps>\n`;
-    p1 += `  <setup_note>${T.en.setup_note}</setup_note>\n\n`;
-    p1 += `  <tools>\n`;
-    T.en.tools.slice(0, 2).forEach(t => { p1 += serializeTool(t) + '\n'; });
-    p1 += `  </tools>\n`;
-    p1 += `</docs>`;
-
-    // Part 2: next 3 tools
-    let p2 = `<tools>\n`;
-    T.en.tools.slice(2, 5).forEach(t => { p2 += serializeTool(t) + '\n'; });
-    p2 += `</tools>`;
-
-    // Part 3: next 3 tools
-    let p3 = `<tools>\n`;
-    T.en.tools.slice(5, 8).forEach(t => { p3 += serializeTool(t) + '\n'; });
-    p3 += `</tools>`;
-
-    // Part 4: next 3 tools
-    let p4 = `<tools>\n`;
-    T.en.tools.slice(8, 11).forEach(t => { p4 += serializeTool(t) + '\n'; });
-    p4 += `</tools>`;
-
-    // Part 5: last tools
-    let p5 = `<tools>\n`;
-    T.en.tools.slice(11).forEach(t => { p5 += serializeTool(t) + '\n'; });
-    p5 += `</tools>`;
-
-    return [p1.trim(), p2.trim(), p3.trim(), p4.trim(), p5.trim()];
-  };
-
-  // AI Translation
-  const translate = useCallback(async (langName) => {
-    if (!langName || langName === 'English') return;
-    if (transCache[langName]) return;
-    setTranslating(true); setTransError('');
-    const system = `You are a professional technical documentation translator.
-Translate the following XML document into ${langName}.
-STRICT RULES:
-1. Keep all XML tags, attribute names, and values (like id="...") exactly as-is. Do not translate them.
-2. Translate ONLY the text content inside the XML tags naturally. Ensure it sounds completely native. Translate everything including brand names, product titles, and user interface labels.
-3. Keep ONLY technical acronyms in English: API, URL, CSV, PDF, JSON, HTML, CSS, JavaScript, Python, SQL, OpenAI, Anthropic, Groq, Gemini, Claude, GPT, Llama, OpenRouter, BYOK
-4. Output ONLY the translated XML. Do not include any explanations, markdown code block wrappers, or extra conversational text.`;
-    try {
-      const parts = buildEnglishXMLParts();
-      const results = [];
-      for (const part of parts) {
-        const r = await callAI(system, 'Translate this part into ' + langName + ':\n' + part, null, activeModel, apiKey, providerKeys, customModels);
-        results.push(r);
-      }
-      setTransCache(prev => ({ ...prev, [langName]: results.join('\n\n') }));
-      setTransError('');
-    } catch (e) {
-      console.error('Translation error:', e);
-      setTransError('Translation failed: ' + (e?.message || 'Unknown error. Make sure API key is set.'));
-    } finally { setTranslating(false); }
-  }, [activeModel, apiKey, providerKeys, customModels, transCache]);
-
-  const handleLangSelect = async (code) => {
-    if (code === 'other') { setShowLang(false); return; }
-    setLang(code); setShowLang(false);
-    if (code === 'en') { setTransError(''); return; }
-    const langObj = LANGS.find(l => l.code === code);
-    await translate(langObj?.name || code);
-  };
-
-  const handleOtherSubmit = async (e) => {
-    e.preventDefault();
-    if (!otherLang.trim()) return;
-    setLang('other'); setShowLang(false);
-    await translate(otherLang.trim());
-  };
-
-  const currentLangName = lang === 'other' ? otherLang : (LANGS.find(l => l.code === lang)?.name || 'English');
-  const isTranslated = lang !== 'en' && transCache[currentLangName];
 
   return (
     <div className="page active">
-      {/* Header */}
       <div style={{ textAlign: 'center', padding: '0 0 32px' }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 16px', borderRadius: 99, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.25)', fontSize: 11, fontWeight: 800, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 16 }}>
-            📖 {content.label_documentation || 'Documentation'}
+            📖 Documentation
           </div>
           <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900, margin: '0 0 10px', background: 'linear-gradient(135deg, #fff, #a78bfa, #38bdf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             {content.title}
           </h1>
           <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', maxWidth: 560, margin: '0 auto 24px' }}>{content.subtitle}</p>
-
-          {/* Language switcher — AI powered */}
-          <div style={{ position: 'relative', display: 'inline-block', marginBottom: 24 }}>
-            <button onClick={() => setShowLang(p => !p)} style={{
-              display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 10,
-              background: lang !== 'en' ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.05)',
-              border: `1.5px solid ${lang !== 'en' ? '#a78bfa' : 'rgba(255,255,255,0.12)'}`,
-              color: lang !== 'en' ? '#a78bfa' : 'rgba(255,255,255,0.7)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700
-            }}>
-              <Globe size={15} />
-              {lang === 'en' ? '🇺🇸 English' : lang === 'other' ? `🌐 ${otherLang}` : LANGS.find(l => l.code === lang)?.label}
-              <ChevronDown size={13} />
-              {lang !== 'en' && (
-                <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(167,139,250,0.25)', color: '#a78bfa', marginLeft: 4 }}>AI TRANSLATED</span>
-              )}
-            </button>
-
-            <AnimatePresence>
-              {showLang && (
-                <motion.div initial={{ opacity: 0, y: -8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                  style={{ position: 'absolute', top: '110%', left: 0, zIndex: 999, background: '#111', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: 8, minWidth: 230, boxShadow: '0 8px 30px rgba(0,0,0,0.4)', maxHeight: 320, overflowY: 'auto' }}>
-                  {LANGS.map(l => (
-                    <div key={l.code}>
-                      {l.code === 'other' ? (
-                        <form onSubmit={handleOtherSubmit} style={{ padding: '6px 4px', borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 4 }}>
-                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 5, paddingLeft: 6 }}>Type any language:</div>
-                          <div style={{ display: 'flex', gap: 6 }}>
-                            <input value={otherLang} onChange={e => setOtherLang(e.target.value)} placeholder="e.g. Swahili, Tamil..." style={{ flex: 1, padding: '6px 10px', borderRadius: 7, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', fontSize: 12, outline: 'none', fontFamily: 'inherit' }} />
-                            <button type="submit" style={{ padding: '6px 12px', borderRadius: 7, background: '#7c3aed', border: 'none', color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>Go</button>
-                          </div>
-                        </form>
-                      ) : (
-                        <button onClick={() => handleLangSelect(l.code)} style={{
-                          width: '100%', textAlign: 'left', padding: '8px 12px', borderRadius: 8, fontSize: 13,
-                          background: lang === l.code ? 'rgba(167,139,250,0.15)' : 'transparent',
-                          border: 'none', color: lang === l.code ? '#a78bfa' : 'rgba(255,255,255,0.75)',
-                          cursor: 'pointer', fontFamily: 'inherit', fontWeight: lang === l.code ? 700 : 400,
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                        }}>
-                          {l.label}
-                          {transCache[l.name] && <span style={{ fontSize: 9, color: '#4ade80' }}>✓ cached</span>}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Translation loading */}
-          {translating && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', fontSize: 13, color: '#a78bfa', marginBottom: 16 }}>
-              <Loader2 size={15} className="animate-spin" />
-              AI is translating into {currentLangName}...
-            </div>
-          )}
-          {transError && (
-            <div style={{ fontSize: 12, color: '#f87171', marginBottom: 12 }}>{transError}</div>
-          )}
-          {isTranslated && !translating && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
-              <span style={{ fontSize: 12, color: '#4ade80' }}>✓ Translated to {currentLangName}</span>
-              <button onClick={() => { setTransCache(p => ({ ...p, [currentLangName]: null })); translate(currentLangName); }} style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <RefreshCw size={11} /> {content.label_retranslate || 'Retranslate'}
-              </button>
-            </div>
-          )}
         </motion.div>
       </div>
 
@@ -1351,23 +913,19 @@ STRICT RULES:
       {/* Search */}
       <div style={{ position: 'relative', marginBottom: 20 }}>
         <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
-        <input
-          value={search} onChange={e => setSearch(e.target.value)}
-          placeholder={content.label_search_placeholder || 'Search tools...'}
-          style={{ width: '100%', boxSizing: 'border-box', paddingLeft: 40, padding: '10px 14px 10px 40px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
-        />
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search tools..."
+          style={{ width: '100%', boxSizing: 'border-box', padding: '10px 14px 10px 40px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 13, outline: 'none', fontFamily: 'inherit' }} />
       </div>
 
-      {/* Tools */}
+      {/* Tool Cards */}
       <div>
         {filtered.map((tool, i) => (
           <motion.div key={tool.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-            <ToolCard tool={tool} content={content} />
+            <ToolCard tool={tool} />
           </motion.div>
         ))}
       </div>
 
-      {/* Footer */}
       <div style={{ marginTop: 40, padding: '20px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>
           PromptForge v2.0 · BYOK · 100% Browser-based · All data stays on your device
@@ -1376,5 +934,6 @@ STRICT RULES:
     </div>
   );
 };
+
 
 export default Docs;

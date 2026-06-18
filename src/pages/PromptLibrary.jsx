@@ -133,10 +133,15 @@ const PromptLibrary = ({ onNavigate }) => {
     showToast('Deleted');
   };
 
-  const usePrompt = (text) => {
+  const usePrompt = (text, cat) => {
     navigator.clipboard.writeText(text);
     showToast('Prompt copied to clipboard!');
-    onNavigate('aiwriter');
+    // Navigate to the most relevant tool based on category
+    const dest = cat === 'Coding' ? 'codehelper'
+      : cat === 'Marketing' ? 'creator'
+      : cat === 'Business' ? 'inventor'
+      : 'aiwriter';
+    onNavigate(dest);
   };
 
   // Fuzzy search — matches even if words are not adjacent
@@ -261,7 +266,7 @@ const PromptLibrary = ({ onNavigate }) => {
               {p.text}
             </div>
             <div className="prompt-actions">
-              <button className="btn btn-sm btn-primary" onClick={() => usePrompt(p.text)} style={{ flex: 1 }}>
+              <button className="btn btn-sm btn-primary" onClick={() => usePrompt(p.text, p.cat)} style={{ flex: 1 }}>
                 <Copy size={14} /> Copy & Use
               </button>
               <button
@@ -308,7 +313,7 @@ const PromptLibrary = ({ onNavigate }) => {
               {p.text}
             </div>
             <div className="prompt-actions">
-              <button className="btn btn-sm btn-outline" onClick={() => usePrompt(p.text)} style={{ flex: 1 }}>
+              <button className="btn btn-sm btn-outline" onClick={() => usePrompt(p.text, p.cat)} style={{ flex: 1 }}>
                 <Copy size={14} /> Copy & Use
               </button>
             </div>
@@ -344,5 +349,4 @@ const PromptLibrary = ({ onNavigate }) => {
     </div>
   );
 };
-
 export default PromptLibrary;
