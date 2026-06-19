@@ -127,7 +127,37 @@ const WhiteLabelModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Direct Buy Button (Gumroad) */}
+                <a 
+                  href="https://aureliancanvas.gumroad.com/l/promptforge"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    background: 'linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%)',
+                    border: 'none',
+                    color: '#fff',
+                    borderRadius: '12px',
+                    padding: '16px 20px',
+                    cursor: 'pointer',
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    textDecoration: 'none',
+                    textAlign: 'center',
+                    boxShadow: '0 8px 25px rgba(124, 92, 252, 0.4)',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(124, 92, 252, 0.6)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(124, 92, 252, 0.4)'; }}
+                >
+                  <Sparkles size={16} /> Direct Buy Source Code ($49) <ArrowRight size={16} />
+                </a>
+
+                {/* Email Inquiry Button */}
                 <a 
                   href="mailto:imranaha310@gmail.com?subject=PromptForge%20Source%20Code%20License%20Inquiry&body=Hello%20Imran%2C%0A%0AI%20am%20interested%20in%20purchasing%20the%20commercial%20source%20code%20license%20for%20PromptForge.%20Please%20provide%20more%20details%20about%20pricing%20and%20the%20licensing%20terms.%0A%0ACompany%20Name%20%2F%20Individual%3A%0APlanned%20Use%20Case%3A%0A%0ABest%20Regards%2C%0A%5BYour%20Name%5D"
                   style={{
@@ -135,23 +165,22 @@ const WhiteLabelModal = ({ isOpen, onClose }) => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px',
-                    background: 'var(--accent)',
-                    border: 'none',
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     color: '#fff',
                     borderRadius: '12px',
-                    padding: '14px 20px',
+                    padding: '13px 20px',
                     cursor: 'pointer',
-                    fontSize: '14px',
+                    fontSize: '13.5px',
                     fontWeight: 700,
                     textDecoration: 'none',
                     textAlign: 'center',
-                    boxShadow: '0 8px 20px rgba(124, 92, 252, 0.35)',
                     transition: 'all 0.2s'
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent2)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(124, 92, 252, 0.5)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(124, 92, 252, 0.35)'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
                 >
-                  <Mail size={16} /> Inquire for Source Code License <ArrowRight size={16} />
+                  <Mail size={15} /> Contact via Email (Custom Deals/Queries)
                 </a>
                 
                 <button 
