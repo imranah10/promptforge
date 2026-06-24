@@ -349,4 +349,5 @@ const PromptLibrary = ({ onNavigate }) => {
     </div>
   );
 };
+
 export default PromptLibrary;

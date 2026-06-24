@@ -101,7 +101,7 @@ const HOOK_TYPES = [
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 const CreatorStudio = () => {
   const pageRef = usePageTranslate('creator');
-  const { activeModel, apiKey, providerKeys, customModels, showToast, saveToVault } = useContext(AppContext);
+  const { activeModel, apiKey, providerKeys, customModels, showToast, saveToVault, savedContext } = useContext(AppContext);
 
   // Active tool tab
   const [activeTool, setActiveTool] = useState('generate'); // generate | hooks | calendar | competitor
@@ -532,6 +532,29 @@ Make the "superior version" ready to post — formatted perfectly for ${platform
 
               <div className="form-group">
                 <label className="form-label">Your Topic / Niche / Product</label>
+
+                {/* Context Memory: if the user saved a business/project elsewhere in the app, offer to reuse it here */}
+                {savedContext && !topic && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                    padding: '10px 14px', marginBottom: 10, borderRadius: 10,
+                    background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.25)',
+                  }}>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', flex: 1 }}>
+                      🧠 You saved context from <strong style={{ color: '#a78bfa' }}>{savedContext.sourceTool}</strong> — want to reuse it here instead of retyping?
+                    </div>
+                    <button
+                      onClick={() => setTopic(savedContext.summary)}
+                      style={{
+                        flexShrink: 0, padding: '6px 14px', borderRadius: 8, fontSize: 11, fontWeight: 700,
+                        background: '#a78bfa', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                      }}
+                    >
+                      Use it
+                    </button>
+                  </div>
+                )}
+
                 <textarea
                   className="form-textarea" rows="3"
                   placeholder={`e.g. I'm a fitness coach promoting my 30-day program for working moms...`}

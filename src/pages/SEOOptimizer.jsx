@@ -244,7 +244,7 @@ const AIDisclaimer = () => (
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 const SEOOptimizer = () => {
-  const { activeModel, apiKey, providerKeys, customModels, showToast, saveToVault } = useContext(AppContext);
+  const { activeModel, apiKey, providerKeys, customModels, showToast, saveToVault, savedContext } = useContext(AppContext);
 
   const [activeTool, setActiveTool] = useState('keyword');
   const [loading, setLoading] = useState(false);
@@ -775,6 +775,28 @@ Make all values realistic — not placeholder text. Use the actual topic provide
       <div className="tool-card">
         <AnimatePresence mode="wait">
           <motion.div key={activeTool} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+
+            {/* Context Memory: reuse a saved business/project if available */}
+            {savedContext && !ts.topic && (
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                padding: '10px 14px', marginBottom: 10, borderRadius: 10,
+                background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.25)',
+              }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', flex: 1 }}>
+                  🧠 You saved context from <strong style={{ color: '#a78bfa' }}>{savedContext.sourceTool}</strong> — reuse it here?
+                </div>
+                <button
+                  onClick={() => setTs({ topic: savedContext.summary.slice(0, 200) })}
+                  style={{
+                    flexShrink: 0, padding: '6px 14px', borderRadius: 8, fontSize: 11, fontWeight: 700,
+                    background: '#a78bfa', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  Use it
+                </button>
+              </div>
+            )}
 
             {/* Main topic input */}
             <div className="form-group">

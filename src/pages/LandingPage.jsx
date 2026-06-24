@@ -230,16 +230,16 @@ const QuantumArena = () => {
     {
       id: 0,
       title: "Chat With Data — PDF & File Intelligence",
-      desc: "Upload up to 50 pages of local PDF reports, scrape websites with Tesseract.js OCR, and explore structural visual links inside a custom SVG Knowledge mesh.",
+      desc: "Upload PDFs, CSVs, Excel files, or scanned images and ask questions in plain language. Text extraction and OCR run entirely in your browser.",
       badge: "Chat With Data",
       color: "#06b6d4",
       img: "/local_vector_nexus.png",
-      testPrompt: "Analyze the 'Year-over-Year revenue trends' from my uploaded local PDFs and plot them inside a Recharts Area map.",
+      testPrompt: "Analyze the 'Year-over-Year revenue trends' from my uploaded PDF and plot them as a chart.",
       nodes: [
-        { label: "Local Vector Indexer", desc: "Instantly tokenizes up to 50 pages of raw PDFs entirely within browser client sandbox memory." },
-        { label: "Tesseract OCR Engine", desc: "Decodes scanned screenshots or low-res images in a secondary thread with high-speed recognition." },
-        { label: "Knowledge Mapping Mesh", desc: "Assembles interactive SVG diagrams linking parsed data concepts automatically." },
-        { label: "Recharts Render Center", desc: "Synthesizes real-time client-side interactive Area, Pie, Bar, and Line charts." }
+        { label: "Client-Side PDF Parsing", desc: "Extracts text from PDFs directly in your browser using pdf.js — nothing is uploaded to a server." },
+        { label: "Tesseract OCR Engine", desc: "Reads text from scanned documents or images in a background thread." },
+        { label: "Spreadsheet Support", desc: "Reads CSV and Excel files using SheetJS, no server round-trip needed." },
+        { label: "Recharts Visualization", desc: "Ask for a chart and get a real Bar, Pie, Line, Area, or Scatter chart instantly." }
       ]
     },
     {
@@ -284,7 +284,7 @@ const QuantumArena = () => {
         { label: "Local Vault Encryption", desc: "Secures API keys locally inside the browser using secure local storage configurations." },
         { label: "BYOK Router Interface", desc: "Executes direct HTTPS queries to LLM providers. Zero data scraping, zero logging traces." },
         { label: "AI Judge Compare Center", desc: "Tests prompts side-by-side with Promise.allSettled and evaluates outputs with comparative judgements." },
-        { label: "IndexedDB History Tracker", desc: "Tracks active workspace prompts, parameters, and generated copies entirely on your device." }
+        { label: "Local History Vault", desc: "Tracks every generation with its tool name and topic, searchable and exportable, entirely on your device." }
       ]
     }
   ]);
@@ -601,7 +601,7 @@ const Navbar = () => {
       <div className="nav-links desktop-only">
         <a href="#features" className="nav-link">Capabilities</a>
         <a href="#quantum-arena" className="nav-link">Quantum Arena</a>
-        <a href="#tools" className="nav-link">The 11 Tools</a>
+        <a href="#tools" className="nav-link">The 11+ Tools</a>
         <a href="#architecture" className="nav-link">Architecture Mesh</a>
         <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); navigate('/dashboard/docs'); }} style={{ color: 'var(--lp-accent-light)', fontWeight: 800 }}>
           Interactive Docs Hub
@@ -866,10 +866,10 @@ const Hover3DCard = ({ children, className, bgImage }) => {
 const ThreeDSlider = () => {
   const [active, setActive] = useState(0);
   const tools = [
-    { title: "Indexed PDF Vector Mesh", desc: "Upload up to 50 pages of local PDF data models, scrape image logs with Tesseract.js OCR, and explore parsed conceptual paths inside a beautiful SVG Knowledge Mesh.", icon: <Database />, color: "#06b6d4", img: "/local_vector_nexus.png" },
-    { title: "Senior AI Software Auditor", desc: "Audit source files in 18 common languages, locate exact line numbers of severe bugs/vulnerabilities, and replace code sections with verified drop-in boilerplate segments.", icon: <Code />, color: "#10b981", img: "/promptforge_nexus_core.png" },
-    { title: "Multi-Agent Debater Council", desc: "Convene 4 specialized expert personas (Visionary, Hacker, Analyst, Critic) inside live bubbles. Synthesis complete blueprints into an AES-encrypted history vault.", icon: <Lightbulb />, color: "#7c5cfc", img: "/neural_agent_synapse.png" },
-    { title: "API Key Vault — Secure BYOK Routing", desc: "BYOK serverless routing. Add API keys directly into local browser sandbox settings, ensuring perfect safety while executing parallel comparative judge debates.", icon: <Shield />, color: "#f43f5e", img: "/private_key_vault_core.png" }
+    { title: "Chat With Your Documents", desc: "Upload PDFs, CSVs, Excel files, or scanned images. Text extraction and OCR run in your browser — ask questions and get charts back instantly.", icon: <Database />, color: "#06b6d4", img: "/local_vector_nexus.png" },
+    { title: "AI Code Auditor", desc: "Fix, explain, or audit code in 18 languages. Security Audit finds specific vulnerability lines, and JavaScript can be run live in a sandbox with automatic AI error-fixing.", icon: <Code />, color: "#10b981", img: "/promptforge_nexus_core.png" },
+    { title: "Multi-Agent Debate Council", desc: "5 expert personas (Visionary, Hacker, Analyst, Critic, and a Master synthesizer) debate your idea in live chat bubbles and produce a 30-60-90 day blueprint.", icon: <Lightbulb />, color: "#7c5cfc", img: "/neural_agent_synapse.png" },
+    { title: "API Key Vault — BYOK Routing", desc: "Your API keys are encrypted and stored only in your browser. Requests go straight to the provider — no middleman server in between.", icon: <Shield />, color: "#f43f5e", img: "/private_key_vault_core.png" }
   ];
 
   const handlePrev = () => {
@@ -1159,13 +1159,13 @@ const TerminalSimulator = () => {
 
   useEffect(() => {
     const logs = [
-      "Securing workspace API tokens in client IndexedDB...",
-      "Bypassing provider middlewares: routing via raw HTTPS endpoints.",
-      "Parallel promises synchronized: Promise.allSettled active.",
-      "Concurring multipersona expert debate bubble compiled.",
-      "Scraper radar scan triggered: Scraping dossier packages safely.",
-      "Local vector DB index initialized entirely in-browser.",
-      "Vulnerability auditor checked: 18 programming scopes loaded."
+      "Encrypting API key with AES-GCM 256-bit, browser-only...",
+      "Routing request directly to provider — no middleman server.",
+      "Running side-by-side model comparison...",
+      "Compiling multi-agent expert debate...",
+      "Extracting live web data for research report...",
+      "Parsing document text in-browser...",
+      "Scanning code for vulnerabilities across 18 languages..."
     ];
     let i = 0;
     const interval = setInterval(() => {
@@ -1201,7 +1201,7 @@ const TerminalSimulator = () => {
   );
 };
 
-// --- INTERACTIVE 13 SYSTEM TOOLS DISCOVERY ---
+// --- INTERACTIVE 14 SYSTEM TOOLS DISCOVERY ---
 
 const ToolsDiscovery = () => {
   const [activeTool, setActiveTool] = useState(0);
@@ -1211,23 +1211,23 @@ const ToolsDiscovery = () => {
       name: "Chat With Data",
       icon: <Database size={20} />,
       privacy: "Local processing (pdf.js / Tesseract.js OCR). No servers.",
-      desc: "Complete client-side vector database indexer. Upload up to 50 pages of PDFs, run OCR image scans locally in a secondary thread, and build custom SVG Knowledge node meshes. Chart trends instantly inside Line, Area, Bar, or Pie recharts modules.",
-      testPrompt: "Upload financial statement PDFs and plot 'Year-over-Year revenue trends' directly into a line chart.",
+      desc: "Upload PDF, CSV, Excel, or scanned images and ask questions in plain language. Text extraction and OCR run entirely in your browser. Ask for a chart and it renders instantly as a Bar, Pie, Line, Area, or Scatter chart.",
+      testPrompt: "Upload a sales CSV and ask 'show me a bar chart of revenue by month'.",
       color: "#06b6d4"
     },
     {
       name: "Prompt Optimizer",
       icon: <Wand2 size={20} />,
-      privacy: "Local engine mapping. Stored in browser IndexedDB.",
-      desc: "Fine-tune prompts using the structured CREATE framework. Adjust refinement intensity dial from 1-100, view weakness diagnostic scoring gauges, analyze parameter weaknesses, and test variations inside a live comparison playground.",
-      testPrompt: "Forge Intensity 85% -> Refine copywriting prompt using Anti-Hallucination and expert roleplay loops.",
+      privacy: "Runs on your chosen AI model. Nothing stored on any server.",
+      desc: "Turns a weak, basic prompt into a structured one using the CREATE framework. Shows a strength score, lists weaknesses found and improvements made, lets you test the new prompt live, and refines it again if you're not satisfied.",
+      testPrompt: "Type 'write a blog about AI', set intensity to 85%, and forge it into a structured expert prompt.",
       color: "#7c5cfc"
     },
     {
       name: "AI Writer",
       icon: <Layers size={20} />,
       privacy: "API routed via secure local keys.",
-      desc: "Elite copywriting suite housing 20 content varieties, 10 dynamic tones, and 16 target languages. Use Content Humanizers to strip AI clichés, check outputs inside A/B comparison screens, and audit engagement metrics in real-time.",
+      desc: "Copywriting suite with 19 content types, 10 tones, and 16 output languages. Type-specific formatting renders each piece properly (headings for blogs, numbered cards for Twitter threads, etc). Humanize strips AI clichés, and A/B Test gives two angles to compare side by side.",
       testPrompt: "Write an authority hook with the Humanizer active, comparing outputs in the A/B side-by-side comparison pane.",
       color: "#10b981"
     },
@@ -1243,23 +1243,31 @@ const ToolsDiscovery = () => {
       name: "Code Helper",
       icon: <Code size={20} />,
       privacy: "Executed locally inside browser sandbox.",
-      desc: "Senior engineering assistant supporting 18 languages. Run static security audits to locate exact vulnerability lines, generate drop-in secure code replacements, write unit tests, and compile formatted conventional commit messages.",
-      testPrompt: "Paste React hook code, run a Security Audit scan, and output conventional commit messages for a bugfix.",
+      desc: "Coding assistant supporting 18 languages. Fixes bugs, explains code, writes tests, and runs a security audit that finds specific vulnerability lines. For JavaScript, code can be run live in an in-browser sandbox — if it errors, AI tries up to 3 different fix strategies automatically.",
+      testPrompt: "Paste a buggy JavaScript function, click Run It Live, and watch AI auto-fix it after a failed test run.",
       color: "#fb7185"
     },
     {
       name: "The Inventor",
       icon: <Lightbulb size={20} />,
       privacy: "Keys encrypted locally. Zero middleman.",
-      desc: "Multi-agent debate council with 4 expert personas (Visionary, Hacker, Analyst, Critic) that debate your idea in real-time chat bubbles. Includes cancel support, session history saved to localStorage, and exports a synthesized 30-60-90 day Master Blueprint as a .md file.",
-      testPrompt: "Topic: 'Zero-emission urban shipping fleet'. Trigger live 4-agent council debate and export Master Blueprint.",
+      desc: "Multi-agent debate council with 5 expert personas (Visionary, Hacker, Analyst, Critic, and a Master synthesizer) that debate your idea in real-time chat bubbles. Includes cancel support, session history saved to localStorage, and exports a synthesized 30-60-90 day Master Blueprint as a .md file.",
+      testPrompt: "Topic: 'Zero-emission urban shipping fleet'. Trigger live 5-agent council debate and export Master Blueprint.",
       color: "#a78bfa"
+    },
+    {
+      name: "Business Strategist",
+      icon: <Layers size={20} />,
+      privacy: "Keys encrypted locally. Zero middleman.",
+      desc: "A 6-expert AI panel — Market Validator, Revenue Architect, Competitor Assassin, Risk Auditor, GTM Strategist, and Financial Modeler — walks through a business idea step by step. Ends with an Executive Summary plus a radar scorecard, a competitor positioning map, and a live revenue calculator you can drag to model different user counts. A structured brainstorming tool, not a verified research service.",
+      testPrompt: "Idea: 'Subscription meal-planning app for Indian families'. Run the 6-expert panel and read the Executive Summary.",
+      color: "#f97316"
     },
     {
       name: "Data Wizard",
       icon: <Database size={20} />,
       privacy: "Client-side output. Private keys.",
-      desc: "Developer sandbox generating BigQuery, Postgres, and Snowflake SQL scripts, Pandas dataframes, Excel formulas, DAX PowerBI strings, Regex patterns, and R-code. Compare two approaches side-by-side with integrated efficiency gauges.",
+      desc: "Generates SQL, Excel formulas, Python/Pandas, Regex, Data Visualization code, DAX/Power BI, R scripts, Shell pipelines, or JSON/GraphQL queries from a plain-English description. A live result panel shows the formula actually computing on AI-generated sample data, and Explain Existing mode breaks down code you already have.",
       testPrompt: "Input schema -> compile Postgres query to fetch active subscriptions with side-by-side optimization options.",
       color: "#fbbf24"
     },
@@ -1267,7 +1275,7 @@ const ToolsDiscovery = () => {
       name: "The Spider",
       icon: <Globe size={20} />,
       privacy: "Client-side Jina AI routing. No server logs.",
-      desc: "Deep web scraping command center via Jina AI parse engines. Supports URL mode and search mode, cancel mid-crawl, 6 output dossier formats, session history with full restore, verified vs AI-hallucinated source detection, and follow-up Q&A on extracted data.",
+      desc: "Researches any URL, company, topic, or person using live web data, then writes a structured report. Choose from 6 report modes (Dossier, Quick Summary, Compare & Contrast, Technical Extract, Timeline, Entity Map). Source links are extracted from the actual scraped data, and you can ask follow-up questions afterward.",
       testPrompt: "Scrape 'https://news.ycombinator.com' → export as Markdown dossier → send to Chat With Data.",
       color: "#10b981"
     },
@@ -1275,7 +1283,7 @@ const ToolsDiscovery = () => {
       name: "SEO Optimizer",
       icon: <Search size={20} />,
       privacy: "Local memory. Direct browser rendering.",
-      desc: "7-tool SEO suite: Keyword Lab, SERP Simulator (live Google preview), Content Scorer (6-dimension score rings), Topic Clusters, Content Gap AI, Meta Forge (5 title variants with char count), and Schema Generator with individual JSON-LD copy buttons.",
+      desc: "7-tool SEO suite: Keyword Lab, SERP Simulator (live Google preview), Content Scorer (scored across 6 dimensions), Topic Clusters, Content Gap AI, Meta Forge (titles and descriptions with live character count), and Schema Generator for JSON-LD structured data.",
       testPrompt: "Simulate SERP snippet for 'PromptForge AI studio' and compile matching JSON-LD Article schema markup.",
       color: "#60a5fa"
     },
@@ -1283,8 +1291,8 @@ const ToolsDiscovery = () => {
       name: "Model Compare",
       icon: <RefreshCw size={20} />,
       privacy: "Parallel async promises direct to providers.",
-      desc: "Test multiple LLMs side-by-side using parallel async Promise.allSettled resolutions. An automated AI Judge panel audits all responses, picks a winner, and generates detailed diagnostic verdict cards with reasoning.",
-      testPrompt: "Prompt: 'Explain quantum entanglement' → compare Claude 3.5 vs GPT-4o with AI Judge verdict active.",
+      desc: "Run the same prompt on two AI models at once and see both responses side by side, with response time, token count, and cost tracked for each. An AI Judge then picks a winner and explains the reasoning.",
+      testPrompt: "Prompt: 'Explain quantum entanglement' → compare two models of your choice with AI Judge verdict active.",
       color: "#ec4899"
     },
     {
@@ -1298,10 +1306,18 @@ const ToolsDiscovery = () => {
     {
       name: "History Vault",
       icon: <Brain size={20} />,
-      privacy: "Stored in browser IndexedDB. Never leaves device.",
-      desc: "Persistent results archive powered by IndexedDB. Every tool output is auto-tagged with tool name and topic, fully searchable, individually restorable, and exportable. Acts as your private AI work history — no cloud, no sync, no data leaks.",
+      privacy: "Stored in browser localStorage. Never leaves device.",
+      desc: "Every tool output is automatically saved with the tool name and topic attached, fully searchable, and exportable as JSON. Acts as your private AI work history — no cloud, no sync, no server ever sees it.",
       testPrompt: "Open Vault → search 'SEO' → restore a previous Content Scorer result directly into SEO Optimizer.",
       color: "#7c5cfc"
+    },
+    {
+      name: "API Keys",
+      icon: <Wand2 size={20} />,
+      privacy: "Encrypted and stored only in your browser. Never sent to any server.",
+      desc: "Connect OpenAI, Anthropic, Google, Groq, Mistral, Deepseek, or OpenRouter — your own key, your own cost, zero markup. Keys are encrypted before being saved locally, and every tool in the app uses whichever key and model you pick here.",
+      testPrompt: "Add a free Groq API key and switch the active model to Llama 3.3 70B in one click.",
+      color: "#94a3b8"
     }
   ];
 
@@ -1502,9 +1518,9 @@ const LandingPage = () => {
           <Hover3DCard className="bento-card bento-tall" bgImage="/local_vector_nexus.png">
             <div className="bento-icon"><Database size={24} /></div>
             <div>
-              <h3 className="bento-title">In-Memory Vectors</h3>
+              <h3 className="bento-title">Document Intelligence</h3>
               <p className="bento-desc">
-                Load up to 50 pages of local manuals, documentation, or reports. PromptForge constructs a client-side vector database inside IndexedDB using pdf.js, decodes low-res graphs via in-browser Tesseract.js OCR, and outlines concept vectors inside visual graphs.
+                Load PDFs, manuals, or reports. PromptForge extracts text directly in your browser using pdf.js, reads scanned pages with Tesseract.js OCR, and turns your questions into charts when the data calls for it.
               </p>
             </div>
           </Hover3DCard>
@@ -1577,9 +1593,9 @@ const LandingPage = () => {
             PromptForge decouples you from single provider silos. Route prompts and data variables across OpenAI, Anthropic, or Google backends in parallel. Let automated AI Judge matrices evaluate outputs, identify weaknesses, and declare winners.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <HoverRevealEffect text="Local Context Streaming" subtext="Feed up to 2,000,000 token structures smoothly via browser IndexedDB." />
-            <HoverRevealEffect text="Parallel Promises Resolution" subtext="Evaluate and contrast prompt returns side-by-side using Promise.allSettled." />
-            <HoverRevealEffect text="Zero Platform Databases Logs" subtext="All communications proceed purely via sandboxed client-side HTTPS. Absolute data safety." />
+            <HoverRevealEffect text="Local Context Memory" subtext="Save a business or project once and other tools offer to reuse it — stored only in your browser." />
+            <HoverRevealEffect text="Side-by-Side Comparison" subtext="Run two models on the same prompt and let an AI Judge pick the stronger response." />
+            <HoverRevealEffect text="No Server In Between" subtext="Requests go directly from your browser to the AI provider you choose. No PromptForge server sees your prompts." />
           </div>
         </div>
         <CardShuffle />

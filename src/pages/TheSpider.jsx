@@ -270,6 +270,8 @@ IMPORTANT: suggestedFollowUps must be SPECIFIC questions based on the actual con
       } else {
         cleanRes = res.replace(/```json[\s\S]*?```/g, '').trim();
       }
+      // Strip stray markdown symbols
+      cleanRes = cleanRes.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#{1,6}\s/g, '').replace(/`{1,3}/g, '').trim();
       setResult(cleanRes);
       if (metaData) {
         setMeta(metaData);
@@ -324,7 +326,10 @@ IMPORTANT: suggestedFollowUps must be SPECIFIC questions based on the actual con
       let res = await callAI(system, user, null, activeModel, apiKey, providerKeys, customModels);
       if (cancelRef.current) return;
 
-      const updated = result + '\n\n---\n\n### Follow-up: ' + fq + '\n\n' + res.trim();
+      // Strip stray markdown symbols
+      res = res.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#{1,6}\s/g, '').replace(/`{1,3}/g, '').trim();
+
+      const updated = result + '\n\n---\n\n### Follow-up: ' + fq + '\n\n' + res;
       setResult(updated);
       setFollowCount(c => c + 1);
 

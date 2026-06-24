@@ -24,7 +24,6 @@ const CONTENT_TYPES = [
   { id: 'Social media post', label: '📱 Social media post', format: 'Hook first sentence. Value/entertainment. 2-3 emojis. Hashtags optional. Call to action. 100-150 words.' },
   { id: 'YouTube script', label: '🎥 YouTube script', format: 'INTRO (hook + promise, 15 sec). MAIN (numbered points, timestamps). OUTRO (recap + CTA). Conversational tone. Read-aloud friendly.' },
   { id: 'TikTok script', label: '📹 TikTok script', format: 'HOOK (first 3 seconds, visual + text). BODY (15-20 sec value). CTA (5 sec). On-screen text cues. Trend-aware language.' },
-  { id: 'Sales page / Landing page', label: '💰 Sales page / Landing page', format: 'Hero headline (benefit). Subhead (who/problem). Social proof. Features → Benefits. Objection handling. Urgency/scarcity. Multiple CTAs.' },
   { id: 'Professional bio', label: '👤 Professional bio', format: 'Third-person. Current role + company. Key achievement/expertise. Human touch (1 personal detail). CTA/contact. 50-100 words.' },
   { id: 'Cover letter', label: '📄 Cover letter', format: 'Opening: Why this company/role excites you. Body: 2-3 relevant achievements with metrics. Closing: Enthusiasm + availability. 250-300 words.' },
   { id: 'Press release', label: '📰 Press release', format: 'Headline (newsworthy angle). Dateline (city, date). Lead (who/what/when/where/why). Quote. Boilerplate. Contact.' },
@@ -1108,7 +1107,7 @@ const renderFormattedContent = (content, contentType, selectedSeoIdx, setSelecte
           fontFamily: 'Georgia, serif', color: isLight ? '#1c1917' : '#e7e5e4'
         }}>
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2px', color: isLight ? '#b45309' : '#d97706', textTransform: 'uppercase' }}>Belles-Lettres Archive</span>
+            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2px', color: isLight ? '#b45309' : '#d97706', textTransform: 'uppercase' }}>Editorial Feature</span>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', margin: '12px 0 0 0', color: isLight ? 'rgba(180,83,9,0.3)' : 'rgba(217,119,6,0.2)', fontSize: '11px' }}>
               <span style={{ height: '1px', width: '30px', background: isLight ? 'rgba(180,83,9,0.3)' : 'rgba(217,119,6,0.2)' }} />
               <span>◆   ◆   ◆</span>
@@ -2014,7 +2013,7 @@ const renderFormattedContent = (content, contentType, selectedSeoIdx, setSelecte
 
 const AIWriter = () => {
   const pageRef = usePageTranslate('aiwriter');
-  const { activeModel, apiKey, providerKeys, customModels, showToast, saveToVault } = useContext(AppContext);
+  const { activeModel, apiKey, providerKeys, customModels, showToast, saveToVault, savedContext } = useContext(AppContext);
 
   const [appTheme, setAppTheme] = useState(() => document.documentElement.getAttribute('data-theme') || 'dark');
 
@@ -2062,7 +2061,6 @@ const AIWriter = () => {
   const [toneReport, setToneReport] = useState(null);
 
   const [activeTab, setActiveTab] = useState('main');
-  const [sandboxOpen, setSandboxOpen] = useState(false);
   const [selectedSeoIdx, setSelectedSeoIdx] = useState(0);
   const [generatedType, setGeneratedType] = useState('Blog post / Article');
   
@@ -3013,6 +3011,29 @@ Scores are 0-100.`;
 
           <div className="form-group">
             <label className="form-label">Describe Your Topic, Product, or Goal</label>
+
+            {/* Context Memory: if the user saved a business/project elsewhere in the app, offer to reuse it here */}
+            {savedContext && !topic && (
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                padding: '10px 14px', marginBottom: 10, borderRadius: 10,
+                background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.25)',
+              }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', flex: 1 }}>
+                  🧠 You saved context from <strong style={{ color: '#a78bfa' }}>{savedContext.sourceTool}</strong> — want to reuse it here instead of retyping?
+                </div>
+                <button
+                  onClick={() => setTopic(savedContext.summary)}
+                  style={{
+                    flexShrink: 0, padding: '6px 14px', borderRadius: 8, fontSize: 11, fontWeight: 700,
+                    background: '#a78bfa', color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  Use it
+                </button>
+              </div>
+            )}
+
             <textarea
               className="form-textarea" rows="4"
               placeholder="e.g. I run a SaaS tool for project management. Write a LinkedIn post announcing our new AI feature..."
@@ -3245,78 +3266,6 @@ Scores are 0-100.`;
               ))}
             </div>
           )}
-        </motion.div>
-      )}
-
-      {/* Interactive Rich Paste Sandbox — OFF by default */}
-      {(result || humanized || variants.length > 0) && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{ marginTop: '16px', width: '100%', boxSizing: 'border-box' }}
-        >
-          {/* Toggle button */}
-          <button
-            onClick={() => setSandboxOpen(p => !p)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '8px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700,
-              cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s',
-              background: sandboxOpen ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.04)',
-              border: `1.5px solid ${sandboxOpen ? '#a78bfa' : 'rgba(255,255,255,0.12)'}`,
-              color: sandboxOpen ? '#a78bfa' : 'rgba(255,255,255,0.5)',
-              marginBottom: sandboxOpen ? 12 : 0,
-            }}
-          >
-            <span>📋</span>
-            Clipboard Rich Paste Sandbox
-            <span style={{
-              fontSize: 9, fontWeight: 900, color: '#fff',
-              background: sandboxOpen ? '#a78bfa' : 'rgba(255,255,255,0.2)',
-              padding: '2px 7px', borderRadius: 20, textTransform: 'uppercase', marginLeft: 4,
-            }}>
-              {sandboxOpen ? 'ON' : 'OFF'}
-            </span>
-          </button>
-
-          {/* Sandbox content — only when open */}
-          <AnimatePresence>
-            {sandboxOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                style={{ overflow: 'hidden' }}
-              >
-                <div style={{
-                  padding: '20px',
-                  border: '2px dashed rgba(167,139,250,0.4)',
-                  background: 'rgba(167,139,250,0.03)',
-                  borderRadius: 14,
-                  width: '100%', boxSizing: 'border-box',
-                }}>
-                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 14, lineHeight: 1.6 }}>
-                    Copy your content above, then press <strong style={{ color: '#a78bfa' }}>Ctrl+V</strong> below to verify it pastes with styling in Google Docs, Notion, MS Word, and WordPress.
-                  </p>
-                  <div
-                    contentEditable="true"
-                    style={{
-                      width: '100%', boxSizing: 'border-box',
-                      minHeight: 180, maxHeight: 500, overflowY: 'auto',
-                      background: 'rgba(0,0,0,0.25)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: 10, padding: 18,
-                      color: 'rgba(255,255,255,0.9)',
-                      fontSize: 13, outline: 'none',
-                      fontFamily: 'inherit', lineHeight: 1.7,
-                    }}
-                    onFocus={e => { e.target.style.borderColor = '#a78bfa'; }}
-                    onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
-                  />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </motion.div>
       )}
     </div>

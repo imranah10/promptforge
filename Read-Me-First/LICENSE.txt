@@ -1,0 +1,52 @@
+PROMPTFORGE SOURCE CODE LICENSE
+
+Copyright © 2026. All rights reserved.
+
+This license governs your use of the PromptForge source code ("the Software") purchased via Gumroad.
+
+---
+
+1. WHAT YOU CAN DO
+
+- Use this code to build and run your own product, under your own brand name
+- Modify, customize, and extend the code in any way
+- Deploy it for your own business, including charging your own customers/users to access it
+- Use it for an unlimited number of end users under ONE deployed brand/product
+
+---
+
+2. WHAT YOU CANNOT DO
+
+- Resell, redistribute, or share the raw source code itself as a product (e.g. you cannot resell this as your own "source code template" on Gumroad, CodeCanyon, etc.)
+- Claim original authorship of the underlying codebase
+- Use the included brand assets (PromptForge logo/wordmark, if any) in your rebranded product — replace these before launching
+
+---
+
+3. WHITE-LABEL / AGENCY USE
+
+If you are an agency or developer building this for MULTIPLE different clients under DIFFERENT brand names, each client deployment is considered a separate use case. Please purchase one license per client project, or contact for a multi-client agency license.
+
+A single license covers ONE branded product/deployment, used by unlimited end users of that product.
+
+---
+
+4. NO WARRANTY
+
+This software is provided "as is", without warranty of any kind. The author is not liable for any damages, data loss, or business losses arising from the use of this software. You are responsible for testing and securing your own deployment.
+
+---
+
+5. THIRD-PARTY SERVICES
+
+This software integrates with third-party AI providers (OpenAI, Anthropic, Google, Groq, Mistral, Deepseek, OpenRouter) and optionally Upstash Redis. You and your end users are responsible for your own accounts, API costs, and compliance with those providers' terms of service. The author of this software is not affiliated with and does not control these third-party services.
+
+---
+
+6. REFUNDS
+
+Refund requests are handled according to Gumroad's standard policy. Since this is digital source code delivered instantly, refunds are evaluated case-by-case for genuine technical issues, not for "change of mind" after the files have been downloaded.
+
+---
+
+Questions about licensing? Check FAQ.md included in this package.

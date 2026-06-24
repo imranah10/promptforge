@@ -101,6 +101,15 @@ export const AppProvider = ({ children }) => {
     JSON.parse(localStorage.getItem('pf_vault_history') || '[]')
   );
 
+  // ── CONTEXT MEMORY: a small, user-controlled "active project" memory ──────
+  // Separate from vaultHistory (which is a full log). This is just the
+  // current business/project facts the user wants every tool to remember,
+  // stored only in this browser's localStorage — no server, no account.
+  const [savedContext, setSavedContext] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('pf_saved_context') || 'null'); }
+    catch (_) { return null; }
+  });
+
   // Decrypt keys on mount
   useEffect(() => {
     const loadKeys = async () => {
@@ -215,6 +224,24 @@ export const AppProvider = ({ children }) => {
     setVaultHistory(prev => prev.filter(item => item.id !== id));
   };
 
+  // ── CONTEXT MEMORY helpers ──────────────────────────────────────────────
+  useEffect(() => {
+    try {
+      if (savedContext) localStorage.setItem('pf_saved_context', JSON.stringify(savedContext));
+      else localStorage.removeItem('pf_saved_context');
+    } catch (_) {}
+  }, [savedContext]);
+
+  const setActiveContext = (summary, sourceTool) => {
+    setSavedContext({
+      summary,
+      sourceTool,
+      savedAt: new Date().toLocaleString(),
+    });
+  };
+
+  const clearActiveContext = () => setSavedContext(null);
+
   return (
     <AppContext.Provider
       value={{
@@ -224,6 +251,7 @@ export const AppProvider = ({ children }) => {
         providerKeys, setProviderKeys,
         customModels, addCustomModel, removeCustomModel,
         vaultHistory, saveToVault, clearVault, deleteVaultItem,
+        savedContext, setActiveContext, clearActiveContext,
         toastMsg, showToast,
         uiLang, setUiLang,
         translateEnabled, setTranslateEnabled,

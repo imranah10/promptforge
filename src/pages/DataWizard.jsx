@@ -21,6 +21,18 @@ const highlightCode = (code, lang) => {
   return html;
 };
 
+// Safely render any value AI might return (string, number, or accidentally an object)
+const safeCell = (v) => {
+  if (v === null || v === undefined) return '—';
+  if (typeof v === 'object') {
+    // AI sometimes wraps a value like {value: 50000} or {amount: 50000, currency: "INR"}
+    const vals = Object.values(v);
+    if (vals.length === 1) return String(vals[0]);
+    return vals.map(x => String(x)).join(' ');
+  }
+  return String(v);
+};
+
 const CodeBlock = ({ className, children }) => {
   const lang = (className || '').replace('language-', '');
   const code = String(children).replace(/\n$/, '');
@@ -382,12 +394,63 @@ export default function DataWizard() {
   const [audit,       setAudit]       = useState(null);
   const [history,     setHistory]     = useState([]);
   const [showHist,    setShowHist]    = useState(false);
+  const [gridData,    setGridData]    = useState(null);   // {headers:[], rows:[[]]}
+  const [gridResults,  setGridResults] = useState(null);   // computed output cells
+  const [gridLoading,  setGridLoading] = useState(false);
+  const [showGrid,     setShowGrid]    = useState(false);
   const cancelRef = useRef(false);
 
   const currentType = TYPES.find(t => t.id === type) || TYPES[0];
 
   const setStep = (i, status) =>
     setPipeSteps(prev => prev.map((s, idx) => idx === i ? { ...s, status } : s));
+
+  // GENERATE LIVE GRID: AI builds a small sample table + applies the formula
+  // to each row, so the user sees real computed results, not just formula text.
+  const generateLiveGrid = async (formulaCode) => {
+    setGridLoading(true);
+    try {
+      const gridSystem = "You output ONLY valid JSON, nothing else. No markdown fences, no explanation text.";
+      const gridPrompt =
+        "Given this " + type + ":\n" + formulaCode.slice(0, 2000) + "\n\n" +
+        (schema.trim() ? "Schema/columns: " + schema + "\n\n" : "") +
+        (sampleData.trim() ? "Sample data given: " + sampleData.slice(0, 500) + "\n\n" : "") +
+        "Create a SMALL realistic sample table (5-8 rows) that this formula/query would run against, " +
+        "then compute what the RESULT would be for each row (or the aggregate result if it's an aggregate query). " +
+        "Output ONLY this JSON structure:\n" +
+        "{\n" +
+        '  "headers": ["col1","col2","col3"],\n' +
+        '  "rows": [["val1","val2","val3"], ["val1b","val2b","val3b"]],\n' +
+        '  "resultColumn": "Result",\n' +
+        '  "results": ["computed1","computed2"]\n' +
+        "}\n" +
+        "Rules: headers/rows = the INPUT sample data (realistic values matching the schema/context). " +
+        "results = what this formula/query produces for each corresponding row, OR if it is a single aggregate " +
+        "value (like SUM/COUNT), put just ONE value in the results array and it will be shown as a total. " +
+        "Keep it small and readable — 5-8 rows max, 3-5 columns max. " +
+        "CRITICAL: every value in headers, rows, and results must be a plain string or number — " +
+        "NEVER an object or nested structure. If a value has a unit (like currency), include it directly " +
+        "in the string, e.g. \"50000\" not {\"amount\":50000,\"currency\":\"INR\"}.";
+
+      const gridRes = await callAI(gridSystem, gridPrompt, null, activeModel, apiKey, providerKeys, customModels);
+      const jsonMatch = gridRes.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.headers?.length && parsed.rows?.length) {
+          setGridData({ headers: parsed.headers, rows: parsed.rows });
+          setGridResults({ column: parsed.resultColumn || 'Result', values: parsed.results || [] });
+          setShowGrid(true);
+        }
+      }
+    } catch (e) {
+      console.error('Live grid generation failed', e);
+      setGridData(null);
+      setGridResults(null);
+      // Non-critical — formula text result is unaffected
+    } finally {
+      setGridLoading(false);
+    }
+  };
 
   const handleGenerate = async () => {
     if (reverseMode && !existingCode.trim()) { showToast('Paste the code/formula to explain', 'error'); return; }
@@ -396,6 +459,8 @@ export default function DataWizard() {
     setLoading(true);
     setVariants([]);
     setAudit(null);
+    setGridData(null);
+    setGridResults(null);
     setPipeSteps(PIPE_LABELS.map(label => ({ label, status: 'pending' })));
 
     try {
@@ -454,6 +519,15 @@ Format your response with a \`\`\`${currentType.id.includes('SQL') ? 'sql' : cur
       setHistory(prev => [{ id: Date.now(), type, query: query.slice(0, 60), content: cleanPrimary, audit, fullQuery: query }, ...prev].slice(0, 20));
       saveToVault?.('DataWizard', query, cleanPrimary);
       showToast('Artifact synthesized!');
+
+      // LIVE GRID: only for tabular formula types, and only in generate mode
+      const gridEligible = ['SQL Query', 'Excel / Google Sheets Formula', 'Python / Pandas Script'].includes(type);
+      if (gridEligible && !reverseMode) {
+        generateLiveGrid(cleanPrimary);
+      } else {
+        setGridData(null);
+        setGridResults(null);
+      }
     } catch (e) {
       setPipeSteps(prev => prev.map(s => s.status === 'running' ? { ...s, status: 'error' } : s));
       showToast(e.message, 'error');
@@ -702,6 +776,68 @@ Format your response with a \`\`\`${currentType.id.includes('SQL') ? 'sql' : cur
                     </div>
                   )}
                 </div>
+
+                {/* ── LIVE RESULTS GRID: shows the formula actually computing on sample data ── */}
+                {(gridLoading || gridData) && (
+                  <div style={{ margin:'0 16px 16px', border:'1px solid rgba(74,222,128,0.2)', borderRadius:'14px', overflow:'hidden', background:'rgba(74,222,128,0.03)' }}>
+                    <div onClick={() => setShowGrid(p => !p)} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 16px', cursor:'pointer', borderBottom: showGrid ? '1px solid rgba(74,222,128,0.15)' : 'none' }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                        <span style={{ fontSize:11, fontWeight:900, color:'#4ade80', letterSpacing:'1px', textTransform:'uppercase' }}>
+                          {gridLoading ? '⏳ Running on sample data...' : '▶ Live Result — Try It On Real Data'}
+                        </span>
+                      </div>
+                      <span style={{ fontSize:11, color:'#4ade80' }}>{showGrid ? '▲' : '▼'}</span>
+                    </div>
+
+                    {gridLoading && (
+                      <div style={{ padding:'20px', display:'flex', flexDirection:'column', gap:8 }}>
+                        {[90,75,85].map((w,i)=>(
+                          <div key={i} style={{ height:'12px', background:'rgba(74,222,128,0.08)', borderRadius:6, width:`${w}%`, animation:'shimmer 1.5s infinite', animationDelay:`${i*0.1}s` }}/>
+                        ))}
+                      </div>
+                    )}
+
+                    {showGrid && gridData && !gridLoading && (
+                      <div style={{ overflowX:'auto', padding:'4px 16px 16px' }}>
+                        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
+                          <thead>
+                            <tr>
+                              {gridData.headers.map((h, i) => (
+                                <th key={i} style={{ textAlign:'left', padding:'8px 10px', color:'rgba(255,255,255,0.5)', fontWeight:700, fontSize:10, textTransform:'uppercase', letterSpacing:'0.5px', borderBottom:'1px solid rgba(255,255,255,0.1)' }}>{h}</th>
+                              ))}
+                              {gridResults?.values?.length > 1 && (
+                                <th style={{ textAlign:'left', padding:'8px 10px', color:'#4ade80', fontWeight:800, fontSize:10, textTransform:'uppercase', letterSpacing:'0.5px', borderBottom:'1px solid rgba(74,222,128,0.3)', background:'rgba(74,222,128,0.06)' }}>{gridResults.column}</th>
+                              )}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {gridData.rows.map((row, ri) => (
+                              <tr key={ri} style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
+                                {row.map((cell, ci) => (
+                                  <td key={ci} style={{ padding:'8px 10px', color:'rgba(255,255,255,0.8)', fontFamily:'monospace' }}>{safeCell(cell)}</td>
+                                ))}
+                                {gridResults?.values?.length > 1 && (
+                                  <td style={{ padding:'8px 10px', color:'#4ade80', fontWeight:700, fontFamily:'monospace', background:'rgba(74,222,128,0.04)' }}>{safeCell(gridResults.values[ri])}</td>
+                                )}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+
+                        {gridResults?.values?.length === 1 && (
+                          <div style={{ marginTop:12, padding:'12px 16px', borderRadius:10, background:'rgba(74,222,128,0.08)', border:'1px solid rgba(74,222,128,0.25)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                            <span style={{ fontSize:11, color:'rgba(255,255,255,0.5)', textTransform:'uppercase', letterSpacing:'0.5px' }}>{gridResults.column}</span>
+                            <span style={{ fontSize:18, fontWeight:900, color:'#4ade80', fontFamily:'monospace' }}>{safeCell(gridResults.values[0])}</span>
+                          </div>
+                        )}
+
+                        <div style={{ marginTop:10, fontSize:10, color:'rgba(255,255,255,0.3)' }}>
+                          Sample data generated by AI to demonstrate the formula. Run this same logic on your real data in your own database/spreadsheet.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {audit && (
                   <div style={{ margin:'0 16px 16px', border:'1px solid rgba(255,255,255,0.06)', borderRadius:'14px', overflow:'hidden' }}>

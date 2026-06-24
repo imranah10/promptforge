@@ -9,7 +9,7 @@ import { downloadText } from '../utils/helpers';
 
 const Vault = () => {
   const pageRef = usePageTranslate('vault');
-  const { vaultHistory, clearVault, deleteVaultItem, showToast } = useContext(AppContext);
+  const { vaultHistory, clearVault, deleteVaultItem, showToast, savedContext, clearActiveContext } = useContext(AppContext);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [selected, setSelected] = useState(new Set());
@@ -89,6 +89,39 @@ const Vault = () => {
           </div>
         )}
       </div>
+
+      {/* ── CONTEXT MEMORY: the one "active project" the user told the app to remember ── */}
+      {savedContext && (
+        <div className="tool-card" style={{ padding: '18px 20px', marginBottom: '18px', border: '1px solid rgba(167,139,250,0.3)', background: 'rgba(167,139,250,0.05)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>
+                🧠 Remembered Context
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6, marginBottom: 6 }}>
+                {savedContext.summary}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text3)' }}>
+                Saved from {savedContext.sourceTool} · {savedContext.savedAt}
+              </div>
+            </div>
+            <button
+              onClick={() => { clearActiveContext(); showToast('Context forgotten — tools will no longer suggest this'); }}
+              style={{
+                flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 14px', borderRadius: 9, fontSize: 12, fontWeight: 700,
+                background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)',
+                color: '#f87171', cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              <Trash2 size={13} /> Forget This
+            </button>
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            This is what other tools (AI Writer, SEO Optimizer, Code Helper) will offer to reuse so you don't have to retype your project details. Stored only on this device — never sent anywhere.
+          </div>
+        </div>
+      )}
 
       <div className="tool-card" style={{ padding: '20px', marginBottom: '24px' }}>
         <div className="search-bar">

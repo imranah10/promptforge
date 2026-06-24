@@ -3,7 +3,7 @@ import {
   LayoutDashboard, PenTool, GitCompare, Code2, MessageSquare, 
   Key, Share2, Languages, DollarSign, Briefcase,
   Zap, Search, Library, Wand2, Database, Archive, FileText,
-  PanelLeftClose, PanelRightClose, Globe, Lightbulb, BookOpen,
+  PanelLeftClose, PanelRightClose, Globe, Lightbulb, BookOpen, TrendingUp,
   Sun, Moon
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -75,6 +75,7 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
         <div className="nav-section">
           {!isCollapsed && <div className="nav-label">Business</div>}
           <NavItem id="sellearn" icon={DollarSign} label="Sell & Earn" />
+          <NavItem id="strategist" icon={TrendingUp} label="Business Strategist" badge="New" badgeClass="badge-new" />
           <div 
             className="nav-item" 
             onClick={() => setWhiteLabelOpen(true)}

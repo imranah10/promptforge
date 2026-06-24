@@ -20,6 +20,7 @@ import ChatWithData from './pages/ChatWithData';
 import Vault from './pages/Vault';
 import TheSpider from './pages/TheSpider';
 import TheInventor from './pages/TheInventor';
+import BusinessStrategist from './pages/BusinessStrategist';
 import Docs from './pages/Docs';
 import Toast from './components/Toast';
 import { AppProvider, AppContext } from './context/AppContext';
@@ -109,6 +110,7 @@ function DashboardLayout({ theme, onToggleTheme }) {
                 <Route path="/library" element={<PromptLibrary onNavigate={handleNavigate} />} />
                 <Route path="/search" element={<TheSpider />} />
                 <Route path="/inventor" element={<TheInventor />} />
+                <Route path="/strategist" element={<BusinessStrategist />} />
                 <Route path="/docs" element={<Docs />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
