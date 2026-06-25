@@ -1,30 +1,41 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import WhiteLabelModal from './components/WhiteLabelModal';
 import Topbar from './components/Topbar';
 import ModelSelector from './components/ModelSelector';
+// Dashboard and LandingPage load eagerly — they're the first thing users see.
 import Dashboard from './pages/Dashboard';
-import AIWriter from './pages/AIWriter';
-import CreatorStudio from './pages/CreatorStudio';
-import ModelCompare from './pages/ModelCompare';
-import CodeHelper from './pages/CodeHelper';
-import ApiKeys from './pages/ApiKeys';
-import SellAndEarn from './pages/SellAndEarn';
-import SEOOptimizer from './pages/SEOOptimizer';
-import PromptLibrary from './pages/PromptLibrary';
-import PromptOptimizer from './pages/PromptOptimizer';
-import DataWizard from './pages/DataWizard';
-import ChatWithData from './pages/ChatWithData';
-import Vault from './pages/Vault';
-import TheSpider from './pages/TheSpider';
-import TheInventor from './pages/TheInventor';
-import BusinessStrategist from './pages/BusinessStrategist';
-import Docs from './pages/Docs';
+import LandingPage from './pages/LandingPage';
+// Every other tool is lazy-loaded into its own small JS chunk, so visiting
+// the Dashboard doesn't force-download all 15 tools (plus three.js, recharts,
+// etc) in one giant bundle. Each tool downloads only when it's opened.
+const AIWriter           = lazy(() => import('./pages/AIWriter'));
+const CreatorStudio      = lazy(() => import('./pages/CreatorStudio'));
+const ModelCompare       = lazy(() => import('./pages/ModelCompare'));
+const CodeHelper         = lazy(() => import('./pages/CodeHelper'));
+const ApiKeys            = lazy(() => import('./pages/ApiKeys'));
+const SellAndEarn        = lazy(() => import('./pages/SellAndEarn'));
+const SEOOptimizer       = lazy(() => import('./pages/SEOOptimizer'));
+const PromptLibrary      = lazy(() => import('./pages/PromptLibrary'));
+const PromptOptimizer    = lazy(() => import('./pages/PromptOptimizer'));
+const DataWizard         = lazy(() => import('./pages/DataWizard'));
+const ChatWithData       = lazy(() => import('./pages/ChatWithData'));
+const Vault              = lazy(() => import('./pages/Vault'));
+const TheSpider          = lazy(() => import('./pages/TheSpider'));
+const TheInventor        = lazy(() => import('./pages/TheInventor'));
+const BusinessStrategist = lazy(() => import('./pages/BusinessStrategist'));
+const Docs               = lazy(() => import('./pages/Docs'));
 import Toast from './components/Toast';
 import { AppProvider, AppContext } from './context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import LandingPage from './pages/LandingPage';
+
+// Small, lightweight fallback shown for the brief moment a tool chunk loads
+const ToolLoading = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: 'var(--text-sub, #888)', fontSize: 14 }}>
+    Loading…
+  </div>
+);
 
 function DashboardLayout({ theme, onToggleTheme }) {
   const { whiteLabelOpen, setWhiteLabelOpen } = useContext(AppContext);
@@ -94,26 +105,28 @@ function DashboardLayout({ theme, onToggleTheme }) {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.3 }}
             >
-              <Routes>
-                <Route path="/" element={<Dashboard onNavigate={handleNavigate} />} />
-                <Route path="/optimizer" element={<PromptOptimizer />} />
-                <Route path="/aiwriter" element={<AIWriter />} />
-                <Route path="/creator" element={<CreatorStudio />} />
-                <Route path="/compare" element={<ModelCompare />} />
-                <Route path="/codehelper" element={<CodeHelper />} />
-                <Route path="/datawizard" element={<DataWizard />} />
-                <Route path="/chatdata" element={<ChatWithData />} />
-                <Route path="/vault" element={<Vault />} />
-                <Route path="/keys" element={<ApiKeys />} />
-                <Route path="/sellearn" element={<SellAndEarn />} />
-                <Route path="/seo" element={<SEOOptimizer />} />
-                <Route path="/library" element={<PromptLibrary onNavigate={handleNavigate} />} />
-                <Route path="/search" element={<TheSpider />} />
-                <Route path="/inventor" element={<TheInventor />} />
-                <Route path="/strategist" element={<BusinessStrategist />} />
-                <Route path="/docs" element={<Docs />} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
-              </Routes>
+              <Suspense fallback={<ToolLoading />}>
+                <Routes>
+                  <Route path="/" element={<Dashboard onNavigate={handleNavigate} />} />
+                  <Route path="/optimizer" element={<PromptOptimizer />} />
+                  <Route path="/aiwriter" element={<AIWriter />} />
+                  <Route path="/creator" element={<CreatorStudio />} />
+                  <Route path="/compare" element={<ModelCompare />} />
+                  <Route path="/codehelper" element={<CodeHelper />} />
+                  <Route path="/datawizard" element={<DataWizard />} />
+                  <Route path="/chatdata" element={<ChatWithData />} />
+                  <Route path="/vault" element={<Vault />} />
+                  <Route path="/keys" element={<ApiKeys />} />
+                  <Route path="/sellearn" element={<SellAndEarn />} />
+                  <Route path="/seo" element={<SEOOptimizer />} />
+                  <Route path="/library" element={<PromptLibrary onNavigate={handleNavigate} />} />
+                  <Route path="/search" element={<TheSpider />} />
+                  <Route path="/inventor" element={<TheInventor />} />
+                  <Route path="/strategist" element={<BusinessStrategist />} />
+                  <Route path="/docs" element={<Docs />} />
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                </Routes>
+              </Suspense>
             </motion.div>
           </AnimatePresence>
         </div>
