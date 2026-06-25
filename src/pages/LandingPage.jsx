@@ -229,62 +229,62 @@ const QuantumArena = () => {
   const [cards, setCards] = useState([
     {
       id: 0,
-      title: "Chat With Data — PDF & File Intelligence",
-      desc: "Upload PDFs, CSVs, Excel files, or scanned images and ask questions in plain language. Text extraction and OCR run entirely in your browser.",
-      badge: "Chat With Data",
-      color: "#06b6d4",
-      img: "/local_vector_nexus.png",
-      testPrompt: "Analyze the 'Year-over-Year revenue trends' from my uploaded PDF and plot them as a chart.",
+      title: "Code Helper — Write, Fix, Run Live",
+      desc: "Write from scratch or fix bugs across 18 languages. Run JavaScript live in-browser with console.log output captured. If it errors, AI tries 3 different fix strategies automatically. Includes Git Commit Generator and Security Audit with vulnerability scoring.",
+      badge: "Code Helper",
+      color: "#10b981",
+      img: "/promptforge_nexus_core.png",
+      testPrompt: "Write a binary search in JavaScript, run it live with input 42, and watch Auto-Fix kick in if it errors.",
       nodes: [
-        { label: "Client-Side PDF Parsing", desc: "Extracts text from PDFs directly in your browser using pdf.js — nothing is uploaded to a server." },
-        { label: "Tesseract OCR Engine", desc: "Reads text from scanned documents or images in a background thread." },
-        { label: "Spreadsheet Support", desc: "Reads CSV and Excel files using SheetJS, no server round-trip needed." },
-        { label: "Recharts Visualization", desc: "Ask for a chart and get a real Bar, Pie, Line, Area, or Scatter chart instantly." }
+        { label: "10 Tasks, 18 Languages", desc: "Fix, explain, write from scratch, convert, optimize, add tests, refactor — JavaScript to Dart/Flutter." },
+        { label: "Run It Live", desc: "Execute JavaScript in-browser. console.log output is captured and shown. No server needed." },
+        { label: "Auto-Fix: 3 Strategies", desc: "Direct fix → Root-cause analysis → Defensive rewrite. Three different AI approaches, not the same prompt repeated." },
+        { label: "Security Audit", desc: "Vulnerability score 0–100 with exact flagged line numbers and secure drop-in replacement code." }
       ]
     },
     {
       id: 1,
-      title: "Senior Software Vulnerability Scanner",
-      desc: "Analyze source code in 18 common languages, locate exact line numbers of critical security vulnerabilities, and generate verified drop-in refactored boilerplate segments.",
-      badge: "Code Helper",
-      color: "#10b981",
-      img: "/promptforge_nexus_core.png",
-      testPrompt: "Audit this React hook code for memory leaks, highlight severe lines, and compile conventional commit messages.",
+      title: "Business Strategist — 6 Expert Personas",
+      desc: "Describe any business idea and 6 AI specialists analyse it at once: Market Validator, Revenue Architect, Competitor Assassin, Risk Auditor, GTM Strategist, Financial Modeler. Ends with Executive Summary, radar scorecard, and live revenue calculator.",
+      badge: "Business Strategist",
+      color: "#f97316",
+      img: "/neural_agent_synapse.png",
+      testPrompt: "Idea: Subscription meal-planning app for Indian families. Run the 6-expert panel and drag the revenue calculator.",
       nodes: [
-        { label: "Syntax Parser", desc: "Checks imports, scope parameters, and potential key leaks across 18 backend/frontend dialects." },
-        { label: "Vulnerability Matrices", desc: "Highlights exact lines matching severe vulnerabilities from Critical down to low warning categories." },
-        { label: "Drop-in Secure Replacements", desc: "Compiles secure clean code patches ready to be inserted directly into your local codebase." },
-        { label: "Conventional Commit Logs", desc: "Evaluates the diff and drafts structured, conventional specification commit logs." }
+        { label: "Market Validator", desc: "TAM/SAM/SOM estimate, demand signals, target customer profile, timing assessment, go/no-go verdict." },
+        { label: "Competitor Assassin", desc: "Names likely competitors, their weaknesses, your differentiation edge and positioning angle." },
+        { label: "GTM Strategist", desc: "90-day launch playbook, first-customer acquisition channels, Week 1 action items." },
+        { label: "Live Revenue Calculator", desc: "Drag user count sliders — MRR and ARR update in real time on the Financial Modeler card." }
       ]
     },
     {
       id: 2,
-      title: "Specialized Multi-Agent Debate Council",
-      desc: "Convene 4 unique expert personas (The Visionary, Hacker, Analyst, Critic) inside live bubbles. Watch them critique ideas, resolve flaws, and export unified 30-60-90 day Master plans.",
-      badge: "The Inventor",
-      color: "#7c5cfc",
-      img: "/neural_agent_synapse.png",
-      testPrompt: "Convene a debate on 'Zero-emission urban shipping fleet using hovercrafts'. Let the Analyst audit feasibility, Critic verify risks.",
+      title: "Creator Studio — 8 Platforms, Platform-Native Output",
+      desc: "TikTok scripts with on-screen text cues, LinkedIn stories, Twitter threads where each tweet stands alone, WhatsApp broadcast messages. Not generic posts — each platform gets content built for its algorithm. 5 hook types, 7-Day Calendar, Beat Competitor mode.",
+      badge: "Creator Studio",
+      color: "#e11d48",
+      img: "/local_vector_nexus.png",
+      testPrompt: "Generate a Shocking Stat hook for TikTok for a fitness coaching business, then fill a 7-day content calendar.",
       nodes: [
-        { label: "Visionary & Hacker Persona", desc: "Synthesizes exponential technological fusions and raw engineering architectural paths." },
-        { label: "Critic & Analyst Filters", desc: "Detects structural failures, edge cases, financial viability limits, and operational risks." },
-        { label: "Staggered Debate Bubble Logs", desc: "Simulates conversational debates dynamically inside visual scrolling bubbles." },
-        { label: "Master Plan Exporter", desc: "Assembles complete 30-60-90 day implementation blueprints straight into your history Vault." }
+        { label: "8 Platforms, Native Formats", desc: "Instagram, YouTube, TikTok, Twitter/X, LinkedIn, Facebook, WhatsApp, Pinterest — platform-specific output, not generic text." },
+        { label: "5 Viral Hook Types", desc: "Question, Shocking Stat, Story, Controversy, Challenge — pick the hook style, AI writes the full post." },
+        { label: "7-Day Content Calendar", desc: "Full week of posts with timing, hook, caption, hashtags — downloadable as CSV for Buffer or Hootsuite." },
+        { label: "Beat Competitor", desc: "Paste a competitor's post, get a better version for your brand targeting the same audience." }
       ]
     },
     {
       id: 3,
-      title: "Decentralized Security Vault Console",
-      desc: "Add your private provider keys (OpenAI, Anthropic, Gemini, DeepSeek), store them safely under browser-native AES encryption, and route all queries directly without mid-tier markup.",
-      badge: "Key Security",
-      color: "#f43f5e",
+      title: "The Spider — Live Web Intelligence Reports",
+      desc: "Research any URL, company, person, or topic using live scraped web data — not AI memory. Pick from 6 report modes. Source links come only from actual scraped content — no invented URLs. Ask follow-up questions after the report.",
+      badge: "The Spider",
+      color: "#10b981",
       img: "/private_key_vault_core.png",
-      testPrompt: "Inject encrypted keys into browser localStorage and run side-by-side LLM comparisons with independent AI Judge verification.",
+      testPrompt: "Scrape a competitor homepage, run Dossier mode, ask a follow-up question, export as Markdown.",
       nodes: [
-        { label: "Local Vault Encryption", desc: "Secures API keys locally inside the browser using secure local storage configurations." },
-        { label: "BYOK Router Interface", desc: "Executes direct HTTPS queries to LLM providers. Zero data scraping, zero logging traces." },
-        { label: "AI Judge Compare Center", desc: "Tests prompts side-by-side with Promise.allSettled and evaluates outputs with comparative judgements." },
-        { label: "Local History Vault", desc: "Tracks every generation with its tool name and topic, searchable and exportable, entirely on your device." }
+        { label: "Live Web Data", desc: "Fetches real-time content from any URL — actual scraped data, not AI's training knowledge." },
+        { label: "6 Report Modes", desc: "Dossier, Quick Summary, Compare & Contrast, Technical Extract, Timeline, Entity Map." },
+        { label: "Verified Source Links Only", desc: "Links cited only if they appear in scraped data. No hallucinated URLs, ever." },
+        { label: "Follow-up Q&A", desc: "After the report generates, keep asking questions — AI answers from the same scraped context." }
       ]
     }
   ]);
@@ -866,10 +866,10 @@ const Hover3DCard = ({ children, className, bgImage }) => {
 const ThreeDSlider = () => {
   const [active, setActive] = useState(0);
   const tools = [
-    { title: "Chat With Your Documents", desc: "Upload PDFs, CSVs, Excel files, or scanned images. Text extraction and OCR run in your browser — ask questions and get charts back instantly.", icon: <Database />, color: "#06b6d4", img: "/local_vector_nexus.png" },
-    { title: "AI Code Auditor", desc: "Fix, explain, or audit code in 18 languages. Security Audit finds specific vulnerability lines, and JavaScript can be run live in a sandbox with automatic AI error-fixing.", icon: <Code />, color: "#10b981", img: "/promptforge_nexus_core.png" },
-    { title: "Multi-Agent Debate Council", desc: "5 expert personas (Visionary, Hacker, Analyst, Critic, and a Master synthesizer) debate your idea in live chat bubbles and produce a 30-60-90 day blueprint.", icon: <Lightbulb />, color: "#7c5cfc", img: "/neural_agent_synapse.png" },
-    { title: "API Key Vault — BYOK Routing", desc: "Your API keys are encrypted and stored only in your browser. Requests go straight to the provider — no middleman server in between.", icon: <Shield />, color: "#f43f5e", img: "/private_key_vault_core.png" }
+    { title: "Chat With Data — Ask Your Files", desc: "Upload PDF, CSV, or Excel files and ask questions in plain English. Auto-generates Bar, Pie, Line, Area, and Scatter charts from your data. Files processed locally in your browser.", icon: <Database />, color: "#06b6d4", img: "/local_vector_nexus.png" },
+    { title: "Code Helper — Run It Live", desc: "Fix bugs, write from scratch, run JavaScript live in-browser with console.log captured. On errors, Auto-Fix tries 3 different AI strategies. Security Audit finds exact vulnerable lines with score 0–100.", icon: <Code />, color: "#10b981", img: "/promptforge_nexus_core.png" },
+    { title: "The Inventor — 5-Agent Debate", desc: "Visionary, Hacker, Analyst, Critic, and Master Synthesizer debate your idea in live streaming bubbles. Exports a full 30-60-90 day Blueprint as a downloadable .md file.", icon: <Lightbulb />, color: "#7c5cfc", img: "/neural_agent_synapse.png" },
+    { title: "BYOK — Your Keys, Zero Markup", desc: "OpenAI, Anthropic, Gemini, Groq, Mistral, Deepseek, OpenRouter — encrypted in your browser only. Requests go direct to the provider. No server ever sees your key or your prompts.", icon: <Shield />, color: "#f43f5e", img: "/private_key_vault_core.png" }
   ];
 
   const handlePrev = () => {
@@ -1210,7 +1210,7 @@ const ToolsDiscovery = () => {
     {
       name: "Chat With Data",
       icon: <Database size={20} />,
-      privacy: "Local processing (pdf.js / Tesseract.js OCR). No servers.",
+      privacy: "Files processed locally via pdf.js. Never leaves your browser.",
       desc: "Upload PDF, CSV, Excel, or scanned images and ask questions in plain language. Text extraction and OCR run entirely in your browser. Ask for a chart and it renders instantly as a Bar, Pie, Line, Area, or Scatter chart.",
       testPrompt: "Upload a sales CSV and ask 'show me a bar chart of revenue by month'.",
       color: "#06b6d4"
@@ -1520,7 +1520,7 @@ const LandingPage = () => {
             <div>
               <h3 className="bento-title">Document Intelligence</h3>
               <p className="bento-desc">
-                Load PDFs, manuals, or reports. PromptForge extracts text directly in your browser using pdf.js, reads scanned pages with Tesseract.js OCR, and turns your questions into charts when the data calls for it.
+                Upload PDFs, CSVs, or Excel files. Ask questions in plain English — get instant AI answers, key stats, deep analysis, and auto-generated charts. Files processed locally in your browser.
               </p>
             </div>
           </Hover3DCard>

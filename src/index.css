@@ -455,6 +455,10 @@ body {
   transition: margin-left 0.3s ease;
 }
 
+@media (max-width: 900px) {
+  .main { margin-left: 0 !important; }
+}
+
 /* ---- CONTENT ---- */
 .content {
   flex: 1;
@@ -696,4 +700,3 @@ input[type=range]::-moz-range-thumb:hover { transform: scale(1.2); }
 :root[data-theme="light"] .page span[style*="color: rgb(167, 139, 250)"] {
   color: var(--accent) !important;
 }
-

@@ -111,10 +111,12 @@ const T = {
           { name: 'Commit Type', desc: 'Auto-detect, or manual: feat, fix, refactor, perf, docs, test, chore, style, ci' },
         ],
         steps: [
-          'Code Helper tab: Select Task → Select Language → Paste code → Click Run',
-          'Git Commit tab: Paste your diff or describe changes → Click "Generate Commit Messages"',
-          'Security Audit tab: Paste code → Select language → Click "Run Security Audit"',
-          'Results show below with copy buttons',
+          'Code Helper: Select Task → Select Language → Paste code or describe what you want built → Click Run',
+          'Run It Live: After code generates, click "Run It Live" tab → leave Test Input empty or add a value → click "Run This Code Now"',
+          'Auto-Fix: When a runtime error appears, click "Auto-Fix With AI" — tries Direct fix, then Root-cause analysis, then Defensive rewrite',
+          'Git Commit: Paste your diff or describe changes → generates 3 commit message versions',
+          'Security Audit: Paste code → click Run Security Audit → get score 0–100 with exact flagged lines',
+          'Flowchart: Click the Flowchart tab after any generation to see a visual logic diagram',
         ],
         examples: [
           {

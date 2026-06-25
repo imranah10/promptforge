@@ -9,7 +9,7 @@ import {
 import { motion } from 'framer-motion';
 import { AppContext } from '../context/AppContext';
 
-const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse, theme, onToggleTheme }) => {
+const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse, onToggleSidebar, theme, onToggleTheme }) => {
   const [tooltip, setTooltip] = React.useState(null);
   const { setWhiteLabelOpen } = React.useContext(AppContext);
 
@@ -47,8 +47,21 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
         <a className="logo-mark" href="#" onClick={(e) => { e.preventDefault(); onNavigate('dashboard'); }}>
           <img src="/logo-icon.png" alt="PF" style={{ width: '42px', height: '42px', objectFit: 'contain', display: 'block' }} />
         </a>
-        <button className="collapse-toggle" onClick={onToggleCollapse} title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}>
-          {isCollapsed ? <PanelRightClose size={18} /> : <PanelLeftClose size={18} />}
+        <button
+          className="collapse-toggle"
+          onClick={() => {
+            if (window.innerWidth <= 900) {
+              onToggleSidebar && onToggleSidebar();
+            } else {
+              onToggleCollapse();
+            }
+          }}
+          title={window.innerWidth <= 900 ? "Close Sidebar" : isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+        >
+          {window.innerWidth <= 900
+            ? <PanelLeftClose size={18} />
+            : isCollapsed ? <PanelRightClose size={18} /> : <PanelLeftClose size={18} />
+          }
         </button>
       </div>
 
@@ -275,9 +288,25 @@ const Sidebar = ({ activePage, onNavigate, isOpen, isCollapsed, onToggleCollapse
         @media (max-width: 900px) {
           .sidebar { transform: translateX(-100%); }
           .sidebar.open { transform: translateX(0); width: var(--sidebar) !important; }
-          .collapse-toggle { display: none; }
+          .collapse-toggle { display: flex; margin-left: auto; }
           .nav-item { justify-content: flex-start !important; padding: 10px 12px !important; }
           .item-label { display: block !important; }
+        }
+
+        @media (max-width: 600px) {
+          .sidebar { width: 100vw !important; max-width: 280px; }
+          .sidebar.open { width: 100vw !important; max-width: 280px; }
+          .sidebar-logo { padding: 14px 12px; }
+          .logo-text { font-size: 15px; }
+          .nav-item { padding: 9px 10px !important; font-size: 13px; }
+          .nav-badge { font-size: 8px; padding: 1px 5px; }
+          .sidebar-footer { padding: 10px 8px; }
+        }
+
+        @media (max-width: 400px) {
+          .sidebar { max-width: 260px; }
+          .sidebar.open { max-width: 260px; }
+          .item-label { font-size: 12px; }
         }
       `}</style>
     </nav>

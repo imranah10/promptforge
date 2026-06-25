@@ -10,7 +10,6 @@ import CreatorStudio from './pages/CreatorStudio';
 import ModelCompare from './pages/ModelCompare';
 import CodeHelper from './pages/CodeHelper';
 import ApiKeys from './pages/ApiKeys';
-import PricingPage from './pages/PricingPage';
 import SellAndEarn from './pages/SellAndEarn';
 import SEOOptimizer from './pages/SEOOptimizer';
 import PromptLibrary from './pages/PromptLibrary';
@@ -74,6 +73,7 @@ function DashboardLayout({ theme, onToggleTheme }) {
         isOpen={sidebarOpen} 
         isCollapsed={isDesktopCollapsed}
         onToggleCollapse={() => setIsDesktopCollapsed(!isDesktopCollapsed)}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         theme={theme}
         onToggleTheme={onToggleTheme}
       />
@@ -166,7 +166,6 @@ function App() {
         <AnalyticsTracker />
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
           <Route 
             path="/dashboard/*" 
             element={<DashboardLayout theme={theme} onToggleTheme={handleToggleTheme} />} 
