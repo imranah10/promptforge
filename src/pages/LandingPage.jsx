@@ -7,7 +7,8 @@ import {
   Search, Brain, Lightbulb, Globe, Menu, X, Wand2, Layers, MessageSquare, Play, Video as VideoIcon, HelpCircle, Shield, Cpu, RefreshCw, Star, ArrowDown, Copy, Terminal, Share2, Briefcase, Mail
 } from 'lucide-react';
 import Lenis from 'lenis';
-import ExplodingObjects from '../components/landing/ExplodingObjects';
+import { lazy, Suspense } from 'react';
+const ExplodingObjects = lazy(() => import('../components/landing/ExplodingObjects'));
 import WhiteLabelModal from '../components/WhiteLabelModal';
 import { AppContext } from '../context/AppContext';
 import './LandingPage.css';
@@ -1407,6 +1408,19 @@ const LandingPage = () => {
   const { setWhiteLabelOpen, whiteLabelOpen } = useContext(AppContext);
   const navigate = useNavigate();
   const heroRef = useRef(null);
+
+  // Skip the heavy WebGL 3D scene on small/mobile screens. Three.js +
+  // continuous useFrame render loops are expensive on mobile-class CPUs
+  // (especially under Lighthouse's 4x throttle), and the effect is
+  // primarily a desktop showpiece anyway — it's not lost functionality,
+  // just lighter weight where it matters most for load time.
+  const [show3D, setShow3D] = useState(false);
+  useEffect(() => {
+    const checkSize = () => setShow3D(window.innerWidth >= 1024);
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    return () => window.removeEventListener('resize', checkSize);
+  }, []);
   
   const { scrollYProgress } = useScroll();
   const heroScale = useTransform(scrollYProgress, [0, 0.25], [1, 1.03]);
@@ -1577,7 +1591,23 @@ const LandingPage = () => {
           <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 800, marginTop: '16px', letterSpacing: '-0.03em', fontFamily: 'var(--lp-font)' }}>Interactive 3D Blueprint Mesh</h2>
           <p style={{ color: 'var(--lp-text-muted)', fontSize: '1.15rem', marginTop: '12px' }}>Hover or drag custom node rings to evaluate system pipelines.</p>
         </div>
-        <ExplodingObjects />
+        {show3D ? (
+          <Suspense fallback={<div style={{ height: 420, borderRadius: 20, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }} />}>
+            <ExplodingObjects />
+          </Suspense>
+        ) : (
+          // Lightweight static preview on mobile/small screens instead of the WebGL scene
+          <div style={{
+            height: 320, borderRadius: 20, background: 'linear-gradient(135deg, rgba(124,92,252,0.08), rgba(56,189,248,0.06))',
+            border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexDirection: 'column', gap: 12, padding: 24, textAlign: 'center',
+          }}>
+            <Layers size={32} color="var(--lp-accent)" />
+            <p style={{ color: 'var(--lp-text-muted)', fontSize: 13, maxWidth: 280 }}>
+              The interactive 3D view is available on larger screens — view this page on a desktop to explore it.
+            </p>
+          </div>
+        )}
       </section>
 
       <ShaderLine />
