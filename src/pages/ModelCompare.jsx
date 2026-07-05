@@ -419,7 +419,7 @@ Evaluate fairly on: accuracy, completeness, clarity, usefulness.`;
 
   // ── RENDER ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ padding:'40px', minHeight:'100vh', background:'var(--bg)', boxSizing:'border-box' }}>
+    <div className="mc-root" style={{ padding:'40px', minHeight:'100vh', background:'var(--bg)', boxSizing:'border-box' }}>
 
       {/* HEADER */}
       <div style={{ borderLeft:'4px solid var(--accent)', paddingLeft:'20px', marginBottom:'32px' }}>
@@ -628,6 +628,32 @@ Evaluate fairly on: accuracy, completeness, clarity, usefulness.`;
         .mc-md-body th{background:var(--bg3);color:var(--accent);padding:7px 12px;text-align:left;font-size:10px;letter-spacing:1px;border:1px solid var(--border)}
         .mc-md-body td{padding:7px 12px;border:1px solid var(--border2);color:var(--text2)}
         .mc-md-body blockquote{border-left:3px solid var(--accent);padding:6px 12px;margin:8px 0;background:var(--bg3);border-radius:0 6px 6px 0}
+
+        /* ── RESPONSIVE: Model Compare ── */
+        @media (max-width: 900px) {
+          .mc-root { padding: 24px 16px !important; }
+          .mc-root h2 { font-size: 26px !important; letter-spacing: -1px !important; }
+          .mc-root > div[style*="border-left"] { padding-left: 14px !important; }
+          /* main card padding */
+          .mc-root > div[style*="borderRadius: 20px"][style*="padding: 28px"],
+          .mc-root > div[style*="border-radius:20px"] { padding: 18px 14px !important; border-radius: 16px !important; }
+          /* model selectors: VS row collapses to stacked */
+          .mc-root [style*="grid-template-columns:1fr auto 1fr"],
+          .mc-root [style*="grid-template-columns: 1fr auto 1fr"] { grid-template-columns: 1fr !important; gap: 14px !important; }
+          /* results grid stacks */
+          .mc-root [style*="grid-template-columns:1fr 1fr"],
+          .mc-root [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; gap: 16px !important; }
+        }
+        @media (max-width: 600px) {
+          .mc-root { padding: 18px 12px !important; }
+          .mc-root h2 { font-size: 22px !important; }
+          .mc-root [style*="borderRadius: 20px"][style*="padding: 28px"] { padding: 14px 11px !important; }
+          /* response body cards less padding */
+          .mc-md-body { font-size: 13px !important; }
+          .mc-root [style*="max-height: 500px"] { max-height: 400px !important; }
+          /* metric chips wrap */
+          .mc-root [style*="justify-content: space-between"] { flex-direction: column !important; align-items: flex-start !important; }
+        }
       `}</style>
     </div>
   );

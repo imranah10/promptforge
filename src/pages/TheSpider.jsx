@@ -393,7 +393,7 @@ IMPORTANT: suggestedFollowUps must be SPECIFIC questions based on the actual con
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg)', padding: '40px', gap: '28px', boxSizing: 'border-box' }}>
+    <div className="sp-root" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg)', padding: '40px', gap: '28px', boxSizing: 'border-box' }}>
 
       {/* ── HEADER ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
@@ -479,7 +479,7 @@ IMPORTANT: suggestedFollowUps must be SPECIFIC questions based on the actual con
         </div>
 
         {/* Depth + Language + Search bar */}
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch', flexWrap: 'wrap' }}>
+        <div className="sp-search-row" style={{ display: 'flex', gap: '10px', alignItems: 'stretch', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
             {[['quick', '⚡ Quick'], ['deep', '🔬 Deep']].map(([id, label]) => (
               <button key={id} onClick={() => setDepth(id)}
@@ -513,7 +513,7 @@ IMPORTANT: suggestedFollowUps must be SPECIFIC questions based on the actual con
             </select>
           </div>
 
-          <div style={{
+          <div className="sp-search-input" style={{
             flex: 1, minWidth: '300px', display: 'flex', alignItems: 'center',
             background: 'var(--bg3)', border: `1px solid ${isUrlInput ? '#34d399' : 'var(--border)'}`,
             borderRadius: '15px', padding: '0 18px', gap: '10px',
@@ -544,6 +544,7 @@ IMPORTANT: suggestedFollowUps must be SPECIFIC questions based on the actual con
 
           {loading ? (
             <button onClick={handleCancel}
+              className="sp-deploy-btn"
               style={{
                 background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.4)',
                 color: '#f87171', padding: '0 22px', borderRadius: '15px',
@@ -554,6 +555,7 @@ IMPORTANT: suggestedFollowUps must be SPECIFIC questions based on the actual con
             </button>
           ) : (
             <button onClick={handleSearch}
+              className="sp-deploy-btn"
               style={{
                 background: 'var(--accent)', border: 'none', color: '#fff',
                 padding: '0 26px', borderRadius: '15px', fontSize: '14px', fontWeight: 800,
@@ -881,6 +883,33 @@ IMPORTANT: suggestedFollowUps must be SPECIFIC questions based on the actual con
         .sp-md-body pre code { background: none; color: var(--text); font-size: 12px; }
         @media (max-width: 900px) {
           .sp-mode-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .sp-root { padding: 24px 16px !important; gap: 20px !important; }
+          .sp-root h2 { font-size: 28px !important; letter-spacing: -1px !important; }
+          /* search input row collapses */
+          .sp-root [style*="min-width: 300px"],
+          .sp-root [style*="minWidth: 300px"] { min-width: 0 !important; width: 100% !important; flex-basis: 100% !important; }
+          .sp-root [style*="min-width: 180px"],
+          .sp-root [style*="minWidth: 180px"] { min-width: 0 !important; flex: 1 1 100% !important; }
+          /* header history box goes full width */
+          .sp-root [style*="min-width: 240px"] { min-width: 0 !important; max-width: 100% !important; width: 100% !important; }
+          /* result panels stack */
+          .sp-root [style*="grid-template-columns:1fr 2fr"],
+          .sp-root [style*="grid-template-columns: 1fr 2fr"],
+          .sp-root [style*="grid-template-columns:1fr 1fr"],
+          .sp-root [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+          /* search row: stack depth/lang above input, deploy button below */
+          .sp-search-row { flex-direction: column !important; align-items: stretch !important; }
+          .sp-search-input { min-width: 0 !important; flex-basis: auto !important; }
+          .sp-deploy-btn { width: 100% !important; justify-content: center !important; padding: 13px 20px !important; }
+        }
+        @media (max-width: 600px) {
+          .sp-root { padding: 16px 12px !important; gap: 16px !important; }
+          .sp-root h2 { font-size: 24px !important; }
+          .sp-mode-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+          .sp-md-body { font-size: 13px !important; }
+          .sp-md-body pre { font-size: 11px !important; padding: 10px !important; }
+          .sp-md-body table { display: block; overflow-x: auto; white-space: nowrap; }
+          .sp-deploy-btn { font-size: 13px !important; }
         }
       `}</style>
     </div>

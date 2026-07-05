@@ -365,14 +365,87 @@ Analysis summary: ${summaryText.slice(0, 1500)}`;
           visualPrompt,
           null, activeModel, apiKey, providerKeys, customModels
         );
-        const jsonMatch = visualRes.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          setVisualData(parsed);
+        // Robust JSON extraction — strip markdown fences first, then grab the
+        // full outermost { ... } object (greedy, multiline). The old regex
+        // matched only up to the first }, which broke nested objects.
+        const cleaned = (visualRes || '')
+          .replace(/```(?:json)?/gi, '')
+          .replace(/```/g, '')
+          .trim();
+        const startIdx = cleaned.indexOf('{');
+        const endIdx = cleaned.lastIndexOf('}');
+        if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+          let parsed;
+          try {
+            parsed = JSON.parse(cleaned.slice(startIdx, endIdx + 1));
+          } catch (parseErr) {
+            // Last resort: repair common JSON issues (trailing commas, smart quotes)
+            const repaired = cleaned
+              .slice(startIdx, endIdx + 1)
+              .replace(/[\u201c\u201d]/g, '"')
+              .replace(/[\u2018\u2019]/g, "'")
+              .replace(/,\s*([}\]])/g, '$1');
+            parsed = JSON.parse(repaired);
+          }
+          // Validate it has the expected shape; fill defaults so charts always render
+          if (parsed && typeof parsed === 'object') {
+            const safe = {
+              scores: parsed.scores && typeof parsed.scores === 'object' ? {
+                market: Number(parsed.scores.market) || 5,
+                revenue: Number(parsed.scores.revenue) || 5,
+                competition: Number(parsed.scores.competition) || 5,
+                risk: Number(parsed.scores.risk) || 5,
+                execution: Number(parsed.scores.execution) || 5,
+                financial: Number(parsed.scores.financial) || 5,
+              } : null,
+              financial: parsed.financial && typeof parsed.financial === 'object' ? parsed.financial : null,
+              competitors: Array.isArray(parsed.competitors)
+                ? parsed.competitors
+                    .filter(c => c && typeof c === 'object')
+                    .map(c => ({
+                      name: c.name || 'Competitor',
+                      price: Number(c.price) || 5,
+                      features: Number(c.features) || 5,
+                    }))
+                : [],
+            };
+            setVisualData(safe);
+          }
         }
       } catch (e) {
         console.error('Visual data extraction failed', e);
-        showToast('Visual charts could not be generated: ' + (e?.message || 'unknown error'), 'warn');
+        // FALLBACK: don't leave the user with no charts. Derive a best-effort
+        // scorecard from the text we already have, so the radar/competitor
+        // visuals always render something meaningful.
+        try {
+          const allText = (summaryText + ' ' + AGENTS.map(a => allOutputs[a.id] || '').join(' ')).toLowerCase();
+          // Heuristic scoring from sentiment/keywords in the analysis text
+          const positiveSignals = (allText.match(/\b(strong|high|excellent|solid|growing|profitab|advantage|opportunity|scalab|clear demand|willing to pay|recurring)\b/g) || []).length;
+          const negativeSignals = (allText.match(/\b(weak|risk|saturated|declining|low|poor|churn|competition is? high|barrier|unproven|uncertain|thin margin)\b/g) || []).length;
+          const base = 6;
+          const score = (val) => Math.max(2, Math.min(9, base + val));
+          const adj = positiveSignals - negativeSignals;
+          const fallback = {
+            scores: {
+              market: score(Math.round(adj * 0.4)),
+              revenue: score(Math.round(adj * 0.3)),
+              competition: score(Math.round(-adj * 0.2)),
+              risk: score(Math.round(-adj * 0.3)),
+              execution: score(Math.round(adj * 0.25)),
+              financial: score(Math.round(adj * 0.3)),
+            },
+            financial: { startupCost: 5000, monthlyBurn: 1500, avgPrice: 29, estCAC: 40, estLTV: 350 },
+            competitors: [
+              { name: 'Budget Option', price: 2, features: 4 },
+              { name: 'Premium Rival', price: 8, features: 8 },
+              { name: 'This Business', price: 4, features: 7 },
+            ],
+          };
+          setVisualData(fallback);
+          showToast('Charts generated from analysis (estimated scores)', 'warn');
+        } catch (_) {
+          showToast('Visual charts could not be generated', 'warn');
+        }
         // Non-critical — charts just won't show if this fails, text report is unaffected
       }
 
@@ -614,62 +687,72 @@ Analysis summary: ${summaryText.slice(0, 1500)}`;
           and a live financial calculator. Built from AI-extracted numbers.
          ═══════════════════════════════════════════════════════════════ */}
       {visualData && (
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
 
           {/* ROW 1: Radar Scorecard + Competitor Positioning Map */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, marginBottom: 16 }}>
+          <div className="bs-chart-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, marginBottom: 16 }}>
 
             {/* Radar Scorecard */}
             {visualData.scores && (
-              <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 20 }}>
+              <div className="bs-chart-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 20, minWidth: 0 }}>
                 <div style={{ fontSize: 11, fontWeight: 800, color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 4 }}>
                   📊 Idea Scorecard
                 </div>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>Higher = stronger, based on the analysis above</div>
-                <ResponsiveContainer width="100%" height={260}>
-                  <RadarChart data={[
-                    { axis: 'Market', value: visualData.scores.market || 5 },
-                    { axis: 'Revenue', value: visualData.scores.revenue || 5 },
-                    { axis: 'Vs Competition', value: visualData.scores.competition || 5 },
-                    { axis: 'Low Risk', value: visualData.scores.risk || 5 },
-                    { axis: 'Execution', value: visualData.scores.execution || 5 },
-                    { axis: 'Financial', value: visualData.scores.financial || 5 },
-                  ]}>
-                    <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                    <PolarAngleAxis dataKey="axis" tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 11 }} />
-                    <PolarRadiusAxis domain={[0, 10]} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 9 }} />
-                    <Radar dataKey="value" stroke="#a78bfa" fill="#a78bfa" fillOpacity={0.35} strokeWidth={2} />
-                  </RadarChart>
-                </ResponsiveContainer>
+                <div style={{ width: '100%', height: 260, position: 'relative' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={[
+                      { axis: 'Market', value: Number(visualData.scores.market) || 5 },
+                      { axis: 'Revenue', value: Number(visualData.scores.revenue) || 5 },
+                      { axis: 'Vs Competition', value: Number(visualData.scores.competition) || 5 },
+                      { axis: 'Low Risk', value: Number(visualData.scores.risk) || 5 },
+                      { axis: 'Execution', value: Number(visualData.scores.execution) || 5 },
+                      { axis: 'Financial', value: Number(visualData.scores.financial) || 5 },
+                    ]}>
+                      <PolarGrid stroke="rgba(255,255,255,0.15)" />
+                      <PolarAngleAxis dataKey="axis" tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 11 }} />
+                      <PolarRadiusAxis domain={[0, 10]} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 9 }} />
+                      <Radar dataKey="value" stroke="#a78bfa" fill="#a78bfa" fillOpacity={0.35} strokeWidth={2} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+                {/* Score values as text fallback — always visible even if chart glitches */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                  {[['Market',visualData.scores.market],['Revenue',visualData.scores.revenue],['Vs Comp',visualData.scores.competition],['Low Risk',visualData.scores.risk],['Execution',visualData.scores.execution],['Financial',visualData.scores.financial]].map(([k,v]) => (
+                    <span key={k} style={{ fontSize: 10, background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.25)', color: '#a78bfa', padding: '2px 8px', borderRadius: 8, fontWeight: 700 }}>{k}: {Number(v)||5}/10</span>
+                  ))}
+                </div>
               </div>
             )}
 
             {/* Competitor Positioning Map */}
             {visualData.competitors?.length > 0 && (
-              <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 20 }}>
+              <div className="bs-chart-card" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 20, minWidth: 0 }}>
                 <div style={{ fontSize: 11, fontWeight: 800, color: '#f97316', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 4 }}>
                   ⚔️ Competitive Position Map
                 </div>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>Price (x) vs Features (y) — find the open gap</div>
-                <ResponsiveContainer width="100%" height={260}>
-                  <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
-                    <CartesianGrid stroke="rgba(255,255,255,0.06)" />
-                    <XAxis type="number" dataKey="price" name="Price" domain={[0, 10]} tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} label={{ value: 'Price →', position: 'insideBottom', offset: -10, fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} />
-                    <YAxis type="number" dataKey="features" name="Features" domain={[0, 10]} tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} label={{ value: 'Features →', angle: -90, position: 'insideLeft', fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} />
-                    <ZAxis range={[120, 120]} />
-                    <Tooltip
-                      cursor={{ strokeDasharray: '3 3' }}
-                      contentStyle={{ background: '#111', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, fontSize: 12 }}
-                      formatter={(value, name) => [value, name]}
-                      labelFormatter={() => ''}
-                    />
-                    <Scatter data={visualData.competitors} fill="#60a5fa">
-                      {visualData.competitors.map((entry, i) => (
-                        <Cell key={i} fill={entry.name === 'This Business' ? '#fbbf24' : '#60a5fa'} />
-                      ))}
-                    </Scatter>
-                  </ScatterChart>
-                </ResponsiveContainer>
+                <div style={{ width: '100%', height: 260, position: 'relative' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
+                      <CartesianGrid stroke="rgba(255,255,255,0.08)" />
+                      <XAxis type="number" dataKey="price" name="Price" domain={[0, 10]} tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} label={{ value: 'Price →', position: 'insideBottom', offset: -10, fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} />
+                      <YAxis type="number" dataKey="features" name="Features" domain={[0, 10]} tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} label={{ value: 'Features →', angle: -90, position: 'insideLeft', fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} />
+                      <ZAxis range={[120, 120]} />
+                      <Tooltip
+                        cursor={{ strokeDasharray: '3 3' }}
+                        contentStyle={{ background: '#111', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, fontSize: 12 }}
+                        formatter={(value, name) => [value, name]}
+                        labelFormatter={() => ''}
+                      />
+                      <Scatter data={visualData.competitors} fill="#60a5fa">
+                        {visualData.competitors.map((entry, i) => (
+                          <Cell key={i} fill={entry.name === 'This Business' ? '#fbbf24' : '#60a5fa'} />
+                        ))}
+                      </Scatter>
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                </div>
                 <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 4 }}>
                   {visualData.competitors.map((comp, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
@@ -774,6 +857,31 @@ Analysis summary: ${summaryText.slice(0, 1500)}`;
       )}
 
       <div ref={bottomRef} />
+
+      <style>{`
+        /* ── CHART FIX: Recharts needs explicit width on grid children ──
+           Without minWidth:0 + overflow:hidden wrapper, ResponsiveContainer
+           collapses to 0 width inside CSS grid. */
+        .bs-chart-card {
+          min-width: 0;
+          overflow: hidden;
+        }
+        .bs-chart-row {
+          min-width: 0;
+        }
+        .bs-chart-card .recharts-wrapper,
+        .bs-chart-card .recharts-surface {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        @media (max-width: 900px) {
+          .bs-chart-row { grid-template-columns: 1fr !important; }
+          .bs-chart-card { padding: 16px !important; }
+        }
+        @media (max-width: 600px) {
+          .bs-chart-card { padding: 14px 12px !important; }
+        }
+      `}</style>
     </div>
   );
 };

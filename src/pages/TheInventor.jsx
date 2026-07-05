@@ -193,7 +193,10 @@ const AgentCard = ({ agent, content, isTyping, index }) => {
         boxShadow: `0 2px 24px ${agent.glow}`,
         position: 'relative',
         overflow: 'hidden',
-      }}>
+        wordBreak: 'break-word',
+        overflowWrap: 'break-word',
+        minWidth: 0,
+      }} className={isSynthesis ? 'inv-bubble-synthesis' : 'inv-bubble-agent'}>
         {isSynthesis && (
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0, height: 2,
@@ -477,6 +480,7 @@ const TheInventor = () => {
               gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
               gap: 12, marginBottom: 28,
             }}
+            className="inv-agent-grid"
           >
             {AGENTS.map(agent => {
               const Icon = agent.icon;
@@ -848,6 +852,31 @@ const TheInventor = () => {
         }
         @media (max-width: 600px) {
           .markdown-council { font-size: 13px; }
+          /* ── AGENTS GRID: 2 per row on phones ── */
+          .inv-agent-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+          .inv-agent-grid > div { padding: 10px 12px !important; gap: 8px !important; flex-direction: column !important; align-items: flex-start !important; text-align: left !important; }
+          /* ── BLUEPRINT OUTPUT: smaller padding + readable text ── */
+          .markdown-council h1 { font-size: 17px !important; margin: 14px 0 8px !important; }
+          .markdown-council h2 { font-size: 15px !important; margin: 14px 0 7px !important; }
+          .markdown-council h3 { font-size: 14px !important; margin: 12px 0 6px !important; }
+          .markdown-council li { font-size: 13px !important; padding: 7px 11px !important; line-height: 1.6 !important; }
+          .markdown-council p { font-size: 13px !important; line-height: 1.65 !important; }
+          .markdown-council code { font-size: 12px !important; }
+          .markdown-council pre { font-size: 11px !important; padding: 10px !important; overflow-x: auto !important; white-space: pre !important; }
+          .markdown-council table { display: block; overflow-x: auto; white-space: nowrap; font-size: 12px !important; max-width: 100% !important; }
+          .markdown-council th, .markdown-council td { padding: 6px 9px !important; }
+          .markdown-council blockquote { padding: 8px 12px !important; margin: 10px 0 !important; }
+          /* blueprint synthesis bubble: shrink big padding + allow full content */
+          .inv-bubble-synthesis { padding: 16px 14px !important; border-radius: 12px !important; overflow: visible !important; box-shadow: 0 2px 16px rgba(251,191,36,0.1) !important; }
+          .inv-bubble-agent { padding: 13px 14px !important; }
+        }
+        /* ── MEDIUM DEVICES (tablet/large phone ≤ 900px): blueprint full visible ── */
+        @media (max-width: 900px) {
+          .inv-bubble-synthesis { padding: 18px 16px !important; overflow: visible !important; }
+        }
+        @media (max-width: 400px) {
+          .inv-agent-grid { grid-template-columns: 1fr !important; }
+          .inv-bubble-synthesis { padding: 14px 11px !important; }
         }
       `}</style>
     </div>

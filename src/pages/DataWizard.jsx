@@ -547,7 +547,7 @@ Format your response with a \`\`\`${currentType.id.includes('SQL') ? 'sql' : cur
   };
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'var(--bg)', padding:'40px', boxSizing:'border-box' }}>
+    <div className="dw-root" style={{ display:'flex', flexDirection:'column', minHeight:'100vh', background:'var(--bg)', padding:'40px', boxSizing:'border-box' }}>
 
       {/* ── HEADER ── */}
       <div style={{ borderLeft:'4px solid var(--accent)', paddingLeft:'20px', marginBottom:'40px' }}>
@@ -570,7 +570,7 @@ Format your response with a \`\`\`${currentType.id.includes('SQL') ? 'sql' : cur
           {/* Type grid */}
           <div>
             <div style={sLabel}>SELECT ARTIFACT TYPE</div>
-            <div style={{ display:'grid', gridTemplate:'auto/1fr 1fr', gap:'8px' }}>
+            <div className="dw-type-grid" style={{ display:'grid', gridTemplate:'auto/1fr 1fr', gap:'8px' }}>
               {TYPES.map(t => (
                 <div key={t.id}
                   onClick={() => { setType(t.id); setSchema(''); setSampleData(''); setQuery(''); }}
@@ -916,6 +916,43 @@ Format your response with a \`\`\`${currentType.id.includes('SQL') ? 'sql' : cur
         .dw-md-body td{padding:7px 12px;border:1px solid rgba(255,255,255,.04);color:#ccc}
         .dw-md-body ul,.dw-md-body ol{padding-left:20px;margin-bottom:10px}
         .dw-md-body li{margin-bottom:5px;color:#bbb}
+
+        /* ── RESPONSIVE: Data Wizard ── */
+        @media (max-width: 900px) {
+          .dw-root { padding: 24px 16px !important; }
+          .dw-root h2 { font-size: 26px !important; letter-spacing: -1px !important; }
+          .dw-root > div[style*="border-left"] { padding-left: 14px !important; margin-bottom: 24px !important; }
+          /* artifact type grid (2-col) → 1-col on tablet */
+          .dw-type-grid { grid-template-columns: 1fr !important; }
+          /* option grid (4-col) → 2-col */
+          .dw-root [style*="grid-template-columns:repeat(4,1fr)"],
+          .dw-root [style*="grid-template-columns: repeat(4, 1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
+          /* type card grid → 1 col */
+          .dw-root [style*="grid-template-columns:repeat(2,1fr)"],
+          .dw-root [style*="grid-template-columns: repeat(2, 1fr)"],
+          .dw-root [style*="grid-template-columns:1fr 1fr"],
+          .dw-root [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+          /* live grid table cells: horizontal scroll */
+          .dw-root [style*="grid-template-columns:repeat(4,1fr)"][style*="borderBottom"] { display: block !important; overflow-x: auto; white-space: nowrap; }
+          .dw-md-body table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
+        @media (max-width: 600px) {
+          .dw-root { padding: 16px 12px !important; }
+          .dw-root h2 { font-size: 22px !important; }
+          .dw-md-body { font-size: 13px !important; }
+          .dw-md-body pre { font-size: 11px !important; padding: 10px !important; }
+          /* artifact type cards stack to 1 column */
+          .dw-type-grid { grid-template-columns: 1fr !important; }
+          /* mode toggle buttons full width stack */
+          .dw-root [style*="display: flex"][style*="gap: 8px"][style*="margin-bottom: 4px"] { flex-direction: column !important; }
+          .dw-root [style*="grid-template-columns:repeat(2,1fr)"] { grid-template-columns: 1fr !important; }
+          /* opt-mode 4-col grid → 2-col */
+          .dw-root [style*="grid-template-columns:repeat(4,1fr)"],
+          .dw-root [style*="grid-template-columns: repeat(4, 1fr)"] { grid-template-columns: repeat(2, 1fr) !important; }
+          /* type card: allow description to wrap instead of truncate */
+          .dw-type-grid > div > div:last-child { min-width: 0 !important; }
+          .dw-type-grid > div { padding: 12px 12px !important; }
+        }
       `}</style>
     </div>
   );

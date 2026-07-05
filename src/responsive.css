@@ -1,0 +1,439 @@
+/* =====================================================================
+   PROMPTFORGE — CENTRALIZED RESPONSIVE OVERRIDE LAYER
+   Loaded AFTER index.css. Makes every dashboard tool fully responsive
+   across desktop, tablet, and mobile. Targets the common patterns
+   (inline fixed widths, multi-column grids, side-by-side panels) used
+   across all tools so we fix them in ONE place instead of 16 files.
+   ===================================================================== */
+
+/* ── PAGE WRAPPER & GLOBAL TYPOGRAPHY ──────────────────────────────── */
+.page.active {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.page.active h1,
+.page.active h2,
+.page.active h3 {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* ── CONTENT / LAYOUT SHELL ────────────────────────────────────────── */
+.main .content {
+  overflow-x: hidden;
+}
+
+/* Tool cards scale their padding down on smaller screens */
+.tool-card {
+  padding: 24px;
+}
+.section-card {
+  padding: 20px;
+}
+
+/* =====================================================================
+   BREAKPOINT: TABLET & BELOW (≤ 1024px)
+   ===================================================================== */
+@media (max-width: 1024px) {
+
+  /* ── AGGRESSIVE: any inline 3+ column grid inside a tool collapses ──
+     This catches the dozens of `gridTemplateColumns: '1fr 1fr 1fr'`
+     and `repeat(3,1fr)` / `repeat(4,1fr)` patterns spread across the
+     tools, without needing to edit each file. */
+  .page.active [style*="grid-template-columns: 1fr 1fr 1fr"],
+  .page.active [style*="gridTemplateColumns:'1fr 1fr 1fr'"],
+  .page.active [style*="gridTemplateColumns: '1fr 1fr 1fr'"],
+  .page.active [style*="gridTemplateColumns:'repeat(4"],
+  .page.active [style*="gridTemplateColumns: 'repeat(4"],
+  .page.active [style*="grid-template-columns:repeat(4"],
+  .page.active [style*="grid-template-columns: repeat(4"],
+  .page.active [style*="grid-template-columns:repeat(6"],
+  .page.active [style*="grid-template-columns: repeat(6"],
+  .page.active [style*="grid-template-columns:1fr auto 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Charts: reduce fixed heights so they don't dominate */
+  .page.active .recharts-wrapper,
+  .page.active .recharts-surface {
+    max-width: 100% !important;
+  }
+
+  /* Content shell tighter */
+  .content { padding: 22px 24px; }
+}
+
+/* =====================================================================
+   BREAKPOINT: LARGE PHONE / SMALL TABLET (≤ 900px)
+   ===================================================================== */
+@media (max-width: 900px) {
+
+  /* Content padding shrinks */
+  .content { padding: 18px 16px; }
+
+  .tool-card { padding: 18px 16px; }
+  .section-card { padding: 16px; }
+
+  /* ── ALL multi-column inline grids collapse to a single column ──
+     Covers every two/three/four column grid defined inline in JSX. */
+  .page.active [style*="grid-template-columns: 1fr 1fr"],
+  .page.active [style*="gridTemplateColumns:'1fr 1fr'"],
+  .page.active [style*="gridTemplateColumns: '1fr 1fr'"],
+  .page.active [style*="grid-template-columns:1fr 1fr"],
+  .page.active [style*="grid-template-columns: 1fr 1fr 1fr"],
+  .page.active [style*="gridTemplateColumns:'1fr 1fr 1fr'"],
+  .page.active [style*="gridTemplateColumns: '1fr 1fr 1fr'"],
+  .page.active [style*="grid-template-columns:1fr auto 1fr"],
+  .page.active [style*="grid-template-columns: 1fr auto 1fr"],
+  .page.active [style*="gridTemplateColumns:'1fr auto 1fr'"],
+  .page.active [style*="gridTemplateColumns: '1fr auto 1fr'"],
+  .page.active [style*="gridTemplateColumns:'repeat(3"],
+  .page.active [style*="gridTemplateColumns: 'repeat(3"],
+  .page.active [style*="grid-template-columns:repeat(3"],
+  .page.active [style*="grid-template-columns: repeat(3"],
+  .page.active [style*="gridTemplateColumns:'repeat(4"],
+  .page.active [style*="gridTemplateColumns: 'repeat(4"],
+  .page.active [style*="grid-template-columns:repeat(4"],
+  .page.active [style*="grid-template-columns: repeat(4"],
+  .page.active [style*="gridTemplateColumns:'repeat(6"],
+  .page.active [style*="gridTemplateColumns: 'repeat(6"],
+  .page.active [style*="grid-template-columns:repeat(6"],
+  .page.active [style*="grid-template-columns: repeat(6"],
+  .page.active [style*="gridTemplateColumns:'repeat(7"],
+  .page.active [style*="gridTemplateColumns: 'repeat(7"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* auto-fit minmax() tracks: shrink the minimum so cards don't overflow */
+  .page.active [style*="minmax(320px"],
+  .page.active [style*="minmax(280px"],
+  .page.active [style*="minmax(300px"],
+  .page.active [style*="minmax(260px"],
+  .page.active [style*="minmax(240px"],
+  .page.active [style*="minmax(220px"],
+  .page.active [style*="minmax(200px"],
+  .page.active [style*="minmax(180px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Named tool grids from index.css (legacy classes) */
+  .mc-picker-grid,
+  .mc-results-grid,
+  .po-audit-grid,
+  .dw-opt-grid,
+  .aw-tone-grid,
+  .ip-main-grid,
+  .ip-tool-grid,
+  .ip-style-grid,
+  .ch-audit-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Side-by-side flex panels stack vertically ──
+     Catches ChatWithData's two-panel layout and similar. */
+  .cwd-container { flex-direction: column !important; height: auto !important; }
+  .cwd-viz-panel { width: 100% !important; height: 380px !important; }
+
+  /* Section headers: title + actions stack */
+  .page.active [style*="justify-content: space-between"] {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* Tool titles font scaling */
+  .section-title { font-size: 20px; }
+  .section-sub { font-size: 12px; }
+
+  /* Output boxes / results wrap nicely */
+  .output-header { flex-wrap: wrap; gap: 8px; }
+  .output-actions { flex-wrap: wrap; }
+
+  /* Prompt Optimizer forged-prompt header wraps */
+  .po-audit-grid > div { padding: 12px !important; }
+
+  /* Model selector panel: expanded content stacks */
+  .model-bar.expanded { padding: 12px 16px 16px !important; }
+  .model-bar-header { flex-direction: row; }
+
+  /* Header / hero paddings shrink */
+  .page.active .tool-card h2,
+  .page.active .tool-card h3 { word-break: break-word; }
+}
+
+/* =====================================================================
+   BREAKPOINT: MOBILE (≤ 600px)
+   ===================================================================== */
+@media (max-width: 600px) {
+
+  .content { padding: 14px 12px; }
+  .tool-card { padding: 14px 12px; margin-bottom: 16px; border-radius: 14px; }
+  .section-card { padding: 12px; border-radius: 14px; }
+
+  /* Even single-column track minimums collapse fully */
+  .page.active [style*="minmax(140px"],
+  .page.active [style*="minmax(160px"],
+  .page.active [style*="minmax(90px"],
+  .page.active [style*="minmax(120px"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Form rows in tools collapse */
+  .form-row.cols2,
+  .form-row.cols3 { grid-template-columns: 1fr !important; }
+
+  /* Buttons & action rows wrap and go full-width-friendly */
+  .output-actions,
+  .btn-copy,
+  .page.active [style*="display: flex"][style*="gap"] {
+    flex-wrap: wrap;
+  }
+
+  /* Generate / primary CTA buttons full width */
+  .btn-generate { padding: 14px; font-size: 14px; }
+  .btn-lg { padding: 12px 20px; font-size: 14px; width: 100%; }
+  .hero-cta { flex-direction: column; width: 100%; }
+  .hero-cta .btn { width: 100%; }
+
+  /* Topbar compact */
+  .topbar { padding: 0 12px; height: 54px; }
+  .topbar-right .status-dot span { display: none; }
+
+  /* Section titles smaller */
+  .section-title { font-size: 18px; }
+  .section-sub { font-size: 11.5px; }
+
+  /* Quickstart chips full width stack */
+  .quickstart-chips { flex-direction: column; }
+  .qs-chip { width: 100%; justify-content: center; }
+
+  /* Stats row: 2 per row on phone */
+  .stats-row { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; margin: 24px 0 !important; }
+  .stat-card { padding: 18px 10px !important; }
+  .stat-num { font-size: 28px !important; }
+
+  /* Output / markdown content readable sizing */
+  .output-content,
+  .chat-bubble { font-size: 13px; }
+  .output-content pre,
+  .chat-bubble pre { font-size: 11.5px; padding: 10px; }
+  .output-content table,
+  .chat-bubble table { font-size: 11px; display: block; overflow-x: auto; white-space: nowrap; }
+  .output-content th,
+  .output-content td,
+  .chat-bubble th,
+  .chat-bubble td { padding: 7px 9px; }
+
+  /* Code blocks scroll horizontally instead of overflowing */
+  .page.active pre {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* Vault action buttons wrap + go full width */
+  .vault-actions { flex-wrap: wrap; }
+  .vault-actions button { flex: 1 1 auto; }
+  .vault-item-header { padding: 14px 14px 14px 14px; }
+  .vault-item-prompt { padding-right: 36px; font-size: 13px; }
+
+  /* Model bar expanded: search full width */
+  .ms-toolbar { flex-direction: column; align-items: stretch; }
+  .ms-search { min-width: 0 !important; width: 100%; }
+  .ms-refresh, .ms-add-custom { justify-content: center; }
+
+  /* Sell & Earn pricing cards */
+  .price-card { padding: 20px 16px !important; }
+  .price-amount { font-size: 38px !important; }
+
+  /* ApiKeys cards */
+  .key-card { padding: 18px 16px !important; }
+
+  /* Model chips wrap naturally and don't overflow */
+  .ms-chip-row { gap: 6px; }
+  .model-chip { white-space: nowrap; }
+  .chip-name { max-width: 160px; }
+
+  /* Generic: prevent any fixed-width inline panel from overflowing viewport */
+  .page.active [style*="width: 360px"],
+  .page.active [style*="width:'360px'"],
+  .page.active [style*="width: 400px"],
+  .page.active [style*="width:'400px'"],
+  .page.active [style*="width: 460px"],
+  .page.active [style*="width:'460px'"],
+  .page.active [style*="minWidth: 300px"],
+  .page.active [style*="minWidth:'300px'"],
+  .page.active [style*="min-width: 300px"],
+  .page.active [style*="minWidth: 220px"],
+  .page.active [style*="minWidth:'220px'"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex-basis: 100% !important;
+  }
+
+  /* Charts shorter on phones */
+  .page.active .recharts-wrapper {
+    height: 220px !important;
+  }
+
+  /* Footer / status compact */
+  .sidebar-footer { padding: 12px 10px; }
+}
+
+/* =====================================================================
+   BREAKPOINT: SMALL PHONE (≤ 400px)
+   ===================================================================== */
+@media (max-width: 400px) {
+  .content { padding: 12px 10px; }
+  .tool-card { padding: 12px 10px; }
+
+  /* Everything that was 2-up now goes single column */
+  .page.active [style*="minmax(140px"],
+  .page.active [style*="minmax(160px"],
+  .page.active [style*="minmax(90px"],
+  .page.active [style*="minmax(120px"],
+  .page.active [style*="minmax(100px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .stats-row { grid-template-columns: 1fr !important; }
+  .stat-num { font-size: 26px !important; }
+
+  /* Sidebar narrows slightly */
+  .sidebar.open { max-width: 240px !important; }
+
+  .section-title { font-size: 16px; }
+  .hero h1 { font-size: clamp(28px, 8vw, 40px) !important; }
+  .hero p { font-size: 15px !important; }
+}
+
+/* =====================================================================
+   SAFETY NET: prevent horizontal scroll anywhere in the app
+   ===================================================================== */
+.app,
+.main,
+.content,
+.page.active {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Tables across tools: scroll instead of breaking layout */
+.page.active table {
+  max-width: 100%;
+}
+.page.active .cwd-bubble table,
+.page.active .output-content table {
+  display: block;
+  overflow-x: auto;
+}
+
+/* Images never overflow */
+.page.active img { max-width: 100%; height: auto; }
+
+/* =====================================================================
+   UNIVERSAL TOOL PATTERNS — applies to every .page.active tool
+   Catches the shared inline patterns across AIWriter, CreatorStudio,
+   SEO, BusinessStrategist, CodeHelper, TheInventor, Docs, ApiKeys,
+   SellAndEarn, PromptLibrary, Vault.
+   ===================================================================== */
+
+/* Section headers with title + button: stack the button on narrow screens */
+.page.active [style*="justify-content: space-between"][style*="align-items: flex-start"] {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* History/restore rows: allow content to wrap */
+.page.active [style*="justify-content: space-between"][style*="align-items: center"] {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Platform/tool-tab grids: keep them responsive but never overflow.
+   minmax(90px) etc. collapse to 2-col on phones, 1-col on tiny screens. */
+@media (max-width: 600px) {
+  .page.active [style*="grid-template-columns: repeat(auto-fill, minmax(90px"],
+  .page.active [style*="grid-template-columns: repeat(auto-fill, minmax(120px"],
+  .page.active [style*="grid-template-columns: repeat(auto-fit, minmax(100px"],
+  .page.active [style*="grid-template-columns: repeat(auto-fill, minmax(110px"] {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+  /* Two-column inline grids → 1 col */
+  .page.active [style*="grid-template-columns:1fr 1fr"],
+  .page.active [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* Tool tab button rows wrap and each button takes fair width */
+  .page.active [style*="display: flex"][style*="gap: 6"][style*="flexWrap: 'wrap'"] button,
+  .page.active [style*="display: flex"][style*="gap: 8"][style*="flexWrap: 'wrap'"] button {
+    flex: 1 1 auto;
+  }
+  /* Cards with large padding shrink */
+  .page.active [style*="padding: 40px"],
+  .page.active [style*="padding:'40px'"] { padding: 18px 14px !important; }
+  .page.active [style*="padding: 32px"],
+  .page.active [style*="padding:'32px'"] { padding: 16px 12px !important; }
+  /* Headings scale down on phones */
+  .page.active h2.section-title,
+  .page.active .section-title { font-size: 18px !important; }
+}
+
+@media (max-width: 400px) {
+  /* Tiny phones: platform grids go 2-col */
+  .page.active [style*="grid-template-columns: repeat(auto-fill, minmax(90px"],
+  .page.active [style*="grid-template-columns: repeat(auto-fill, minmax(120px"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* =====================================================================
+   RECHARTS — make all charts fluid and not overflow
+   ===================================================================== */
+.page.active .recharts-wrapper,
+.page.active .recharts-surface {
+  max-width: 100% !important;
+}
+@media (max-width: 600px) {
+  .page.active .recharts-legend-wrapper,
+  .page.active .recharts-default-legend {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+}
+
+/* =====================================================================
+   TOOL-SPECIFIC ENHANCEMENTS (lightweight, where global isn't enough)
+   ===================================================================== */
+
+/* Sell & Earn pricing — bigger scaling on mobile */
+@media (max-width: 600px) {
+  .page.active [style*="font-size: 48px"],
+  .page.active [style*="fontSize:'48px'"],
+  .page.active [style*="fontSize: 48"] { font-size: 36px !important; }
+}
+
+/* ApiKeys — large hero icon doesn't dominate on mobile */
+@media (max-width: 600px) {
+  .page.active [style*="width: 100px"][style*="height: 100px"],
+  .page.active [style*="width:'100px'"][style*="height:'100px'"] {
+    width: 60px !important;
+    height: 60px !important;
+  }
+}
+
+/* BusinessStrategist — chart cards stack and shrink */
+@media (max-width: 900px) {
+  .page.active [style*="grid-template-columns: repeat(auto-fit, minmax(320px"],
+  .page.active [style*="grid-template-columns: repeat(auto-fit, minmax(300px"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media (max-width: 600px) {
+  .page.active [style*="height: 260px"],
+  .page.active [style*="height:'260px'"] { height: 200px !important; }
+}

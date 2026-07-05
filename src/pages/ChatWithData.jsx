@@ -587,7 +587,7 @@ CRITICAL: Your answer must be based ONLY on the file content shown above in the 
       </div>
 
       {/* ── LAYOUT ── */}
-      <div style={{ display: 'flex', gap: '18px', flex: 1, minHeight: 0 }}>
+      <div style={{ display: 'flex', gap: '18px', flex: 1, minHeight: 0, flexWrap: 'wrap' }}>
 
         {/* ── CHAT PANEL ── */}
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '20px', overflow: 'hidden', minHeight: 0 }}>
@@ -736,6 +736,7 @@ CRITICAL: Your answer must be based ONLY on the file content shown above in the 
         {/* ── VIZ PANEL ── */}
         {hasViz && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+            className="cwd-viz-panel-inner"
             style={{ width: '360px', flexShrink: 0, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', gap: '2px', padding: '7px', background: 'var(--border2)', borderBottom: '1px solid var(--border)' }}>
               {[
@@ -799,6 +800,14 @@ CRITICAL: Your answer must be based ONLY on the file content shown above in the 
         .cwd-bubble ul,.cwd-bubble ol{padding-left:18px;margin-bottom:9px}
         .cwd-bubble li{margin-bottom:4px}
         .cwd-bubble hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+
+        /* ── RESPONSIVE: stack chat + viz panel on tablet/mobile ── */
+        @media (max-width: 1024px) {
+          .cwd-viz-panel-inner { width: 100% !important; flex-basis: 100% !important; flex-shrink: 1 !important; height: 380px !important; }
+        }
+        @media (max-width: 600px) {
+          .cwd-viz-panel-inner { height: 320px !important; }
+        }
       `}</style>
     </div>
   );
